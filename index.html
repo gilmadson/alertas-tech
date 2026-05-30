@@ -361,6 +361,35 @@ header {
 
 .btn-icon { font-size: 1.2rem; }
 
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.field-group input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color .2s;
+  -webkit-appearance: none;
+}
+.field-group input::placeholder { color: var(--muted); }
+.field-group input:focus { border-color: rgba(0,229,255,.5); }
+.field-group input:invalid:not(:placeholder-shown) { border-color: var(--danger); }
+
+.form-erro {
+  font-size: .8rem;
+  color: var(--danger);
+  margin-bottom: 8px;
+  min-height: 18px;
+}
+
 .modal-close {
   margin-top: 16px;
   width: 100%;
@@ -577,53 +606,116 @@ footer a { color: var(--accent); text-decoration: none; }
       <span class="modal-cat-emoji" id="modal-emoji">📱</span>
       <span class="modal-cat-name" id="modal-nome">Smartphones</span>
     </div>
-    <p class="modal-subtitle" id="modal-sub">
-      Entre no grupo agora e receba alertas de desconto direto no seu app favorito.
-    </p>
-    <div class="modal-btns">
-      <a class="btn btn-whatsapp" id="btn-whatsapp" href="#" target="_blank">
-        <span class="btn-icon">💬</span> Entrar pelo WhatsApp
-      </a>
-      <a class="btn btn-telegram" id="btn-telegram" href="#" target="_blank">
-        <span class="btn-icon">✈️</span> Entrar pelo Telegram
-      </a>
-    </div>
+    <p class="modal-subtitle">Deixa seu contato e entra no grupo — alertas grátis, sem spam.</p>
+
+    <form id="lead-form" onsubmit="submeterLead(event)">
+      <div class="field-group">
+        <input type="text" id="lead-nome" placeholder="Seu nome (opcional)"
+          autocomplete="name" maxlength="60">
+        <input type="tel" id="lead-tel" placeholder="WhatsApp com DDD (obrigatório)"
+          autocomplete="tel" pattern="[0-9\s\+\-\(\)]{8,20}" required>
+      </div>
+      <p id="form-erro" class="form-erro"></p>
+      <div class="modal-btns">
+        <button type="submit" class="btn btn-whatsapp" id="btn-whatsapp" data-plat="wpp">
+          <span class="btn-icon">💬</span> Entrar pelo WhatsApp
+        </button>
+        <button type="submit" class="btn btn-telegram" id="btn-telegram" data-plat="tg">
+          <span class="btn-icon">✈️</span> Entrar pelo Telegram
+        </button>
+      </div>
+    </form>
+
     <button class="modal-close" onclick="fecharModal()">Cancelar</button>
   </div>
 </div>
 
 <script>
+// ── CONFIG ──────────────────────────────────────────
+const SUPABASE_URL  = 'https://jfuqmjbxzhoceycauhys.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpmdXFtamJ4emhvY2V5Y2F1aHlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzc5MDMsImV4cCI6MjA5Mzc1MzkwM30.JuBLqxfyfaRClDIvwSoiDGsDLSAVHSwTI4eAayMyLvU';
+
 const TG_PRINCIPAL  = 'https://t.me/alertasml';
 const WPP_PRINCIPAL = 'https://chat.whatsapp.com/E2Rs1FHUXTkBWjXltcVLxH';
 
 const GRUPOS = {
-  'smartphone':  { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL },
-  'notebook':    { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL },
-  'smart-tv':    { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL },
-  'fone-audio':  { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL },
-  'smartwatch':  { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL },
-  'tablet':      { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL },
-  'monitor':     { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL },
+  'smartphone': { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL },
+  'notebook':   { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL },
+  'smart-tv':   { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL },
+  'fone-audio': { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL },
+  'smartwatch': { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL },
+  'tablet':     { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL },
+  'monitor':    { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL },
 };
 
+// ── STATE ────────────────────────────────────────────
+let categoriaAtual = '';
+let plataformaEscolhida = '';
+
+// ── MODAL ────────────────────────────────────────────
 function abrirModal(emoji, nome, slug) {
+  categoriaAtual = slug;
   document.getElementById('modal-emoji').textContent = emoji;
   document.getElementById('modal-nome').textContent = nome;
-  document.getElementById('modal-sub').textContent =
-    `Entre no grupo de ${nome} e receba alertas quando o preço cair. Grátis, sem spam.`;
-
-  const links = GRUPOS[slug] || { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL };
-  document.getElementById('btn-telegram').href = links.tg;
-  document.getElementById('btn-whatsapp').href = links.wpp;
-
+  document.getElementById('form-erro').textContent = '';
+  document.getElementById('lead-nome').value = '';
+  document.getElementById('lead-tel').value = '';
   document.getElementById('modal').classList.add('active');
   document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('lead-tel').focus(), 300);
 }
 
 function fecharModal(e) {
   if (e && e.target !== document.getElementById('modal')) return;
   document.getElementById('modal').classList.remove('active');
   document.body.style.overflow = '';
+}
+
+// ── SUBMISSÃO ────────────────────────────────────────
+async function submeterLead(e) {
+  e.preventDefault();
+  const btn = e.submitter;
+  plataformaEscolhida = btn ? btn.dataset.plat : 'wpp';
+
+  const nome = document.getElementById('lead-nome').value.trim();
+  const tel  = document.getElementById('lead-tel').value.replace(/\D/g, '');
+  const erro = document.getElementById('form-erro');
+
+  if (tel.length < 8) {
+    erro.textContent = 'Digite um número de WhatsApp válido com DDD.';
+    return;
+  }
+
+  btn && (btn.disabled = true, btn.textContent = 'Entrando...');
+
+  // Salvar lead no Supabase
+  try {
+    if (SUPABASE_ANON !== '__SUPABASE_ANON_KEY__') {
+      await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON,
+          'Authorization': `Bearer ${SUPABASE_ANON}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal',
+        },
+        body: JSON.stringify({
+          nome: nome || null,
+          telefone: tel,
+          categoria: categoriaAtual,
+          plataforma: plataformaEscolhida,
+        }),
+      });
+    }
+  } catch (_) { /* não bloquear se o DB falhar */ }
+
+  // Redirecionar pro grupo
+  const links = GRUPOS[categoriaAtual] || { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL };
+  const destino = plataformaEscolhida === 'tg' ? links.tg : links.wpp;
+  window.open(destino, '_blank');
+
+  fecharModal();
+  if (btn) { btn.disabled = false; btn.textContent = plataformaEscolhida === 'tg' ? '✈️ Entrar pelo Telegram' : '💬 Entrar pelo WhatsApp'; }
 }
 </script>
 </body>
