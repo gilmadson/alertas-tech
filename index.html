@@ -361,6 +361,13 @@ header {
 
 .btn-icon { font-size: 1.2rem; }
 
+.btn:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
 .field-group {
   display: flex;
   flex-direction: column;
@@ -609,20 +616,26 @@ footer a { color: var(--accent); text-decoration: none; }
     <p class="modal-subtitle">Deixa seu contato e entra no grupo — alertas grátis, sem spam.</p>
 
     <form id="lead-form" onsubmit="submeterLead(event)">
+      <!-- honeypot anti-bot (invisível para humanos) -->
+      <input type="text" id="hp-field" name="website" tabindex="-1"
+        autocomplete="off" style="position:absolute;left:-9999px;opacity:0;height:0">
+
       <div class="field-group">
         <input type="text" id="lead-nome" placeholder="Seu nome (opcional)"
-          autocomplete="name" maxlength="60">
+          autocomplete="name" maxlength="60" oninput="checarCampos()">
         <input type="email" id="lead-email" placeholder="E-mail (opcional)"
-          autocomplete="email" maxlength="100">
+          autocomplete="email" maxlength="100" oninput="checarCampos()">
         <input type="tel" id="lead-tel" placeholder="WhatsApp com DDD (obrigatório)"
-          autocomplete="tel" pattern="[0-9\s\+\-\(\)]{8,20}" required>
+          autocomplete="tel" required oninput="checarCampos()">
       </div>
       <p id="form-erro" class="form-erro"></p>
       <div class="modal-btns">
-        <button type="submit" class="btn btn-whatsapp" id="btn-whatsapp" data-plat="wpp">
+        <button type="submit" class="btn btn-whatsapp" id="btn-whatsapp"
+          data-plat="wpp" disabled>
           <span class="btn-icon">💬</span> Entrar pelo WhatsApp
         </button>
-        <button type="submit" class="btn btn-telegram" id="btn-telegram" data-plat="tg">
+        <button type="submit" class="btn btn-telegram" id="btn-telegram"
+          data-plat="tg" disabled>
           <span class="btn-icon">✈️</span> Entrar pelo Telegram
         </button>
       </div>
@@ -653,6 +666,16 @@ const GRUPOS = {
 // ── STATE ────────────────────────────────────────────
 let categoriaAtual = '';
 let plataformaEscolhida = '';
+const BOT_THRESHOLD_MS = 1500; // humanos levam mais de 1,5s pra preencher
+let modalAbertaEm = 0;
+
+// ── VALIDAÇÃO ────────────────────────────────────────
+function checarCampos() {
+  const tel = document.getElementById('lead-tel').value.replace(/\D/g, '');
+  const ok  = tel.length >= 8;
+  document.getElementById('btn-whatsapp').disabled = !ok;
+  document.getElementById('btn-telegram').disabled = !ok;
+}
 
 // ── MODAL ────────────────────────────────────────────
 function abrirModal(emoji, nome, slug) {
@@ -661,7 +684,12 @@ function abrirModal(emoji, nome, slug) {
   document.getElementById('modal-nome').textContent = nome;
   document.getElementById('form-erro').textContent = '';
   document.getElementById('lead-nome').value = '';
+  document.getElementById('lead-email').value = '';
   document.getElementById('lead-tel').value = '';
+  document.getElementById('hp-field').value = '';
+  document.getElementById('btn-whatsapp').disabled = true;
+  document.getElementById('btn-telegram').disabled = true;
+  modalAbertaEm = Date.now();
   document.getElementById('modal').classList.add('active');
   document.body.style.overflow = 'hidden';
   setTimeout(() => document.getElementById('lead-tel').focus(), 300);
@@ -686,6 +714,17 @@ async function submeterLead(e) {
 
   if (tel.length < 8) {
     erro.textContent = 'Digite um número de WhatsApp válido com DDD.';
+    return;
+  }
+
+  // Anti-bot: honeypot preenchido = bot
+  if (document.getElementById('hp-field').value) return;
+
+  // Anti-bot: preencheu em menos de 1,5s = provável bot
+  if (Date.now() - modalAbertaEm < BOT_THRESHOLD_MS) {
+    // Simula sucesso mas não salva
+    window.open(plataformaEscolhida === 'tg' ? (GRUPOS[categoriaAtual]||{}).tg || TG_PRINCIPAL : WPP_PRINCIPAL, '_blank');
+    fecharModal();
     return;
   }
 
