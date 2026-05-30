@@ -368,6 +368,55 @@ header {
   box-shadow: none !important;
 }
 
+/* CAPTCHA CHECKBOX */
+.captcha-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color .2s;
+}
+.captcha-box:hover { border-color: rgba(0,229,255,.3); }
+.captcha-box input[type=checkbox] { display: none; }
+
+.captcha-check-ui {
+  width: 24px; height: 24px;
+  border: 2px solid var(--muted);
+  border-radius: 4px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+  background: var(--bg);
+}
+.captcha-box input:checked ~ .captcha-check-ui {
+  background: #4caf50;
+  border-color: #4caf50;
+}
+.captcha-box input:checked ~ .captcha-check-ui::after {
+  content: '✓';
+  color: #fff;
+  font-size: .9rem;
+  font-weight: 700;
+}
+.captcha-text { flex: 1; }
+.captcha-label-txt {
+  display: block;
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.captcha-sub {
+  font-size: .7rem;
+  color: var(--muted);
+}
+.captcha-logo { font-size: 1.4rem; }
+
 .field-group {
   display: flex;
   flex-direction: column;
@@ -628,6 +677,16 @@ footer a { color: var(--accent); text-decoration: none; }
         <input type="tel" id="lead-tel" placeholder="WhatsApp com DDD (obrigatório)"
           autocomplete="tel" required oninput="checarCampos()">
       </div>
+      <label class="captcha-box" id="captcha-label">
+        <input type="checkbox" id="captcha-check" onchange="checarCampos()">
+        <span class="captcha-check-ui"></span>
+        <div class="captcha-text">
+          <span class="captcha-label-txt">Não sou um robô</span>
+          <span class="captcha-sub">Verificação de segurança</span>
+        </div>
+        <div class="captcha-logo">🛡️</div>
+      </label>
+
       <p id="form-erro" class="form-erro"></p>
       <div class="modal-btns">
         <button type="submit" class="btn btn-whatsapp" id="btn-whatsapp"
@@ -671,8 +730,9 @@ let modalAbertaEm = 0;
 
 // ── VALIDAÇÃO ────────────────────────────────────────
 function checarCampos() {
-  const tel = document.getElementById('lead-tel').value.replace(/\D/g, '');
-  const ok  = tel.length >= 8;
+  const tel      = document.getElementById('lead-tel').value.replace(/\D/g, '');
+  const captcha  = document.getElementById('captcha-check').checked;
+  const ok       = tel.length >= 8 && captcha;
   document.getElementById('btn-whatsapp').disabled = !ok;
   document.getElementById('btn-telegram').disabled = !ok;
 }
@@ -687,6 +747,7 @@ function abrirModal(emoji, nome, slug) {
   document.getElementById('lead-email').value = '';
   document.getElementById('lead-tel').value = '';
   document.getElementById('hp-field').value = '';
+  document.getElementById('captcha-check').checked = false;
   document.getElementById('btn-whatsapp').disabled = true;
   document.getElementById('btn-telegram').disabled = true;
   modalAbertaEm = Date.now();
