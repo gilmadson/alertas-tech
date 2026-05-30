@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AlertasTech — Ofertas de Tecnologia no seu WhatsApp ou Telegram</title>
+<meta name="description" content="Receba alertas de ofertas reais em tecnologia diretamente no seu WhatsApp ou Telegram. Notebooks, Smartphones, Smart TVs e mais.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080B10;
+  --surface: #0F1520;
+  --border: #1E2A3A;
+  --accent: #00E5FF;
+  --accent2: #FFD600;
+  --danger: #FF4D6D;
+  --text: #E8EDF5;
+  --muted: #6B7FA0;
+  --card-bg: #0D1826;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Background grid animado */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,229,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Glow blob */
+body::after {
+  content: '';
+  position: fixed;
+  top: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(0,229,255,.08) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* HEADER */
+header {
+  padding: 24px 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+.logo-dot {
+  width: 10px; height: 10px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--accent);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .6; transform: scale(1.4); }
+}
+.logo-text {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  color: var(--text);
+}
+.logo-text span { color: var(--accent); }
+
+/* HERO */
+.hero {
+  padding: 48px 20px 0;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0,229,255,.1);
+  border: 1px solid rgba(0,229,255,.25);
+  border-radius: 100px;
+  padding: 5px 14px;
+  font-size: .75rem;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.badge-dot {
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2rem, 8vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -.03em;
+  margin-bottom: 16px;
+}
+.hero h1 em {
+  font-style: normal;
+  color: var(--accent2);
+  display: block;
+}
+
+.hero p {
+  color: var(--muted);
+  font-size: .95rem;
+  line-height: 1.6;
+  max-width: 340px;
+  margin: 0 auto 32px;
+}
+
+/* STATS */
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+.stat {
+  text-align: center;
+}
+.stat-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--accent);
+  display: block;
+}
+.stat-label {
+  font-size: .72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+/* SECTION LABEL */
+.section-label {
+  text-align: center;
+  font-size: .75rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  margin-bottom: 16px;
+  padding: 0 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* CATEGORIAS GRID */
+.categorias {
+  padding: 0 20px 32px;
+  position: relative;
+  z-index: 1;
+}
+
+.categorias-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.cat-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px 16px;
+  cursor: pointer;
+  transition: all .2s ease;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+.cat-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0,229,255,.05) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity .2s;
+}
+.cat-card:hover::before,
+.cat-card:active::before { opacity: 1; }
+.cat-card:hover {
+  border-color: rgba(0,229,255,.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.3), 0 0 0 1px rgba(0,229,255,.15);
+}
+.cat-card:active { transform: translateY(0); }
+
+.cat-emoji {
+  font-size: 1.8rem;
+  display: block;
+  margin-bottom: 10px;
+  line-height: 1;
+}
+.cat-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: .9rem;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.cat-count {
+  font-size: .72rem;
+  color: var(--muted);
+}
+.cat-arrow {
+  position: absolute;
+  top: 16px; right: 16px;
+  font-size: .85rem;
+  color: var(--muted);
+  transition: transform .2s, color .2s;
+}
+.cat-card:hover .cat-arrow {
+  transform: translate(2px, -2px);
+  color: var(--accent);
+}
+
+/* FULL WIDTH CARD */
+.cat-card.full {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+}
+.cat-card.full .cat-emoji { margin-bottom: 0; }
+.cat-card.full .cat-info { flex: 1; }
+
+/* MODAL OVERLAY */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.8);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px 24px 0 0;
+  padding: 32px 24px 40px;
+  width: 100%;
+  max-width: 480px;
+  animation: slideUp .3s cubic-bezier(.22,.61,.36,1);
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-handle {
+  width: 40px; height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 auto 24px;
+}
+
+.modal-cat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.modal-cat-emoji { font-size: 2rem; }
+.modal-cat-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.modal-subtitle {
+  color: var(--muted);
+  font-size: .875rem;
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.modal-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 20px;
+  border-radius: 14px;
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all .2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-whatsapp {
+  background: #25D366;
+  color: #fff;
+}
+.btn-whatsapp:hover { background: #1ebe59; transform: translateY(-1px); }
+
+.btn-telegram {
+  background: #229ED9;
+  color: #fff;
+}
+.btn-telegram:hover { background: #1b8ec2; transform: translateY(-1px); }
+
+.btn-icon { font-size: 1.2rem; }
+
+.modal-close {
+  margin-top: 16px;
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 12px;
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .875rem;
+  cursor: pointer;
+  transition: all .2s;
+}
+.modal-close:hover { background: var(--card-bg); color: var(--text); }
+
+/* COMO FUNCIONA */
+.how {
+  padding: 0 20px 48px;
+  position: relative;
+  z-index: 1;
+}
+.how-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.step {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+.step:last-child { border-bottom: none; }
+.step-num {
+  width: 32px; height: 32px;
+  background: rgba(0,229,255,.1);
+  border: 1px solid rgba(0,229,255,.25);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-size: .8rem;
+  font-weight: 800;
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.step-title {
+  font-weight: 600;
+  font-size: .9rem;
+  margin-bottom: 3px;
+}
+.step-desc {
+  font-size: .8rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 24px 20px 40px;
+  color: var(--muted);
+  font-size: .75rem;
+  line-height: 1.6;
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--border);
+}
+footer a { color: var(--accent); text-decoration: none; }
+
+/* Vibrar no mobile ao clicar */
+@keyframes tapVibrate {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(.96); }
+}
+.tapped { animation: tapVibrate .15s ease; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-dot"></div>
+  <div class="logo-text">Alertas<span>Tech</span></div>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <div class="badge"><span class="badge-dot"></span>Monitoramento em tempo real</div>
+    <h1>Tecnologia com <em>desconto real</em> no seu bolso</h1>
+    <p>Receba alertas automáticos quando o preço cair nas suas categorias favoritas. Direto no WhatsApp ou Telegram.</p>
+
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-num" id="stat-produtos">100+</span>
+        <span class="stat-label">Produtos monitorados</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">3×</span>
+        <span class="stat-label">Coletas por dia</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">≥15%</span>
+        <span class="stat-label">Desconto mínimo</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-label">Escolha sua categoria</div>
+
+<section class="categorias">
+  <div class="categorias-grid">
+
+    <div class="cat-card" onclick="abrirModal('📱','Smartphones','smartphone')">
+      <span class="cat-emoji">📱</span>
+      <div class="cat-name">Smartphones</div>
+      <div class="cat-count">iPhone · Samsung · Motorola</div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+    <div class="cat-card" onclick="abrirModal('💻','Notebooks','notebook')">
+      <span class="cat-emoji">💻</span>
+      <div class="cat-name">Notebooks</div>
+      <div class="cat-count">Dell · Lenovo · MacBook</div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+    <div class="cat-card" onclick="abrirModal('📺','Smart TVs','smart-tv')">
+      <span class="cat-emoji">📺</span>
+      <div class="cat-name">Smart TVs</div>
+      <div class="cat-count">4K · QLED · OLED</div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+    <div class="cat-card" onclick="abrirModal('🎧','Fones & Áudio','fone-audio')">
+      <span class="cat-emoji">🎧</span>
+      <div class="cat-name">Fones & Áudio</div>
+      <div class="cat-count">JBL · Sony · AirPods</div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+    <div class="cat-card" onclick="abrirModal('⌚','Smartwatches','smartwatch')">
+      <span class="cat-emoji">⌚</span>
+      <div class="cat-name">Smartwatches</div>
+      <div class="cat-count">Galaxy Watch · Apple Watch</div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+    <div class="cat-card" onclick="abrirModal('📟','Tablets','tablet')">
+      <span class="cat-emoji">📟</span>
+      <div class="cat-name">Tablets</div>
+      <div class="cat-count">iPad · Samsung Tab · Xiaomi</div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+    <div class="cat-card full" onclick="abrirModal('🖥','Monitores & Periféricos','monitor')">
+      <span class="cat-emoji">🖥</span>
+      <div class="cat-info">
+        <div class="cat-name">Monitores & Periféricos</div>
+        <div class="cat-count">Monitor · SSD · Impressora · Câmera</div>
+      </div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+  </div>
+</section>
+
+<div class="section-label">Como funciona</div>
+
+<section class="how">
+  <div class="how-steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Escolha sua categoria</div>
+        <div class="step-desc">Selecione o tipo de produto que você quer monitorar.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Entre no grupo</div>
+        <div class="step-desc">Um clique. Sem formulário. Direto para o seu WhatsApp ou Telegram.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Receba os alertas</div>
+        <div class="step-desc">Nosso bot monitora 3× ao dia. Quando o preço cair ≥15%, você é o primeiro a saber.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div>
+        <div class="step-title">Aproveite a oferta</div>
+        <div class="step-desc">Clique no link, compre direto no Mercado Livre. É gratuito.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Parceiro oficial Mercado Livre · Alertas gratuitos · Sem spam</p>
+  <p style="margin-top:8px">Preços verificados diretamente no Mercado Livre.<br>Comissionado pelo programa de afiliados ML.</p>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="fecharModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-cat">
+      <span class="modal-cat-emoji" id="modal-emoji">📱</span>
+      <span class="modal-cat-name" id="modal-nome">Smartphones</span>
+    </div>
+    <p class="modal-subtitle" id="modal-sub">
+      Entre no grupo agora e receba alertas de desconto direto no seu app favorito.
+    </p>
+    <div class="modal-btns">
+      <a class="btn btn-whatsapp" id="btn-whatsapp" href="#" target="_blank">
+        <span class="btn-icon">💬</span> Entrar pelo WhatsApp
+      </a>
+      <a class="btn btn-telegram" id="btn-telegram" href="#" target="_blank">
+        <span class="btn-icon">✈️</span> Entrar pelo Telegram
+      </a>
+    </div>
+    <button class="modal-close" onclick="fecharModal()">Cancelar</button>
+  </div>
+</div>
+
+<script>
+// Mapa de links por categoria (substituir pelos links reais dos grupos)
+const GRUPOS = {
+  'smartphone':  { wpp: 'https://chat.whatsapp.com/LINK_SMARTPHONE',  tg: 'https://t.me/alertasml_smartphone' },
+  'notebook':    { wpp: 'https://chat.whatsapp.com/LINK_NOTEBOOK',    tg: 'https://t.me/alertasml_notebook' },
+  'smart-tv':    { wpp: 'https://chat.whatsapp.com/LINK_SMARTTV',     tg: 'https://t.me/alertasml_smarttv' },
+  'fone-audio':  { wpp: 'https://chat.whatsapp.com/LINK_FONE',        tg: 'https://t.me/alertasml_audio' },
+  'smartwatch':  { wpp: 'https://chat.whatsapp.com/LINK_SMARTWATCH',  tg: 'https://t.me/alertastech' },
+  'tablet':      { wpp: 'https://chat.whatsapp.com/LINK_TABLET',      tg: 'https://t.me/alertasml_tablet' },
+  'monitor':     { wpp: 'https://chat.whatsapp.com/LINK_MONITOR',     tg: 'https://t.me/alertasml_monitor' },
+};
+
+function abrirModal(emoji, nome, slug) {
+  document.getElementById('modal-emoji').textContent = emoji;
+  document.getElementById('modal-nome').textContent = nome;
+  document.getElementById('modal-sub').textContent =
+    `Entre no grupo de ${nome} e receba alertas quando o preço cair. Grátis, sem spam.`;
+
+  const links = GRUPOS[slug] || { wpp: '#', tg: '#' };
+  document.getElementById('btn-whatsapp').href = links.wpp;
+  document.getElementById('btn-telegram').href = links.tg;
+
+  document.getElementById('modal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function fecharModal(e) {
+  if (e && e.target !== document.getElementById('modal')) return;
+  document.getElementById('modal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+</script>
+</body>
+</html>
