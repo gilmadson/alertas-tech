@@ -578,27 +578,30 @@ footer a { color: var(--accent); text-decoration: none; }
       Entre no grupo agora e receba alertas de desconto direto no seu app favorito.
     </p>
     <div class="modal-btns">
-      <a class="btn btn-whatsapp" id="btn-whatsapp" href="#" target="_blank">
-        <span class="btn-icon">💬</span> Entrar pelo WhatsApp
-      </a>
       <a class="btn btn-telegram" id="btn-telegram" href="#" target="_blank">
         <span class="btn-icon">✈️</span> Entrar pelo Telegram
       </a>
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:14px;border:1px solid #1E2A3A;opacity:.5;cursor:not-allowed;">
+        <span style="font-size:1.2rem">💬</span>
+        <span style="font-size:.95rem;font-weight:600;color:#6B7FA0">WhatsApp — Em breve</span>
+      </div>
     </div>
     <button class="modal-close" onclick="fecharModal()">Cancelar</button>
   </div>
 </div>
 
 <script>
-// Mapa de links por categoria (substituir pelos links reais dos grupos)
+// Canal principal — todas as categorias no mesmo canal por enquanto
+const TG_PRINCIPAL = 'https://t.me/alertasml';
+
 const GRUPOS = {
-  'smartphone':  { wpp: 'https://chat.whatsapp.com/LINK_SMARTPHONE',  tg: 'https://t.me/alertasml_smartphone' },
-  'notebook':    { wpp: 'https://chat.whatsapp.com/LINK_NOTEBOOK',    tg: 'https://t.me/alertasml_notebook' },
-  'smart-tv':    { wpp: 'https://chat.whatsapp.com/LINK_SMARTTV',     tg: 'https://t.me/alertasml_smarttv' },
-  'fone-audio':  { wpp: 'https://chat.whatsapp.com/LINK_FONE',        tg: 'https://t.me/alertasml_audio' },
-  'smartwatch':  { wpp: 'https://chat.whatsapp.com/LINK_SMARTWATCH',  tg: 'https://t.me/alertastech' },
-  'tablet':      { wpp: 'https://chat.whatsapp.com/LINK_TABLET',      tg: 'https://t.me/alertasml_tablet' },
-  'monitor':     { wpp: 'https://chat.whatsapp.com/LINK_MONITOR',     tg: 'https://t.me/alertasml_monitor' },
+  'smartphone':  { tg: TG_PRINCIPAL },
+  'notebook':    { tg: TG_PRINCIPAL },
+  'smart-tv':    { tg: TG_PRINCIPAL },
+  'fone-audio':  { tg: TG_PRINCIPAL },
+  'smartwatch':  { tg: TG_PRINCIPAL },
+  'tablet':      { tg: TG_PRINCIPAL },
+  'monitor':     { tg: TG_PRINCIPAL },
 };
 
 function abrirModal(emoji, nome, slug) {
@@ -607,8 +610,7 @@ function abrirModal(emoji, nome, slug) {
   document.getElementById('modal-sub').textContent =
     `Entre no grupo de ${nome} e receba alertas quando o preço cair. Grátis, sem spam.`;
 
-  const links = GRUPOS[slug] || { wpp: '#', tg: '#' };
-  document.getElementById('btn-whatsapp').href = links.wpp;
+  const links = GRUPOS[slug] || { tg: TG_PRINCIPAL };
   document.getElementById('btn-telegram').href = links.tg;
 
   document.getElementById('modal').classList.add('active');
