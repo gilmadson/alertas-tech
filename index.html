@@ -709,17 +709,16 @@ footer a { color: var(--accent); text-decoration: none; }
 const SUPABASE_URL  = 'https://jfuqmjbxzhoceycauhys.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpmdXFtamJ4emhvY2V5Y2F1aHlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzc5MDMsImV4cCI6MjA5Mzc1MzkwM30.JuBLqxfyfaRClDIvwSoiDGsDLSAVHSwTI4eAayMyLvU';
 
-const TG_PRINCIPAL  = 'https://t.me/alertasml';
-const WPP_PRINCIPAL = 'https://chat.whatsapp.com/E2Rs1FHUXTkBWjXltcVLxH';
+const WPP_GERAL = 'https://chat.whatsapp.com/E2Rs1FHUXTkBWjXltcVLxH';
 
 const GRUPOS = {
-  'smartphone': { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL },
-  'notebook':   { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL },
-  'smart-tv':   { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL },
-  'fone-audio': { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL },
-  'smartwatch': { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL },
-  'tablet':     { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL },
-  'monitor':    { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL },
+  'smartphone': { tg: 'https://t.me/alertatech_smartphone',      wpp: WPP_GERAL },
+  'notebook':   { tg: 'https://t.me/alertatechnotebook',         wpp: WPP_GERAL },
+  'smart-tv':   { tg: 'https://t.me/alertatechsmarttvs',         wpp: WPP_GERAL },
+  'fone-audio': { tg: 'https://t.me/alertatechFoneseAudio',      wpp: WPP_GERAL },
+  'smartwatch': { tg: 'https://t.me/alertasml',                  wpp: WPP_GERAL },
+  'tablet':     { tg: 'https://t.me/alertatechtablet',           wpp: WPP_GERAL },
+  'monitor':    { tg: 'https://t.me/+4qjXKCJpncZiNzMx',         wpp: WPP_GERAL },
 };
 
 // ── STATE ────────────────────────────────────────────
