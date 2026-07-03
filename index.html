@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AlertasTech — Ofertas de Tecnologia no seu WhatsApp ou Telegram</title>
-<meta name="description" content="Receba alertas de ofertas reais em tecnologia diretamente no seu WhatsApp ou Telegram. Notebooks, Smartphones, Smart TVs e mais.">
+<meta name="description" content="Receba alertas de ofertas reais em tecnologia diretamente no seu WhatsApp ou Telegram. Mercado Livre, Amazon e Magalu.">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -33,7 +33,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Background grid animado */
 body::before {
   content: '';
   position: fixed;
@@ -46,7 +45,6 @@ body::before {
   z-index: 0;
 }
 
-/* Glow blob */
 body::after {
   content: '';
   position: fixed;
@@ -149,6 +147,34 @@ header {
   max-width: 340px;
   margin: 0 auto 32px;
 }
+
+/* LOJAS BADGES */
+.lojas-hero {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+.loja-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  font-size: .75rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.loja-badge-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.loja-badge-dot.ml { background: #FFE600; }
+.loja-badge-dot.amz { background: #FF9900; }
+.loja-badge-dot.mag { background: #0086FF; }
 
 /* STATS */
 .stats {
@@ -290,6 +316,8 @@ header {
   padding: 32px 24px 40px;
   width: 100%;
   max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
   animation: slideUp .3s cubic-bezier(.22,.61,.36,1);
 }
 @keyframes slideUp {
@@ -368,6 +396,71 @@ header {
   box-shadow: none !important;
 }
 
+/* STORE CHECKBOXES */
+.lojas-section {
+  margin-bottom: 16px;
+}
+.lojas-label {
+  font-size: .75rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: 10px;
+  display: block;
+}
+.lojas-grid {
+  display: flex;
+  gap: 8px;
+}
+.loja-check {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  user-select: none;
+  transition: all .2s;
+}
+.loja-check:hover { border-color: rgba(0,229,255,.3); }
+.loja-check input[type=checkbox] { display: none; }
+.loja-check-ui {
+  width: 18px; height: 18px;
+  border: 2px solid var(--muted);
+  border-radius: 4px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+  background: var(--bg);
+}
+.loja-check input:checked ~ .loja-check-ui {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+.loja-check input:checked ~ .loja-check-ui::after {
+  content: '\2713';
+  color: var(--bg);
+  font-size: .7rem;
+  font-weight: 700;
+}
+.loja-check.ml input:checked ~ .loja-check-ui { border-color: #FFE600; background: #FFE600; }
+.loja-check.ml input:checked ~ .loja-check-ui::after { color: #000; }
+.loja-check.amz input:checked ~ .loja-check-ui { border-color: #FF9900; background: #FF9900; }
+.loja-check.amz input:checked ~ .loja-check-ui::after { color: #000; }
+.loja-check.mag input:checked ~ .loja-check-ui { border-color: #0086FF; background: #0086FF; }
+.loja-check.mag input:checked ~ .loja-check-ui::after { color: #fff; }
+.loja-check-name {
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+}
+.loja-check input:not(:checked) ~ .loja-check-name { color: var(--muted); }
+
 /* CAPTCHA CHECKBOX */
 .captcha-box {
   display: flex;
@@ -399,7 +492,7 @@ header {
   border-color: #4caf50;
 }
 .captcha-box input:checked ~ .captcha-check-ui::after {
-  content: '✓';
+  content: '\2713';
   color: #fff;
   font-size: .9rem;
   font-weight: 700;
@@ -517,7 +610,6 @@ footer {
 }
 footer a { color: var(--accent); text-decoration: none; }
 
-/* Vibrar no mobile ao clicar */
 @keyframes tapVibrate {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(.96); }
@@ -538,18 +630,24 @@ footer a { color: var(--accent); text-decoration: none; }
     <h1>Tecnologia com <em>desconto real</em> no seu bolso</h1>
     <p>Receba alertas automáticos quando o preço cair nas suas categorias favoritas. Direto no WhatsApp ou Telegram.</p>
 
+    <div class="lojas-hero">
+      <span class="loja-badge"><span class="loja-badge-dot ml"></span>Mercado Livre</span>
+      <span class="loja-badge"><span class="loja-badge-dot amz"></span>Amazon</span>
+      <span class="loja-badge"><span class="loja-badge-dot mag"></span>Magalu</span>
+    </div>
+
     <div class="stats">
       <div class="stat">
         <span class="stat-num" id="stat-produtos">100+</span>
         <span class="stat-label">Produtos monitorados</span>
       </div>
       <div class="stat">
-        <span class="stat-num">3×</span>
+        <span class="stat-num">3&times;</span>
         <span class="stat-label">Coletas por dia</span>
       </div>
       <div class="stat">
-        <span class="stat-num">≥15%</span>
-        <span class="stat-label">Desconto mínimo</span>
+        <span class="stat-num">&ge;15%</span>
+        <span class="stat-label">Desconto m&iacute;nimo</span>
       </div>
     </div>
   </div>
@@ -628,30 +726,30 @@ footer a { color: var(--accent); text-decoration: none; }
     <div class="step">
       <div class="step-num">2</div>
       <div>
-        <div class="step-title">Entre no grupo</div>
-        <div class="step-desc">Um clique. Sem formulário. Direto para o seu WhatsApp ou Telegram.</div>
+        <div class="step-title">Escolha as lojas</div>
+        <div class="step-desc">Marque de quais lojas quer receber alertas: Mercado Livre, Amazon e/ou Magalu.</div>
       </div>
     </div>
     <div class="step">
       <div class="step-num">3</div>
       <div>
-        <div class="step-title">Receba os alertas</div>
-        <div class="step-desc">Nosso bot monitora 3× ao dia. Quando o preço cair ≥15%, você é o primeiro a saber.</div>
+        <div class="step-title">Entre no grupo</div>
+        <div class="step-desc">Um clique. Direto para o seu WhatsApp ou Telegram.</div>
       </div>
     </div>
     <div class="step">
       <div class="step-num">4</div>
       <div>
-        <div class="step-title">Aproveite a oferta</div>
-        <div class="step-desc">Clique no link, compre direto no Mercado Livre. É gratuito.</div>
+        <div class="step-title">Receba os alertas</div>
+        <div class="step-desc">Nosso bot monitora 3× ao dia. Quando o preço cair ≥15%, você é o primeiro a saber.</div>
       </div>
     </div>
   </div>
 </section>
 
 <footer>
-  <p>Parceiro oficial Mercado Livre · Alertas gratuitos · Sem spam</p>
-  <p style="margin-top:8px">Preços verificados diretamente no Mercado Livre.<br>Comissionado pelo programa de afiliados ML.</p>
+  <p>Mercado Livre · Amazon · Magalu · Alertas gratuitos · Sem spam</p>
+  <p style="margin-top:8px">Preços verificados diretamente nas lojas.<br>Comissionado pelos programas de afiliados.</p>
 </footer>
 
 <!-- MODAL -->
@@ -662,10 +760,9 @@ footer a { color: var(--accent); text-decoration: none; }
       <span class="modal-cat-emoji" id="modal-emoji">📱</span>
       <span class="modal-cat-name" id="modal-nome">Smartphones</span>
     </div>
-    <p class="modal-subtitle">Deixa seu contato e entra no grupo — alertas grátis, sem spam.</p>
+    <p class="modal-subtitle">Deixa seu contato e escolha de quais lojas quer receber alertas.</p>
 
     <form id="lead-form" onsubmit="submeterLead(event)">
-      <!-- honeypot anti-bot (invisível para humanos) -->
       <input type="text" id="hp-field" name="website" tabindex="-1"
         autocomplete="off" style="position:absolute;left:-9999px;opacity:0;height:0">
 
@@ -677,6 +774,28 @@ footer a { color: var(--accent); text-decoration: none; }
         <input type="tel" id="lead-tel" placeholder="WhatsApp com DDD (obrigatório)"
           autocomplete="tel" required oninput="checarCampos()">
       </div>
+
+      <div class="lojas-section">
+        <span class="lojas-label">De quais lojas quer alertas?</span>
+        <div class="lojas-grid">
+          <label class="loja-check ml">
+            <input type="checkbox" id="loja-ml" value="mercadolivre" checked onchange="checarCampos()">
+            <span class="loja-check-ui"></span>
+            <span class="loja-check-name">Mercado Livre</span>
+          </label>
+          <label class="loja-check amz">
+            <input type="checkbox" id="loja-amz" value="amazon" onchange="checarCampos()">
+            <span class="loja-check-ui"></span>
+            <span class="loja-check-name">Amazon</span>
+          </label>
+          <label class="loja-check mag">
+            <input type="checkbox" id="loja-mag" value="magalu" onchange="checarCampos()">
+            <span class="loja-check-ui"></span>
+            <span class="loja-check-name">Magalu</span>
+          </label>
+        </div>
+      </div>
+
       <label class="captcha-box" id="captcha-label">
         <input type="checkbox" id="captcha-check" onchange="checarCampos()">
         <span class="captcha-check-ui"></span>
@@ -724,14 +843,23 @@ const GRUPOS = {
 // ── STATE ────────────────────────────────────────────
 let categoriaAtual = '';
 let plataformaEscolhida = '';
-const BOT_THRESHOLD_MS = 1500; // humanos levam mais de 1,5s pra preencher
+const BOT_THRESHOLD_MS = 1500;
 let modalAbertaEm = 0;
 
 // ── VALIDAÇÃO ────────────────────────────────────────
+function getLojasEscolhidas() {
+  const lojas = [];
+  if (document.getElementById('loja-ml').checked)  lojas.push('mercadolivre');
+  if (document.getElementById('loja-amz').checked) lojas.push('amazon');
+  if (document.getElementById('loja-mag').checked) lojas.push('magalu');
+  return lojas;
+}
+
 function checarCampos() {
   const tel      = document.getElementById('lead-tel').value.replace(/\D/g, '');
   const captcha  = document.getElementById('captcha-check').checked;
-  const ok       = tel.length >= 8 && captcha;
+  const lojas    = getLojasEscolhidas();
+  const ok       = tel.length >= 8 && captcha && lojas.length > 0;
   document.getElementById('btn-whatsapp').disabled = !ok;
   document.getElementById('btn-telegram').disabled = !ok;
 }
@@ -747,6 +875,9 @@ function abrirModal(emoji, nome, slug) {
   document.getElementById('lead-tel').value = '';
   document.getElementById('hp-field').value = '';
   document.getElementById('captcha-check').checked = false;
+  document.getElementById('loja-ml').checked = true;
+  document.getElementById('loja-amz').checked = false;
+  document.getElementById('loja-mag').checked = false;
   document.getElementById('btn-whatsapp').disabled = true;
   document.getElementById('btn-telegram').disabled = true;
   modalAbertaEm = Date.now();
@@ -770,27 +901,29 @@ async function submeterLead(e) {
   const nome  = document.getElementById('lead-nome').value.trim();
   const email = document.getElementById('lead-email').value.trim() || null;
   const tel   = document.getElementById('lead-tel').value.replace(/\D/g, '');
-  const erro = document.getElementById('form-erro');
+  const lojas = getLojasEscolhidas();
+  const erro  = document.getElementById('form-erro');
 
   if (tel.length < 8) {
     erro.textContent = 'Digite um número de WhatsApp válido com DDD.';
     return;
   }
 
-  // Anti-bot: honeypot preenchido = bot
+  if (lojas.length === 0) {
+    erro.textContent = 'Selecione pelo menos uma loja.';
+    return;
+  }
+
   if (document.getElementById('hp-field').value) return;
 
-  // Anti-bot: preencheu em menos de 1,5s = provável bot
   if (Date.now() - modalAbertaEm < BOT_THRESHOLD_MS) {
-    // Simula sucesso mas não salva
-    window.open(plataformaEscolhida === 'tg' ? (GRUPOS[categoriaAtual]||{}).tg || TG_PRINCIPAL : WPP_PRINCIPAL, '_blank');
+    window.open(plataformaEscolhida === 'tg' ? (GRUPOS[categoriaAtual]||{}).tg || '#' : (GRUPOS[categoriaAtual]||{}).wpp || WPP_GERAL, '_blank');
     fecharModal();
     return;
   }
 
   btn && (btn.disabled = true, btn.textContent = 'Entrando...');
 
-  // Salvar lead no Supabase
   try {
     if (SUPABASE_ANON !== '__SUPABASE_ANON_KEY__') {
       await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
@@ -807,13 +940,13 @@ async function submeterLead(e) {
           telefone: tel,
           categoria: categoriaAtual,
           plataforma: plataformaEscolhida,
+          lojas: lojas.join(','),
         }),
       });
     }
-  } catch (_) { /* não bloquear se o DB falhar */ }
+  } catch (_) {}
 
-  // Redirecionar pro grupo
-  const links = GRUPOS[categoriaAtual] || { tg: TG_PRINCIPAL, wpp: WPP_PRINCIPAL };
+  const links = GRUPOS[categoriaAtual] || { tg: '#', wpp: WPP_GERAL };
   const destino = plataformaEscolhida === 'tg' ? links.tg : links.wpp;
   window.open(destino, '_blank');
 
