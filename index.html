@@ -700,12 +700,31 @@ footer a { color: var(--accent); text-decoration: none; }
       <span class="cat-arrow">↗</span>
     </div>
 
-    <div class="cat-card full" onclick="abrirModal('🖥','Monitores & Periféricos','monitor')">
+    <div class="cat-card" onclick="abrirModal('🖥','Monitores & Periféricos','monitor')">
       <span class="cat-emoji">🖥</span>
-      <div class="cat-info">
-        <div class="cat-name">Monitores & Periféricos</div>
-        <div class="cat-count">Monitor · SSD · Impressora · Câmera</div>
-      </div>
+      <div class="cat-name">Monitores & Periféricos</div>
+      <div class="cat-count">Monitor · Teclado · Mouse</div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+    <div class="cat-card" onclick="abrirModal('💾','Armazenamento','armazenamento')">
+      <span class="cat-emoji">💾</span>
+      <div class="cat-name">Armazenamento</div>
+      <div class="cat-count">SSD · HD Externo · Pendrive</div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+    <div class="cat-card" onclick="abrirModal('📷','Câmeras','camera')">
+      <span class="cat-emoji">📷</span>
+      <div class="cat-name">Câmeras</div>
+      <div class="cat-count">Câmera · GoPro · Drone</div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+    <div class="cat-card" onclick="abrirModal('🖨','Outros Tech','outros')">
+      <span class="cat-emoji">🖨</span>
+      <div class="cat-name">Outros Tech</div>
+      <div class="cat-count">Impressora · Roteador · Mais</div>
       <span class="cat-arrow">↗</span>
     </div>
 
@@ -831,13 +850,16 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const WPP_GERAL = 'https://chat.whatsapp.com/E2Rs1FHUXTkBWjXltcVLxH';
 
 const GRUPOS = {
-  'smartphone': { tg: 'https://t.me/alertatech_smartphone',      wpp: 'https://chat.whatsapp.com/IXcsKbJOn6lGbD3eoeTcn3' },
-  'notebook':   { tg: 'https://t.me/alertatechnotebook',         wpp: 'https://chat.whatsapp.com/LnGJnr8PhBQKkjJhjs2jGr' },
-  'smart-tv':   { tg: 'https://t.me/alertatechsmarttvs',         wpp: 'https://chat.whatsapp.com/IstMrtE306F2VcoUKqp4Av' },
-  'fone-audio': { tg: 'https://t.me/alertatechFoneseAudio',      wpp: 'https://chat.whatsapp.com/DXYGgxUflUQAOYiWmLe4MG' },
-  'smartwatch': { tg: 'https://t.me/alertasml',                  wpp: WPP_GERAL },
-  'tablet':     { tg: 'https://t.me/alertatechtablet',           wpp: 'https://chat.whatsapp.com/IFvk6zWwYqw6d31OacgHCu' },
-  'monitor':    { tg: 'https://t.me/+4qjXKCJpncZiNzMx',         wpp: 'https://chat.whatsapp.com/IRp9hPcT15O7Fb6n8AWO2w' },
+  'smartphone':    { tg: 'https://t.me/alertatech_smartphone',       wpp: 'https://chat.whatsapp.com/IXcsKbJOn6lGbD3eoeTcn3' },
+  'notebook':      { tg: 'https://t.me/alertatechnotebook',          wpp: 'https://chat.whatsapp.com/LnGJnr8PhBQKkjJhjs2jGr' },
+  'smart-tv':      { tg: 'https://t.me/alertatechsmarttvs',          wpp: 'https://chat.whatsapp.com/IstMrtE306F2VcoUKqp4Av' },
+  'fone-audio':    { tg: 'https://t.me/alertatechFoneseAudio',       wpp: 'https://chat.whatsapp.com/DXYGgxUflUQAOYiWmLe4MG' },
+  'smartwatch':    { tg: 'https://t.me/alertarechsmartwatch',        wpp: WPP_GERAL },
+  'tablet':        { tg: 'https://t.me/alertatechtablet',            wpp: 'https://chat.whatsapp.com/IFvk6zWwYqw6d31OacgHCu' },
+  'monitor':       { tg: 'https://t.me/monitoreperiferico',          wpp: 'https://chat.whatsapp.com/IRp9hPcT15O7Fb6n8AWO2w' },
+  'armazenamento': { tg: 'https://t.me/alertatecharmazenamento',     wpp: WPP_GERAL },
+  'camera':        { tg: 'https://t.me/alertatechcameras',           wpp: WPP_GERAL },
+  'outros':        { tg: 'https://t.me/alertatechoutrosprodutos',    wpp: WPP_GERAL },
 };
 
 // ── STATE ────────────────────────────────────────────
