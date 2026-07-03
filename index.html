@@ -175,6 +175,9 @@ header {
 .loja-badge-dot.ml { background: #FFE600; }
 .loja-badge-dot.amz { background: #FF9900; }
 .loja-badge-dot.mag { background: #0086FF; }
+.loja-badge-dot.shp { background: #EE4D2D; }
+.loja-badge-dot.ali { background: #FF4747; }
+.loja-badge-dot.kbm { background: #FF6000; }
 
 /* STATS */
 .stats {
@@ -410,7 +413,8 @@ header {
   display: block;
 }
 .lojas-grid {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
 .loja-check {
@@ -453,6 +457,12 @@ header {
 .loja-check.amz input:checked ~ .loja-check-ui::after { color: #000; }
 .loja-check.mag input:checked ~ .loja-check-ui { border-color: #0086FF; background: #0086FF; }
 .loja-check.mag input:checked ~ .loja-check-ui::after { color: #fff; }
+.loja-check.shp input:checked ~ .loja-check-ui { border-color: #EE4D2D; background: #EE4D2D; }
+.loja-check.shp input:checked ~ .loja-check-ui::after { color: #fff; }
+.loja-check.ali input:checked ~ .loja-check-ui { border-color: #FF4747; background: #FF4747; }
+.loja-check.ali input:checked ~ .loja-check-ui::after { color: #fff; }
+.loja-check.kbm input:checked ~ .loja-check-ui { border-color: #FF6000; background: #FF6000; }
+.loja-check.kbm input:checked ~ .loja-check-ui::after { color: #fff; }
 .loja-check-name {
   font-size: .8rem;
   font-weight: 600;
@@ -634,6 +644,9 @@ footer a { color: var(--accent); text-decoration: none; }
       <span class="loja-badge"><span class="loja-badge-dot ml"></span>Mercado Livre</span>
       <span class="loja-badge"><span class="loja-badge-dot amz"></span>Amazon</span>
       <span class="loja-badge"><span class="loja-badge-dot mag"></span>Magalu</span>
+      <span class="loja-badge"><span class="loja-badge-dot shp"></span>Shopee</span>
+      <span class="loja-badge"><span class="loja-badge-dot ali"></span>AliExpress</span>
+      <span class="loja-badge"><span class="loja-badge-dot kbm"></span>KaBuM!</span>
     </div>
 
     <div class="stats">
@@ -746,7 +759,7 @@ footer a { color: var(--accent); text-decoration: none; }
       <div class="step-num">2</div>
       <div>
         <div class="step-title">Escolha as lojas</div>
-        <div class="step-desc">Marque de quais lojas quer receber alertas: Mercado Livre, Amazon e/ou Magalu.</div>
+        <div class="step-desc">Marque de quais lojas quer receber alertas: Mercado Livre, Amazon, Magalu, Shopee, AliExpress e KaBuM!.</div>
       </div>
     </div>
     <div class="step">
@@ -767,7 +780,8 @@ footer a { color: var(--accent); text-decoration: none; }
 </section>
 
 <footer>
-  <p>Mercado Livre · Amazon · Magalu · Alertas gratuitos · Sem spam</p>
+  <p>Mercado Livre · Amazon · Magalu · Shopee · AliExpress · KaBuM!</p>
+  <p style="margin-top:4px">Alertas gratuitos · Sem spam</p>
   <p style="margin-top:8px">Preços verificados diretamente nas lojas.<br>Comissionado pelos programas de afiliados.</p>
 </footer>
 
@@ -811,6 +825,21 @@ footer a { color: var(--accent); text-decoration: none; }
             <input type="checkbox" id="loja-mag" value="magalu" onchange="checarCampos()">
             <span class="loja-check-ui"></span>
             <span class="loja-check-name">Magalu</span>
+          </label>
+          <label class="loja-check shp">
+            <input type="checkbox" id="loja-shp" value="shopee" onchange="checarCampos()">
+            <span class="loja-check-ui"></span>
+            <span class="loja-check-name">Shopee</span>
+          </label>
+          <label class="loja-check ali">
+            <input type="checkbox" id="loja-ali" value="aliexpress" onchange="checarCampos()">
+            <span class="loja-check-ui"></span>
+            <span class="loja-check-name">AliExpress</span>
+          </label>
+          <label class="loja-check kbm">
+            <input type="checkbox" id="loja-kbm" value="kabum" onchange="checarCampos()">
+            <span class="loja-check-ui"></span>
+            <span class="loja-check-name">KaBuM!</span>
           </label>
         </div>
       </div>
@@ -869,12 +898,13 @@ const BOT_THRESHOLD_MS = 1500;
 let modalAbertaEm = 0;
 
 // ── VALIDAÇÃO ────────────────────────────────────────
+const LOJA_IDS = ['loja-ml', 'loja-amz', 'loja-mag', 'loja-shp', 'loja-ali', 'loja-kbm'];
+
 function getLojasEscolhidas() {
-  const lojas = [];
-  if (document.getElementById('loja-ml').checked)  lojas.push('mercadolivre');
-  if (document.getElementById('loja-amz').checked) lojas.push('amazon');
-  if (document.getElementById('loja-mag').checked) lojas.push('magalu');
-  return lojas;
+  return LOJA_IDS
+    .map(id => document.getElementById(id))
+    .filter(el => el.checked)
+    .map(el => el.value);
 }
 
 function checarCampos() {
@@ -897,9 +927,7 @@ function abrirModal(emoji, nome, slug) {
   document.getElementById('lead-tel').value = '';
   document.getElementById('hp-field').value = '';
   document.getElementById('captcha-check').checked = false;
-  document.getElementById('loja-ml').checked = true;
-  document.getElementById('loja-amz').checked = false;
-  document.getElementById('loja-mag').checked = false;
+  LOJA_IDS.forEach(id => document.getElementById(id).checked = id === 'loja-ml');
   document.getElementById('btn-whatsapp').disabled = true;
   document.getElementById('btn-telegram').disabled = true;
   modalAbertaEm = Date.now();
