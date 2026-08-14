@@ -634,6 +634,11 @@ footer a { color: var(--accent); text-decoration: none; }
   <div class="logo-text">Alertas<span>Tech</span></div>
 </header>
 
+<!-- <main> existe para o leitor de tela: com ele, quem usa NVDA/VoiceOver pula
+     direto ao conteúdo em vez de ouvir o cabeçalho a cada visita. Sem ele o
+     Lighthouse reprovava `landmark-one-main`. -->
+<main>
+
 <section class="hero">
   <div class="container">
     <div class="badge"><span class="badge-dot"></span>Monitoramento em tempo real</div>
@@ -778,6 +783,8 @@ footer a { color: var(--accent); text-decoration: none; }
     </div>
   </div>
 </section>
+
+</main>
 
 <footer>
   <p>Mercado Livre · Amazon · Magalu · Shopee · AliExpress · KaBuM!</p>
