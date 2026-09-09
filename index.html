@@ -620,6 +620,70 @@ footer {
 }
 footer a { color: var(--accent); text-decoration: none; }
 
+/* OFERTAS GERAIS — o card de quem não quer escolher categoria */
+.cat-card.destaque {
+  border-color: rgba(255,214,0,.35);
+  background: linear-gradient(135deg, rgba(255,214,0,.07) 0%, var(--card-bg) 60%);
+}
+.cat-card.destaque .cat-name { color: var(--accent2); }
+
+/* CONSENTIMENTO (LGPD) */
+.consent-box { align-items: flex-start; }
+.consent-box .captcha-check-ui { margin-top: 2px; }
+.consent-box .captcha-sub { line-height: 1.5; }
+.consent-link {
+  font-size: .75rem;
+  margin: -8px 0 14px;
+  text-align: right;
+}
+.consent-link a { color: var(--accent); text-decoration: underline; }
+
+/* AVISOS DO FORMULÁRIO */
+.tg-nota {
+  font-size: .75rem;
+  color: var(--muted);
+  margin-top: 10px;
+  line-height: 1.5;
+}
+.form-aviso {
+  display: none;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,214,0,.4);
+  background: rgba(255,214,0,.08);
+  color: var(--accent2);
+  font-size: .8rem;
+  line-height: 1.5;
+}
+.form-aviso.ativo { display: block; }
+.form-aviso a { color: var(--accent); }
+
+/* PRIVACIDADE */
+.privacidade {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 20px 40px;
+  position: relative;
+  z-index: 1;
+  font-size: .82rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.privacidade p { margin-bottom: 12px; }
+.privacidade strong { color: var(--text); font-weight: 600; }
+.priv-titulo {
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+.priv-rodape {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  font-size: .75rem;
+}
+
 @keyframes tapVibrate {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(.96); }
@@ -676,71 +740,136 @@ footer a { color: var(--accent); text-decoration: none; }
 <section class="categorias">
   <div class="categorias-grid">
 
-    <div class="cat-card" onclick="abrirModal('📱','Smartphones','smartphone')">
+    <div class="cat-card full destaque" data-slug="geral" onclick="abrirModal('🔥','Ofertas gerais','geral')">
+      <span class="cat-emoji">🔥</span>
+      <div class="cat-info">
+        <div class="cat-name">Ofertas gerais — não quero escolher</div>
+        <div class="cat-count">Um grupo só, com o desconto grande de qualquer loja</div>
+      </div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+    <div class="cat-card" data-slug="smartphone" onclick="abrirModal('📱','Smartphones','smartphone')">
       <span class="cat-emoji">📱</span>
       <div class="cat-name">Smartphones</div>
       <div class="cat-count">iPhone · Samsung · Motorola</div>
       <span class="cat-arrow">↗</span>
     </div>
 
-    <div class="cat-card" onclick="abrirModal('💻','Notebooks','notebook')">
+    <div class="cat-card" data-slug="notebook" onclick="abrirModal('💻','Notebooks','notebook')">
       <span class="cat-emoji">💻</span>
       <div class="cat-name">Notebooks</div>
       <div class="cat-count">Dell · Lenovo · MacBook</div>
       <span class="cat-arrow">↗</span>
     </div>
 
-    <div class="cat-card" onclick="abrirModal('📺','Smart TVs','smart-tv')">
+    <div class="cat-card" data-slug="smart-tv" onclick="abrirModal('📺','Smart TVs','smart-tv')">
       <span class="cat-emoji">📺</span>
       <div class="cat-name">Smart TVs</div>
       <div class="cat-count">4K · QLED · OLED</div>
       <span class="cat-arrow">↗</span>
     </div>
 
-    <div class="cat-card" onclick="abrirModal('🎧','Fones & Áudio','fone-audio')">
+    <div class="cat-card" data-slug="fone-audio" onclick="abrirModal('🎧','Fones & Áudio','fone-audio')">
       <span class="cat-emoji">🎧</span>
       <div class="cat-name">Fones & Áudio</div>
       <div class="cat-count">JBL · Sony · AirPods</div>
       <span class="cat-arrow">↗</span>
     </div>
 
-    <div class="cat-card" onclick="abrirModal('⌚','Smartwatches','smartwatch')">
+    <div class="cat-card" data-slug="smartwatch" onclick="abrirModal('⌚','Smartwatches','smartwatch')">
       <span class="cat-emoji">⌚</span>
       <div class="cat-name">Smartwatches</div>
       <div class="cat-count">Galaxy Watch · Apple Watch</div>
       <span class="cat-arrow">↗</span>
     </div>
 
-    <div class="cat-card" onclick="abrirModal('📟','Tablets','tablet')">
+    <div class="cat-card" data-slug="tablet" onclick="abrirModal('📟','Tablets','tablet')">
       <span class="cat-emoji">📟</span>
       <div class="cat-name">Tablets</div>
-      <div class="cat-count">iPad · Samsung Tab · Xiaomi</div>
+      <div class="cat-count">iPad · Galaxy Tab · Xiaomi</div>
       <span class="cat-arrow">↗</span>
     </div>
 
-    <div class="cat-card" onclick="abrirModal('🖥','Monitores & Periféricos','monitor')">
+    <div class="cat-card" data-slug="monitor" onclick="abrirModal('🖥','Monitores & Periféricos','monitor')">
       <span class="cat-emoji">🖥</span>
       <div class="cat-name">Monitores & Periféricos</div>
       <div class="cat-count">Monitor · Teclado · Mouse</div>
       <span class="cat-arrow">↗</span>
     </div>
 
-    <div class="cat-card" onclick="abrirModal('💾','Armazenamento','armazenamento')">
+    <div class="cat-card" data-slug="armazenamento" onclick="abrirModal('💾','Armazenamento','armazenamento')">
       <span class="cat-emoji">💾</span>
       <div class="cat-name">Armazenamento</div>
-      <div class="cat-count">SSD · HD Externo · Pendrive</div>
+      <div class="cat-count">SSD · HD externo · Pendrive</div>
       <span class="cat-arrow">↗</span>
     </div>
 
-    <div class="cat-card" onclick="abrirModal('📷','Câmeras','camera')">
+    <div class="cat-card" data-slug="camera" onclick="abrirModal('📷','Câmeras & Drones','camera')">
       <span class="cat-emoji">📷</span>
-      <div class="cat-name">Câmeras</div>
+      <div class="cat-name">Câmeras & Drones</div>
       <div class="cat-count">Câmera · GoPro · Drone</div>
       <span class="cat-arrow">↗</span>
     </div>
 
-    <div class="cat-card" onclick="abrirModal('🖨','Outros Tech','outros')">
-      <span class="cat-emoji">🖨</span>
+    <div class="cat-card" data-slug="livros" onclick="abrirModal('📚','Livros','livros')">
+      <span class="cat-emoji">📚</span>
+      <div class="cat-name">Livros</div>
+      <div class="cat-count">Box · Capa dura · Best-seller</div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+    <div class="cat-card" data-slug="eletrodomestico" onclick="abrirModal('🏠','Eletrodomésticos','eletrodomestico')">
+      <span class="cat-emoji">🏠</span>
+      <div class="cat-name">Eletrodomésticos</div>
+      <div class="cat-count">Air fryer · Liquidificador · Mixer</div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+    <div class="cat-card" data-slug="cozinha" onclick="abrirModal('🍳','Cozinha','cozinha')">
+      <span class="cat-emoji">🍳</span>
+      <div class="cat-name">Cozinha</div>
+      <div class="cat-count">Jogo de panelas · Aparelho de jantar</div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+    <div class="cat-card" data-slug="mesa-posta" onclick="abrirModal('🍽️','Mesa Posta','mesa-posta')">
+      <span class="cat-emoji">🍽️</span>
+      <div class="cat-name">Mesa Posta</div>
+      <div class="cat-count">Faqueiro · Jogo de copos</div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+    <div class="cat-card" data-slug="casa-moveis" onclick="abrirModal('🛋️','Casa & Móveis','casa-moveis')">
+      <span class="cat-emoji">🛋️</span>
+      <div class="cat-name">Casa & Móveis</div>
+      <div class="cat-count">Sofá · Rack · Cadeira</div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+    <div class="cat-card" data-slug="fitness" onclick="abrirModal('💪','Fitness & Esporte','fitness')">
+      <span class="cat-emoji">💪</span>
+      <div class="cat-name">Fitness & Esporte</div>
+      <div class="cat-count">Whey · Creatina · Colchonete</div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+    <div class="cat-card" data-slug="beleza" onclick="abrirModal('✨','Beleza & Perfumes','beleza')">
+      <span class="cat-emoji">✨</span>
+      <div class="cat-name">Beleza & Perfumes</div>
+      <div class="cat-count">Perfume · Skincare · Prancha</div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+    <div class="cat-card" data-slug="moda" onclick="abrirModal('👜','Moda & Acessórios','moda')">
+      <span class="cat-emoji">👜</span>
+      <div class="cat-name">Moda & Acessórios</div>
+      <div class="cat-count">Mochila · Óculos · Mala</div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+    <div class="cat-card" data-slug="outros" onclick="abrirModal('🎁','Outros Tech','outros')">
+      <span class="cat-emoji">🎁</span>
       <div class="cat-name">Outros Tech</div>
       <div class="cat-count">Impressora · Roteador · Mais</div>
       <span class="cat-arrow">↗</span>
@@ -784,12 +913,41 @@ footer a { color: var(--accent); text-decoration: none; }
   </div>
 </section>
 
+<div class="section-label">Privacidade</div>
+
+<section class="privacidade" id="privacidade">
+  <h2 class="priv-titulo">O que fazemos com os seus dados</h2>
+  <p><strong>Responsável:</strong> AlertasTech, projeto pessoal de curadoria de
+    ofertas. O contato é o mesmo número de WhatsApp que envia os alertas.</p>
+  <p><strong>O que é coletado:</strong> seu WhatsApp (obrigatório), e nome e
+    e-mail se você quiser preencher — esses dois são opcionais. Guardamos
+    também a categoria e as lojas que você escolheu, e a data do cadastro.</p>
+  <p><strong>Para quê:</strong> te enviar alertas de oferta e te colocar no
+    grupo da categoria que você escolheu. Nada além disso.</p>
+  <p><strong>Base legal:</strong> o seu consentimento (art. 7º, I da LGPD),
+    dado na caixa que você marca antes de entrar. Sem ela marcada, nada é
+    enviado e nada é guardado.</p>
+  <p><strong>Com quem é compartilhado:</strong> ninguém. Os dados ficam num
+    banco de uso exclusivo do projeto (Supabase). Não vendemos, não trocamos e
+    não alugamos cadastro. Os links levam a grupos de WhatsApp e canais de
+    Telegram, que têm as políticas deles.</p>
+  <p><strong>Por quanto tempo:</strong> enquanto você quiser receber.</p>
+  <p><strong>Como pedir a exclusão:</strong> mande "APAGAR MEUS DADOS" para o
+    mesmo número que te envia os alertas, ou fale com o administrador dentro de
+    qualquer um dos grupos. Sair do grupo você pode a qualquer momento, sem
+    precisar justificar.</p>
+  <p class="priv-rodape">Os links de produto podem conter código de afiliado: se
+    você comprar, o AlertasTech pode receber comissão da loja, sem custo a mais
+    para você.</p>
+</section>
+
 </main>
 
 <footer>
   <p>Mercado Livre · Amazon · Magalu · Shopee · AliExpress · KaBuM!</p>
   <p style="margin-top:4px">Alertas gratuitos · Sem spam</p>
   <p style="margin-top:8px">Preços verificados diretamente nas lojas.<br>Comissionado pelos programas de afiliados.</p>
+  <p style="margin-top:8px"><a href="#privacidade">Privacidade e uso dos dados</a></p>
 </footer>
 
 <!-- MODAL -->
@@ -861,6 +1019,21 @@ footer a { color: var(--accent); text-decoration: none; }
         <div class="captcha-logo">🛡️</div>
       </label>
 
+      <label class="captcha-box consent-box">
+        <input type="checkbox" id="consent-check" onchange="checarCampos()">
+        <span class="captcha-check-ui"></span>
+        <div class="captcha-text">
+          <span class="captcha-label-txt">Autorizo receber as ofertas</span>
+          <span class="captcha-sub">Guardar meu nome, e-mail e WhatsApp para me
+            mandar ofertas e me colocar no grupo de
+            <strong id="consent-cat">Smartphones</strong>. Posso pedir a
+            exclusão quando quiser.</span>
+        </div>
+      </label>
+      <!-- Em aba nova de propósito: o modal cobre a página, e fechar o modal
+           para ler a política faria a pessoa preencher tudo de novo. -->
+      <p class="consent-link"><a href="#privacidade" target="_blank" rel="noopener">O que fazemos com seus dados</a></p>
+
       <p id="form-erro" class="form-erro"></p>
       <div class="modal-btns">
         <button type="submit" class="btn btn-whatsapp" id="btn-whatsapp"
@@ -872,6 +1045,9 @@ footer a { color: var(--accent); text-decoration: none; }
           <span class="btn-icon">✈️</span> Entrar pelo Telegram
         </button>
       </div>
+      <p id="tg-nota" class="tg-nota"></p>
+      <!-- Sem este aviso a página fingia sucesso quando o cadastro falhava. -->
+      <p id="form-aviso" class="form-aviso"></p>
     </form>
 
     <button class="modal-close" onclick="fecharModal()">Cancelar</button>
@@ -883,20 +1059,37 @@ footer a { color: var(--accent); text-decoration: none; }
 const SUPABASE_URL  = 'https://jfuqmjbxzhoceycauhys.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpmdXFtamJ4emhvY2V5Y2F1aHlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzc5MDMsImV4cCI6MjA5Mzc1MzkwM30.JuBLqxfyfaRClDIvwSoiDGsDLSAVHSwTI4eAayMyLvU';
 
-const WPP_GERAL = 'https://chat.whatsapp.com/E2Rs1FHUXTkBWjXltcVLxH';
+// As 8 categorias criadas em 25/08/2026 ainda não têm canal próprio no
+// Telegram: o motor manda todas para o canal de "outros". A landing avisa isso
+// em vez de fingir que cada uma tem o seu.
+const TELEGRAM_FALLBACK = 'https://t.me/alertatechoutrosprodutos';
 
+// Convite de WhatsApp muda quando alguém revoga, e a página não tem como
+// saber. Este bloco é REESCRITO por `scripts/sincronizar_landing.py`, que
+// pergunta o convite atual ao gateway do OpenWA — não edite à mão.
+// GRUPOS:INICIO (gerado por scripts/sincronizar_landing.py)
 const GRUPOS = {
-  'smartphone':    { tg: 'https://t.me/alertatech_smartphone',       wpp: 'https://chat.whatsapp.com/IXcsKbJOn6lGbD3eoeTcn3' },
-  'notebook':      { tg: 'https://t.me/alertatechnotebook',          wpp: 'https://chat.whatsapp.com/LnGJnr8PhBQKkjJhjs2jGr' },
-  'smart-tv':      { tg: 'https://t.me/alertatechsmarttvs',          wpp: 'https://chat.whatsapp.com/IstMrtE306F2VcoUKqp4Av' },
-  'fone-audio':    { tg: 'https://t.me/alertatechFoneseAudio',       wpp: 'https://chat.whatsapp.com/DXYGgxUflUQAOYiWmLe4MG' },
-  'smartwatch':    { tg: 'https://t.me/alertarechsmartwatch',        wpp: WPP_GERAL },
-  'tablet':        { tg: 'https://t.me/alertatechtablet',            wpp: 'https://chat.whatsapp.com/IFvk6zWwYqw6d31OacgHCu' },
-  'monitor':       { tg: 'https://t.me/monitoreperiferico',          wpp: 'https://chat.whatsapp.com/IRp9hPcT15O7Fb6n8AWO2w' },
-  'armazenamento': { tg: 'https://t.me/alertatecharmazenamento',     wpp: WPP_GERAL },
-  'camera':        { tg: 'https://t.me/alertatechcameras',           wpp: WPP_GERAL },
-  'outros':        { tg: 'https://t.me/alertatechoutrosprodutos',    wpp: WPP_GERAL },
+  'geral':           { tg: null, wpp: 'https://chat.whatsapp.com/JaSa6KFkq30Ea24cJWx2za' },
+  'smartphone':      { tg: 'https://t.me/alertatech_smartphone', wpp: 'https://chat.whatsapp.com/F2jZYz7jPjP9JFKTvl83F9' },
+  'notebook':        { tg: 'https://t.me/alertatechnotebook', wpp: 'https://chat.whatsapp.com/BDBWJS2sBvA2oGk7UfCt5L' },
+  'smart-tv':        { tg: 'https://t.me/alertatechsmarttvs', wpp: 'https://chat.whatsapp.com/K1Ib4Mn00vZApwLvF6d7ST' },
+  'fone-audio':      { tg: 'https://t.me/alertatechFoneseAudio', wpp: 'https://chat.whatsapp.com/EGUo43WqI4RFQFhfTVSQts' },
+  'smartwatch':      { tg: 'https://t.me/alertarechsmartwatch', wpp: 'https://chat.whatsapp.com/L5aWqcj0j1RL7cQbdBNuig' },
+  'tablet':          { tg: 'https://t.me/alertatechtablet', wpp: 'https://chat.whatsapp.com/LBP4X0ZvK327KDX8VyLwfs' },
+  'monitor':         { tg: 'https://t.me/monitoreperiferico', wpp: 'https://chat.whatsapp.com/JRgncBgVN0CClDaQzGGYTN' },
+  'armazenamento':   { tg: 'https://t.me/alertatecharmazenamento', wpp: 'https://chat.whatsapp.com/CXWxsm29bJW09IyVk68uKt' },
+  'camera':          { tg: 'https://t.me/alertatechcameras', wpp: 'https://chat.whatsapp.com/CD09VogNTSx6Qcn0UTd1YU' },
+  'livros':          { tg: 'https://t.me/alertatechoutrosprodutos', wpp: 'https://chat.whatsapp.com/FF2rXTfphxT93dBRBym5Bc' },
+  'eletrodomestico': { tg: 'https://t.me/alertatechoutrosprodutos', wpp: 'https://chat.whatsapp.com/LoELGKzQf3JDuFiK42uphy' },
+  'cozinha':         { tg: 'https://t.me/alertatechoutrosprodutos', wpp: 'https://chat.whatsapp.com/E4XruWOnsTo9y5WOz6DkBo' },
+  'mesa-posta':      { tg: 'https://t.me/alertatechoutrosprodutos', wpp: 'https://chat.whatsapp.com/HPCyzUhV3mbDqznpcASIvQ' },
+  'casa-moveis':     { tg: 'https://t.me/alertatechoutrosprodutos', wpp: 'https://chat.whatsapp.com/JesM9T2DaXm9n2qsZ605Tz' },
+  'fitness':         { tg: 'https://t.me/alertatechoutrosprodutos', wpp: 'https://chat.whatsapp.com/HWhxKTbS5P681DplTaJWX3' },
+  'beleza':          { tg: 'https://t.me/alertatechoutrosprodutos', wpp: 'https://chat.whatsapp.com/LHRp0BRxsDM5MgXmBI6VGR' },
+  'moda':            { tg: 'https://t.me/alertatechoutrosprodutos', wpp: 'https://chat.whatsapp.com/EOJprKSQGI930gRRclVan2' },
+  'outros':          { tg: 'https://t.me/alertatechoutrosprodutos', wpp: 'https://chat.whatsapp.com/FFvyqzf0VflJYbR5tfPOAK' },
 };
+// GRUPOS:FIM
 
 // ── STATE ────────────────────────────────────────────
 let categoriaAtual = '';
@@ -917,8 +1110,9 @@ function getLojasEscolhidas() {
 function checarCampos() {
   const tel      = document.getElementById('lead-tel').value.replace(/\D/g, '');
   const captcha  = document.getElementById('captcha-check').checked;
+  const consent  = document.getElementById('consent-check').checked;
   const lojas    = getLojasEscolhidas();
-  const ok       = tel.length >= 8 && captcha && lojas.length > 0;
+  const ok       = tel.length >= 8 && captcha && consent && lojas.length > 0;
   document.getElementById('btn-whatsapp').disabled = !ok;
   document.getElementById('btn-telegram').disabled = !ok;
 }
@@ -934,6 +1128,20 @@ function abrirModal(emoji, nome, slug) {
   document.getElementById('lead-tel').value = '';
   document.getElementById('hp-field').value = '';
   document.getElementById('captcha-check').checked = false;
+  document.getElementById('consent-check').checked = false;
+  document.getElementById('consent-cat').textContent =
+    slug === 'geral' ? 'ofertas que eu escolher' : nome;
+  limparAviso();
+  // As categorias novas ainda não têm canal próprio no Telegram. Dizer isso é
+  // melhor que a pessoa entrar num canal com outro nome e achar que errou.
+  const links = GRUPOS[slug] || {};
+  document.getElementById('tg-nota').textContent =
+    (links.tg === TELEGRAM_FALLBACK && slug !== 'outros')
+      ? 'No Telegram esta categoria sai no canal Outros Tech — o canal próprio ainda não existe.'
+      : '';
+  // Sem canal no Telegram (é o caso das ofertas gerais) o botão some: botão que
+  // não leva a lugar nenhum é promessa quebrada.
+  document.getElementById('btn-telegram').style.display = links.tg ? '' : 'none';
   LOJA_IDS.forEach(id => document.getElementById(id).checked = id === 'loja-ml');
   document.getElementById('btn-whatsapp').disabled = true;
   document.getElementById('btn-telegram').disabled = true;
@@ -949,6 +1157,63 @@ function fecharModal(e) {
   document.body.style.overflow = '';
 }
 
+// ── DESTINO E AVISOS ─────────────────────────────────
+function destinoDaCategoria() {
+  const links = GRUPOS[categoriaAtual] || {};
+  if (plataformaEscolhida === 'tg' && links.tg) return links.tg;
+  return links.wpp || null;
+}
+
+function abrirDestino(destino) {
+  if (!destino) return false;
+  const aba = window.open(destino, '_blank');
+  return !!aba;   // false = o navegador barrou a aba
+}
+
+function limparAviso() {
+  const aviso = document.getElementById('form-aviso');
+  aviso.innerHTML = '';
+  aviso.classList.remove('ativo');
+}
+
+function mostrarAviso(html) {
+  const aviso = document.getElementById('form-aviso');
+  aviso.innerHTML = html;
+  aviso.classList.add('ativo');
+}
+
+function linkManual(destino) {
+  return destino
+    ? ' <a href="' + destino + '" target="_blank" rel="noopener">Abrir o grupo aqui</a>.'
+    : ' Não achei o link do grupo — fale com o administrador.';
+}
+
+// Antes desta função a página fingia sucesso: o cadastro falhava, ninguém
+// via nada e nenhum lead era gravado. Falha silenciosa é o inimigo.
+function mostrarFalhaDeCadastro(detalhe, destino) {
+  mostrarAviso('⚠️ Não consegui salvar seu cadastro (' + detalhe + '). ' +
+    'Seu convite para o grupo continua valendo, mas para receber os alertas ' +
+    'no seu WhatsApp tente de novo daqui a pouco.' + linkManual(destino));
+}
+
+async function salvarLead(dados) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON,
+        'Authorization': `Bearer ${SUPABASE_ANON}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify(dados),
+    });
+    return res.ok ? { ok: true } : { ok: false, detalhe: 'erro ' + res.status };
+  } catch (err) {
+    return { ok: false, detalhe: 'sem conexão' };
+  }
+}
+
 // ── SUBMISSÃO ────────────────────────────────────────
 async function submeterLead(e) {
   e.preventDefault();
@@ -960,6 +1225,7 @@ async function submeterLead(e) {
   const tel   = document.getElementById('lead-tel').value.replace(/\D/g, '');
   const lojas = getLojasEscolhidas();
   const erro  = document.getElementById('form-erro');
+  limparAviso();
 
   if (tel.length < 8) {
     erro.textContent = 'Digite um número de WhatsApp válido com DDD.';
@@ -971,43 +1237,46 @@ async function submeterLead(e) {
     return;
   }
 
+  // Sem consentimento não sai nada: nem o POST, nem o convite.
+  if (!document.getElementById('consent-check').checked) {
+    erro.textContent = 'Marque a autorização para eu poder te mandar as ofertas.';
+    return;
+  }
+
   if (document.getElementById('hp-field').value) return;
 
+  const destino = destinoDaCategoria();
+
+  // Rápido demais para ser gente. Antes daqui saía convite aberto e modal
+  // fechado SEM nem tentar gravar: sucesso perfeito e zero linha no banco.
+  // Agora barra e diz o motivo — quem é gente toca de novo e passa.
   if (Date.now() - modalAbertaEm < BOT_THRESHOLD_MS) {
-    window.open(plataformaEscolhida === 'tg' ? (GRUPOS[categoriaAtual]||{}).tg || '#' : (GRUPOS[categoriaAtual]||{}).wpp || WPP_GERAL, '_blank');
-    fecharModal();
+    erro.textContent = 'Isso foi rápido demais. Toque no botão de novo, por favor.';
     return;
   }
 
   btn && (btn.disabled = true, btn.textContent = 'Entrando...');
 
-  try {
-    if (SUPABASE_ANON !== '__SUPABASE_ANON_KEY__') {
-      await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_ANON,
-          'Authorization': `Bearer ${SUPABASE_ANON}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal',
-        },
-        body: JSON.stringify({
-          nome: nome || null,
-          email,
-          telefone: tel,
-          categoria: categoriaAtual,
-          plataforma: plataformaEscolhida,
-          lojas: lojas.join(','),
-        }),
-      });
-    }
-  } catch (_) {}
+  const resultado = await salvarLead({
+    nome: nome || null,
+    email,
+    telefone: tel,
+    categoria: categoriaAtual,
+    plataforma: plataformaEscolhida,   // 'wpp' ou 'tg': o banco tem CHECK
+    lojas: lojas.join(','),
+  });
 
-  const links = GRUPOS[categoriaAtual] || { tg: '#', wpp: WPP_GERAL };
-  const destino = plataformaEscolhida === 'tg' ? links.tg : links.wpp;
-  window.open(destino, '_blank');
+  const abriu = abrirDestino(destino);
 
-  fecharModal();
+  if (!resultado.ok) {
+    mostrarFalhaDeCadastro(resultado.detalhe, destino);
+  } else if (!abriu) {
+    mostrarAviso('Seu cadastro foi salvo. O navegador segurou a aba do grupo:' +
+                 linkManual(destino));
+  } else {
+    fecharModal();
+  }
+
   if (btn) { btn.disabled = false; btn.textContent = plataformaEscolhida === 'tg' ? '✈️ Entrar pelo Telegram' : '💬 Entrar pelo WhatsApp'; }
 }
 </script>

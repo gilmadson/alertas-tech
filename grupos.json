@@ -1,0 +1,192 @@
+{
+  "_leia_antes": [
+    "Fonte única de verdade dos grupos de WhatsApp da landing.",
+    "18 slugs são exatamente as categorias que o motor publica (mapa CANAIS de monitor/config.py no repo trading_c_agente, conferido em 09/09/2026); o 19º, 'geral', é o grupo de super desconto, que recebe por número e não por assunto.",
+    "Os links que aparecem no index.html NÃO se escrevem aqui: rode `scripts/sincronizar_landing.py`, que busca o convite atual de cada grupo no gateway OpenWA.",
+    "A chave do gateway vem da variável de ambiente OPENWA_API_KEY. Nunca escreva a chave neste arquivo."
+  ],
+  "gateway": {
+    "base_url": "http://167.233.226.97:2785",
+    "chave_env": "OPENWA_API_KEY",
+    "rota_convite": "/api/sessions/{sessao}/groups/{jid}/invite-code"
+  },
+  "sessoes": {
+    "alertastech": "70bee236-4d02-48d6-8b8f-f99bec706af7"
+  },
+  "telegram_fallback": "https://t.me/alertatechoutrosprodutos",
+  "_telegram_fallback_por_que": "As 8 categorias criadas em 25/08/2026 ainda não têm canal próprio no Telegram; o motor manda todas para o canal de 'outros'. A landing diz a mesma coisa que a produção faz.",
+  "categorias": [
+    {
+      "slug": "geral",
+      "nome": "Ofertas gerais",
+      "emoji": "🔥",
+      "exemplos": "Desconto grande de qualquer loja e categoria",
+      "jid": "120363430022168681@g.us",
+      "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "telegram": null,
+      "_por_que": "Grupo de SUPER DESCONTO do motor (GRUPOS_SUPER_DESCONTO no .env): recebe por NÚMERO, não por assunto — qualquer produto acima do piso de desconto, de qualquer loja. É o destino de quem não quer escolher categoria. Não existe canal equivalente no Telegram."
+    },
+    {
+      "slug": "smartphone",
+      "nome": "Smartphones",
+      "emoji": "📱",
+      "exemplos": "iPhone · Samsung · Motorola",
+      "jid": "120363426129841177@g.us",
+      "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "telegram": "https://t.me/alertatech_smartphone"
+    },
+    {
+      "slug": "notebook",
+      "nome": "Notebooks",
+      "emoji": "💻",
+      "exemplos": "Dell · Lenovo · MacBook",
+      "jid": "120363408590298129@g.us",
+      "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "telegram": "https://t.me/alertatechnotebook"
+    },
+    {
+      "slug": "smart-tv",
+      "nome": "Smart TVs",
+      "emoji": "📺",
+      "exemplos": "4K · QLED · OLED",
+      "jid": "120363429283704274@g.us",
+      "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "telegram": "https://t.me/alertatechsmarttvs"
+    },
+    {
+      "slug": "fone-audio",
+      "nome": "Fones & Áudio",
+      "emoji": "🎧",
+      "exemplos": "JBL · Sony · AirPods",
+      "jid": "120363425595035144@g.us",
+      "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "telegram": "https://t.me/alertatechFoneseAudio"
+    },
+    {
+      "slug": "smartwatch",
+      "nome": "Smartwatches",
+      "emoji": "⌚",
+      "exemplos": "Galaxy Watch · Apple Watch",
+      "jid": "120363429335303648@g.us",
+      "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "telegram": "https://t.me/alertarechsmartwatch"
+    },
+    {
+      "slug": "tablet",
+      "nome": "Tablets",
+      "emoji": "📟",
+      "exemplos": "iPad · Galaxy Tab · Xiaomi",
+      "jid": "120363410090253435@g.us",
+      "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "telegram": "https://t.me/alertatechtablet"
+    },
+    {
+      "slug": "monitor",
+      "nome": "Monitores & Periféricos",
+      "emoji": "🖥",
+      "exemplos": "Monitor · Teclado · Mouse",
+      "jid": "120363411385130078@g.us",
+      "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "telegram": "https://t.me/monitoreperiferico"
+    },
+    {
+      "slug": "armazenamento",
+      "nome": "Armazenamento",
+      "emoji": "💾",
+      "exemplos": "SSD · HD externo · Pendrive",
+      "jid": "120363412224872167@g.us",
+      "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "telegram": "https://t.me/alertatecharmazenamento"
+    },
+    {
+      "slug": "camera",
+      "nome": "Câmeras & Drones",
+      "emoji": "📷",
+      "exemplos": "Câmera · GoPro · Drone",
+      "jid": "120363430110179072@g.us",
+      "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "telegram": "https://t.me/alertatechcameras"
+    },
+    {
+      "slug": "livros",
+      "nome": "Livros",
+      "emoji": "📚",
+      "exemplos": "Box · Capa dura · Best-seller",
+      "jid": "120363410902978258@g.us",
+      "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "telegram": "https://t.me/alertatechoutrosprodutos"
+    },
+    {
+      "slug": "eletrodomestico",
+      "nome": "Eletrodomésticos",
+      "emoji": "🏠",
+      "exemplos": "Air fryer · Liquidificador · Mixer",
+      "jid": "120363430123371811@g.us",
+      "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "telegram": "https://t.me/alertatechoutrosprodutos"
+    },
+    {
+      "slug": "cozinha",
+      "nome": "Cozinha",
+      "emoji": "🍳",
+      "exemplos": "Jogo de panelas · Aparelho de jantar",
+      "jid": "120363410852776610@g.us",
+      "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "telegram": "https://t.me/alertatechoutrosprodutos"
+    },
+    {
+      "slug": "mesa-posta",
+      "nome": "Mesa Posta",
+      "emoji": "🍽️",
+      "exemplos": "Faqueiro · Jogo de copos",
+      "jid": "120363431518947255@g.us",
+      "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "telegram": "https://t.me/alertatechoutrosprodutos"
+    },
+    {
+      "slug": "casa-moveis",
+      "nome": "Casa & Móveis",
+      "emoji": "🛋️",
+      "exemplos": "Sofá · Rack · Cadeira",
+      "jid": "120363429832085460@g.us",
+      "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "telegram": "https://t.me/alertatechoutrosprodutos"
+    },
+    {
+      "slug": "fitness",
+      "nome": "Fitness & Esporte",
+      "emoji": "💪",
+      "exemplos": "Whey · Creatina · Colchonete",
+      "jid": "120363427911666074@g.us",
+      "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "telegram": "https://t.me/alertatechoutrosprodutos"
+    },
+    {
+      "slug": "beleza",
+      "nome": "Beleza & Perfumes",
+      "emoji": "✨",
+      "exemplos": "Perfume · Skincare · Prancha",
+      "jid": "120363430523142176@g.us",
+      "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "telegram": "https://t.me/alertatechoutrosprodutos"
+    },
+    {
+      "slug": "moda",
+      "nome": "Moda & Acessórios",
+      "emoji": "👜",
+      "exemplos": "Mochila · Óculos · Mala",
+      "jid": "120363412462127930@g.us",
+      "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "telegram": "https://t.me/alertatechoutrosprodutos"
+    },
+    {
+      "slug": "outros",
+      "nome": "Outros Tech",
+      "emoji": "🎁",
+      "exemplos": "Impressora · Roteador · Mais",
+      "jid": "120363430336835895@g.us",
+      "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "telegram": "https://t.me/alertatechoutrosprodutos"
+    }
+  ]
+}

@@ -16,14 +16,29 @@ Single-file static site (`index.html`) deployed on Vercel. No build step, no bun
 
 ## Key Patterns
 
-- **Category → Group mapping**: `GRUPOS` object maps category slugs to WhatsApp/Telegram group links. Adding a new category requires: a card in the HTML grid, an entry in `GRUPOS`, and group links.
+- **Category → Group mapping**: `grupos.json` is the single source of truth — 19 entries: the 18 categories the deal engine publishes to, plus `geral` (the engine's super-discount group, which receives by discount size rather than by subject; it is the destination for people who do not want to pick a category). It holds each entry's WhatsApp group JID and the owning OpenWA session UUID. The `GRUPOS` object inside `index.html` lives between the `// GRUPOS:INICIO` and `// GRUPOS:FIM` markers and is **generated** by `scripts/sincronizar_landing.py` — do not hand-edit it. Adding a category requires: an entry in `grupos.json`, a card in the HTML grid (with `data-slug`), and a sync run.
+- **Every category takes the same path.** There is no special-case flow — the previous "ofertas gerais" branch hid the form (and with it `#form-aviso`), which brought back the silent failure. A group with no Telegram channel gets `tg: null` and the Telegram button is hidden for it.
+- **Anti-drift tests**: `tests/` fails when the landing and `grupos.json` disagree, when a WhatsApp invite is duplicated across categories, when the Supabase key placeholder comes back, or when the consent block disappears. `tests/test_landing_comportamento.py` runs the page's own JS under `node` with a fake DOM.
+- **Consent (LGPD)**: submission is blocked until `consent-check` is ticked (never pre-ticked), and the page carries a privacy section (`#privacidade`). The `leads` table has no consent column yet — nothing about consent is sent to Supabase.
+- **Visible failure**: `salvarLead` checks `res.ok`; a failed POST shows `#form-aviso` and keeps the modal open, while the group invite is still delivered. Never go back to swallowing the error.
 - **Store selection**: Modal includes checkboxes for Mercado Livre (checked by default), Amazon, Magalu, Shopee, AliExpress and KaBuM!. Users pick which stores they want alerts from. Selected stores are saved as comma-separated values in the `lojas` field on Supabase. Store checkbox IDs live in the `LOJA_IDS` array; adding a store requires: a hero badge, a checkbox in the modal, CSS color classes, and an entry in `LOJA_IDS`.
 - **Lead capture flow**: Modal opens on category click → user fills phone (required) + optional name/email → selects stores → "Não sou um robô" checkbox → submit saves to Supabase then redirects to group link.
-- **Anti-bot measures**: Honeypot hidden field + minimum time threshold (1.5s) before submission is accepted.
+- **Anti-bot measures**: Honeypot hidden field + minimum time threshold (1.5s). A submission faster than that is **refused with a message** — it must never open the group or close the modal, because that would signal success without a single attempt to store the lead.
 
 ## Development
 
-No build or test commands. Open `index.html` in a browser to preview. Deploy happens automatically via Vercel on push.
+No build step. Open `index.html` in a browser to preview.
+
+```bash
+python -m pytest                                    # suite (no network)
+python -m coverage run --source=scripts -m pytest && python -m coverage report -m
+OPENWA_API_KEY=... python scripts/sincronizar_landing.py --dry-run
+```
+
+Deploy is **manual and double**: the Vercel project `alertastech-landing` is not
+linked to GitHub, and the same page is also served by GitHub Pages from this
+repo. Publishing one and forgetting the other is how they drift apart. See
+`README.md`.
 
 ## Language
 
