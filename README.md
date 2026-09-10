@@ -106,5 +106,33 @@ São três frentes, todas **sem rede**:
 HTML de qualquer jeito. A policy do banco deixa **inserir** e não deixa **ler**.
 
 Colunas: `nome`, `email`, `telefone`, `categoria`, `plataforma`, `lojas`,
-`criado_em`. Atenção: `plataforma` tem CHECK e só aceita `'wpp'` ou `'tg'` —
-qualquer outro valor devolve HTTP 400 e o lead se perde.
+`consentimento`, `consentimento_em`, `origem`, `meio`, `campanha`, `criado_em`.
+Atenção: `plataforma` tem CHECK e só aceita `'wpp'` ou `'tg'` — qualquer outro
+valor devolve HTTP 400 e o lead se perde. Mandar coluna que não existe dá o
+mesmo 400, por isso o espelho do schema está em `tests/test_landing.py`
+(`COLUNAS_DE_LEADS`).
+
+### Prova do consentimento
+
+`consentimento_em` guarda **o instante em que a caixa foi marcada**, não o do
+envio. É a prova que a LGPD pede como base legal (art. 7º, I) e é também o que
+sustenta o link de afiliado: a política de Associados da Amazon só admite esse
+tipo de comunicação "desde que tais comunicações sejam solicitadas".
+
+### Origem da visita (para medir campanha)
+
+Campanha sem medir origem não é campanha, é gasto. Todo lead sai com
+`origem`/`meio`/`campanha`, nesta ordem de preferência:
+
+1. `?utm_source=`, `utm_medium=`, `utm_campaign=` da URL;
+2. o que ficou no `sessionStorage` da primeira visita (recarregar sem UTM não
+   apaga a origem real — mas um clique NOVO de campanha vence o guardado);
+3. o domínio de `document.referrer` (ex.: `instagram.com`) com `meio: 'referrer'`;
+4. `origem: 'direto'`.
+
+O texto do UTM vem da URL, ou seja, do mundo, e vai para o banco: passa por
+`UTM_ACEITO` (só caracteres inocentes; o que não bate é descartado, não
+"consertado") e é cortado em `UTM_MAX` = 120. A limpeza vale também na leitura
+do `sessionStorage`, que é do visitante e dá para editar à mão. Se qualquer
+parte disso falhar — Safari privado bloqueando storage, por exemplo — o
+cadastro segue e a origem vira `'direto'`: telemetria nunca custa um lead.

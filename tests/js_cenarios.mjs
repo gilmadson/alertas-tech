@@ -7,7 +7,8 @@ function preencher({ consent = true, captcha = true, tel = '81999998888' } = {})
   el('lead-tel').value = tel;
   el('captcha-check').checked = captcha;
   el('consent-check').checked = consent;
-  checarCampos();
+  // É o onchange da caixa: registra o instante do aceite e revalida o formulário.
+  marcarConsentimento();
 }
 
 async function submeter(plat) {
@@ -18,7 +19,18 @@ async function submeter(plat) {
 
 const extra = {};
 
-if (cenario === 'sucesso') {
+if (cenario === 'cadastro') {
+  // Cenário genérico da telemetria: o que muda é o ambiente (URL_BUSCA,
+  // REFERRER, SESSION_GUARDADO, SESSION_QUEBRADO, LOCATION_QUEBRADA), não o
+  // roteiro. O aceite acontece 5s antes do envio, de propósito.
+  abrirModal('📱', 'Smartphones', 'smartphone');
+  preencher();
+  extra.instanteDoAceite = new Date().toISOString();
+  avancarRelogio(5000);
+  await submeter('wpp');
+  extra.instanteDoEnvio = new Date().toISOString();
+
+} else if (cenario === 'sucesso') {
   abrirModal('📱', 'Smartphones', 'smartphone');
   avancarRelogio(5000);
   preencher();

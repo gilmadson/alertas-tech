@@ -1020,7 +1020,7 @@ footer a { color: var(--accent); text-decoration: none; }
       </label>
 
       <label class="captcha-box consent-box">
-        <input type="checkbox" id="consent-check" onchange="checarCampos()">
+        <input type="checkbox" id="consent-check" onchange="marcarConsentimento()">
         <span class="captcha-check-ui"></span>
         <div class="captcha-text">
           <span class="captcha-label-txt">Autorizo receber as ofertas</span>
@@ -1091,11 +1091,101 @@ const GRUPOS = {
 };
 // GRUPOS:FIM
 
+// ── ORIGEM DA VISITA ─────────────────────────────────
+// Campanha sem medir origem não é campanha, é gasto. Todo lead sai daqui com
+// origem preenchida: UTM da URL, senão o domínio de quem indicou, senão
+// 'direto'. Lead sem origem é o que estraga relatório de campanha.
+const UTM_MAX = 120;
+// O valor vem da URL — ou seja, do mundo — e vai para o banco. Só passa o
+// inocente; o resto é descartado, não "consertado".
+const UTM_ACEITO = /^[A-Za-z0-9._+ -]+$/;
+const CHAVE_ORIGEM = 'alertastech:origem';
+const SEM_ORIGEM = { origem: 'direto', meio: null, campanha: null };
+
+function limparUtm(valor) {
+  if (typeof valor !== 'string') return null;
+  const cru = valor.trim();
+  if (!cru || !UTM_ACEITO.test(cru)) return null;
+  return cru.slice(0, UTM_MAX);
+}
+
+function origemDaUrl() {
+  const params = new URLSearchParams(location.search || '');
+  const origem = limparUtm(params.get('utm_source'));
+  if (!origem) return null;   // sem source não há campanha para atribuir
+  return {
+    origem,
+    meio: limparUtm(params.get('utm_medium')),
+    campanha: limparUtm(params.get('utm_campaign')),
+  };
+}
+
+function origemDoReferrer() {
+  try {
+    const host = new URL(document.referrer).hostname.replace(/^www\./, '');
+    if (!host || host === location.hostname) return null;   // navegação interna
+    return { origem: host, meio: 'referrer', campanha: null };
+  } catch (_) {
+    return null;
+  }
+}
+
+function lerOrigemGuardada() {
+  try {
+    const bruto = JSON.parse(sessionStorage.getItem(CHAVE_ORIGEM) || 'null');
+    // A sessão é do visitante: dá para editar à mão. Limpa de novo na leitura.
+    const origem = bruto && limparUtm(bruto.origem);
+    if (!origem) return null;
+    return { origem, meio: limparUtm(bruto.meio), campanha: limparUtm(bruto.campanha) };
+  } catch (_) {
+    return null;
+  }
+}
+
+function guardarOrigem(origem) {
+  try {
+    sessionStorage.setItem(CHAVE_ORIGEM, JSON.stringify(origem));
+  } catch (_) {}   // Safari privado bloqueia storage — e nem por isso perdemos o lead
+  return origem;
+}
+
+function origemDaVisita() {
+  const daUrl = origemDaUrl();
+  if (daUrl) return guardarOrigem(daUrl);          // clique de campanha é explícito
+  const guardada = lerOrigemGuardada();
+  if (guardada) return guardada;                   // recarregou sem UTM: vale a 1ª visita
+  return guardarOrigem(origemDoReferrer() || SEM_ORIGEM);
+}
+
+let origemMemo = null;
+function origemParaEnviar() {
+  if (!origemMemo) {
+    try {
+      origemMemo = origemDaVisita();
+    } catch (_) {
+      origemMemo = SEM_ORIGEM;   // telemetria nunca custa um cadastro
+    }
+  }
+  return origemMemo;
+}
+
 // ── STATE ────────────────────────────────────────────
 let categoriaAtual = '';
 let plataformaEscolhida = '';
 const BOT_THRESHOLD_MS = 1500;
 let modalAbertaEm = 0;
+let consentimentoEm = null;
+
+// O instante do ACEITE, não o do envio: é essa a prova que a LGPD pede como
+// base legal (art. 7º, I) e é ela que sustenta o link de afiliado — a política
+// de Associados da Amazon só admite comunicação "desde que tais comunicações
+// sejam solicitadas". Sem o aceite guardado, não há como mostrar que foi.
+function marcarConsentimento() {
+  consentimentoEm = document.getElementById('consent-check').checked
+    ? new Date().toISOString()
+    : null;
+  checarCampos();
+}
 
 // ── VALIDAÇÃO ────────────────────────────────────────
 const LOJA_IDS = ['loja-ml', 'loja-amz', 'loja-mag', 'loja-shp', 'loja-ali', 'loja-kbm'];
@@ -1129,6 +1219,7 @@ function abrirModal(emoji, nome, slug) {
   document.getElementById('hp-field').value = '';
   document.getElementById('captcha-check').checked = false;
   document.getElementById('consent-check').checked = false;
+  consentimentoEm = null;
   document.getElementById('consent-cat').textContent =
     slug === 'geral' ? 'ofertas que eu escolher' : nome;
   limparAviso();
@@ -1257,6 +1348,7 @@ async function submeterLead(e) {
 
   btn && (btn.disabled = true, btn.textContent = 'Entrando...');
 
+  const origem = origemParaEnviar();
   const resultado = await salvarLead({
     nome: nome || null,
     email,
@@ -1264,6 +1356,11 @@ async function submeterLead(e) {
     categoria: categoriaAtual,
     plataforma: plataformaEscolhida,   // 'wpp' ou 'tg': o banco tem CHECK
     lojas: lojas.join(','),
+    consentimento: true,               // só chega aqui com a caixa marcada
+    consentimento_em: consentimentoEm || new Date().toISOString(),
+    origem: origem.origem,
+    meio: origem.meio,
+    campanha: origem.campanha,
   });
 
   const abriu = abrirDestino(destino);
@@ -1279,6 +1376,10 @@ async function submeterLead(e) {
 
   if (btn) { btn.disabled = false; btn.textContent = plataformaEscolhida === 'tg' ? '✈️ Entrar pelo Telegram' : '💬 Entrar pelo WhatsApp'; }
 }
+
+// Guarda a origem já no carregamento: se a pessoa chegou por campanha e só se
+// cadastrar depois de dar uma volta pela página, a origem real dela não se perde.
+origemParaEnviar();
 </script>
 </body>
 </html>

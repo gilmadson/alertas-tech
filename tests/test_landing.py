@@ -183,6 +183,50 @@ def test_a_plataforma_enviada_respeita_o_check_do_banco(html):
     assert plats == {"wpp", "tg"}, plats
 
 
+                                            # ── colunas da tabela `leads` ──
+# Espelho do schema (migration `leads_consentimento_e_origem`, 09/09/2026).
+# `id` e `criado_em` são do banco. Mandar coluna que não existe devolve HTTP
+# 400 e o lead se perde — por isso o espelho vive aqui, sem depender de rede.
+COLUNAS_DE_LEADS = {
+    "nome", "email", "telefone", "categoria", "plataforma", "lojas",
+    "consentimento", "consentimento_em", "origem", "meio", "campanha",
+}
+
+
+def test_o_cadastro_so_manda_coluna_que_existe(html):
+    corpo = re.search(r"await salvarLead\(\{(.*?)\n  \}\)", html, re.S)
+    assert corpo, "não achei a chamada de salvarLead"
+    # `[:,]` porque o JS aceita atalho: `email,` é a chave `email`.
+    chaves = set(re.findall(r"^\s{4}(\w+)\s*[:,]", corpo.group(1), re.M))
+    assert chaves == COLUNAS_DE_LEADS
+
+
+def test_o_consentimento_nunca_vai_sem_data(html):
+    """`consentimento: true` com `consentimento_em` vazio não prova nada."""
+    assert "consentimento_em: consentimentoEm || new Date().toISOString()" in html
+
+
+def test_o_instante_do_aceite_e_o_da_caixa_marcada(html):
+    """Quem grava a data é o onchange da caixa, não a submissão."""
+    assert 'onchange="marcarConsentimento()"' in html
+    fn = re.search(r"function marcarConsentimento\(\)\s*\{(.*?)\n\}", html, re.S)
+    assert fn and "toISOString" in fn.group(1)
+
+
+def test_todo_utm_passa_pela_limpeza_antes_de_ir_ao_banco(html):
+    """Valor de URL é texto do mundo: nada entra cru no banco."""
+    for campo in ("utm_source", "utm_medium", "utm_campaign"):
+        assert re.search(r"limparUtm\(params\.get\('%s'\)\)" % campo, html), campo
+    guardada = re.search(r"function lerOrigemGuardada\(\)\s*\{(.*?)\n\}", html, re.S)
+    assert guardada and guardada.group(1).count("limparUtm") >= 3, \
+        "a sessão é do visitante: o que vem dela também precisa ser limpo"
+
+
+def test_a_limpeza_de_utm_tem_teto_e_lista_do_que_aceita(html):
+    assert re.search(r"const UTM_MAX = \d+;", html)
+    assert re.search(r"const UTM_ACEITO = /\^\[[^/]+\]\+\$/;", html)
+
+
 def test_envio_rapido_nao_pula_o_cadastro(html):
     """O ramo antibot antigo abria o grupo e fechava o modal SEM tentar gravar:
     sucesso perfeito para quem visita, zero linha no banco."""

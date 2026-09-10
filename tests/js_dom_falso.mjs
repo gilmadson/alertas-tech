@@ -32,8 +32,40 @@ function elemento(id) {
   return elementos[id];
 }
 
-let relogio = 1_000_000;
+let relogio = 1_764_000_000_000;   // instante fixo: data previsível nos testes
 export function avancarRelogio(ms) { relogio += ms; }
+
+// O `new Date()` do código de produção precisa andar com o relógio de mentira,
+// senão não há como provar que o consentimento guarda o instante do ACEITE e
+// não o do envio.
+const DataReal = globalThis.Date;
+globalThis.Date = class extends DataReal {
+  constructor(...args) { super(...(args.length ? args : [relogio])); }
+  static now() { return relogio; }
+};
+
+// ── mundo de fora, configurado por variável de ambiente ──────────────────────
+const amb = process.env;
+export const HOST = 'alertastech-landing.vercel.app';
+// Mesma chave que o index.html usa: se la mudar de nome, os testes de sessao
+// caem -- que e o aviso certo.
+const CHAVE_ORIGEM_TESTE = 'alertastech:origem';
+
+globalThis.location = amb.LOCATION_QUEBRADA
+  ? { get search() { throw new Error('location bloqueada'); }, hostname: HOST }
+  : { search: amb.URL_BUSCA || '', hostname: HOST };
+
+const naSessao = {};
+if (amb.SESSION_GUARDADO) naSessao[CHAVE_ORIGEM_TESTE] = amb.SESSION_GUARDADO;
+globalThis.sessionStorage = amb.SESSION_QUEBRADO
+  ? {
+      getItem() { throw new Error('storage bloqueado'); },
+      setItem() { throw new Error('storage bloqueado'); },
+    }
+  : {
+      getItem: (k) => (k in naSessao ? naSessao[k] : null),
+      setItem: (k, v) => { naSessao[k] = String(v); },
+    };
 
 export const abertas = [];
 export const chamadasFetch = [];
@@ -43,11 +75,14 @@ export function bloquearJanela() { janelaLiberada = false; }
 export let respostaDoSupabase = { ok: true, status: 201 };
 export function responderSupabase(resp) { respostaDoSupabase = resp; }
 
-globalThis.document = { getElementById: elemento, body: { style: {} } };
+globalThis.document = {
+  getElementById: elemento,
+  body: { style: {} },
+  referrer: amb.REFERRER || '',
+};
 globalThis.window = {
   open: (url) => { abertas.push(url); return janelaLiberada ? {} : null; },
 };
-globalThis.Date.now = () => relogio;
 globalThis.setTimeout = () => {};   // o focus() atrasado do modal
 globalThis.fetch = async (url, opcoes) => {
   chamadasFetch.push({ url, opcoes });
@@ -71,6 +106,7 @@ export function estado() {
     consentMarcado: el('consent-check').checked,
     botaoTelegram: el('btn-telegram').style.display,
     fetchesTentados: chamadasFetch.length,
+    origemGuardada: naSessao[CHAVE_ORIGEM_TESTE] ?? null,
     abertas,
     fetches: chamadasFetch.map((c) => ({
       url: c.url,
