@@ -77,7 +77,7 @@ def grupos_json(tmp_path):
 
 def test_carregar_grupos_le_o_arquivo_de_verdade():
     dados = sinc.carregar_grupos(RAIZ / "grupos.json")
-    assert len(dados["categorias"]) == 19   # 18 do motor + o grupo geral
+    assert len(dados["categorias"]) == 20   # 19 do motor + o grupo geral
 
 
 def test_carregar_grupos_recusa_arquivo_sem_categorias(tmp_path):

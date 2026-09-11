@@ -85,6 +85,15 @@ if (cenario === 'cadastro') {
   preencher();
   await submeter('wpp');
 
+} else if (cenario === 'salao') {
+  // Card comum do grid com `tg: null`: o botão do Telegram tem de sumir sem
+  // que nada mais mude — o `geral` já provava isso, mas ele é o card em
+  // destaque e por muito tempo teve caminho próprio.
+  abrirModal('💇', 'Salão de Beleza', 'salao');
+  avancarRelogio(5000);
+  preencher();
+  await submeter('wpp');
+
 } else if (cenario === 'telegram_categoria_nova') {
   abrirModal('👜', 'Moda & Acessórios', 'moda');
   avancarRelogio(5000);

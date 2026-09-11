@@ -34,7 +34,7 @@ grupo de WhatsApp, o **UUID da sessão** dona do grupo no gateway e o canal de
 Telegram (`null` quando não existe canal — aí a landing esconde o botão do
 Telegram em vez de oferecer um caminho que não leva a lugar nenhum).
 
-São 19 entradas: as **18 categorias** do motor (`monitor/config.py`, mapa
+São 20 entradas: as **19 categorias** do motor (`monitor/config.py`, mapa
 `CANAIS`, do repo `trading_c_agente`) mais **`geral`**, que é o grupo de super
 desconto (`GRUPOS_SUPER_DESCONTO` no `.env` do motor). Esse recebe por número e
 não por assunto — qualquer produto de qualquer loja acima do piso de desconto —
@@ -74,6 +74,9 @@ Duas regras do script, as duas nascidas de dor:
   sequência começam a voltar HTTP 500 a partir do 12º (o WhatsApp limita), e os
   mesmos grupos respondem 200 quando consultados devagar. O padrão é 2s de
   pausa e 3 tentativas (`--pausa`, `--tentativas`).
+  Com 20 grupos (10/09/2026) os 2s de padrão ficaram no limite: a rodada que
+  entregou `salao` foi feita com `--pausa 4`, e as 20 responderam 200 na
+  primeira tentativa. Categoria nova alonga a fila — suba a pausa junto.
 
 ## Testes
 

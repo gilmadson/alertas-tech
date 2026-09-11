@@ -24,14 +24,17 @@ INDEX = RAIZ / "index.html"
 GRUPOS_JSON = RAIZ / "grupos.json"
 
 # Espelho da lista de categorias do motor (`monitor/config.py`, mapa CANAIS do
-# repo trading_c_agente, conferido em 09/09/2026). O motor publica nestas 18 e
+# repo trading_c_agente, conferido em 10/09/2026). O motor publica nestas 19 e
 # só nestas: se ele ganhar categoria nova, este teste é o lembrete de que a
 # landing também precisa ganhar.
 CATEGORIAS_DO_MOTOR = (
     "smartphone", "notebook", "smart-tv", "fone-audio", "smartwatch",
     "livros", "tablet", "armazenamento", "camera", "monitor",
     "eletrodomestico", "cozinha", "mesa-posta", "casa-moveis", "fitness",
-    "beleza", "moda", "outros",
+    # `salao` (10/09/2026) é o primeiro nicho de PRESTADOR DE SERVIÇO: fala com
+    # quem compra para atender cliente, não para si. Fica ao lado de `beleza`
+    # na lista porque é o vizinho de assunto, mas é outro público.
+    "beleza", "salao", "moda", "outros",
 )
 
 # `geral` não é categoria do motor: é o grupo de SUPER DESCONTO
@@ -59,7 +62,7 @@ def mapa(html):
 
 # ── grupos.json ──────────────────────────────────────────────────────────────
 
-def test_grupos_json_cobre_as_18_categorias_do_motor(dados):
+def test_grupos_json_cobre_as_19_categorias_do_motor(dados):
     slugs = {c["slug"] for c in dados["categorias"]}
     faltando = set(CATEGORIAS_DO_MOTOR) - slugs
     assert not faltando, f"categorias do motor fora da landing: {sorted(faltando)}"

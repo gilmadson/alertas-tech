@@ -173,6 +173,21 @@ def test_categoria_com_canal_mantem_o_botao_do_telegram(sucesso):
     assert sucesso["botaoTelegram"] == ""
 
 
+def test_salao_esconde_o_telegram_e_entrega_o_grupo_certo(tmp_path):
+    """`salao` (10/09/2026) é a segunda entrada com `tg: null` — e a primeira
+    num card COMUM do grid, não no card em destaque do `geral`.
+
+    Vale rodar de verdade porque isto lê o bloco GRUPOS do `index.html`
+    publicado: prova que o convite do salão está lá e que o botão do Telegram
+    some, em vez de prometer um canal que não existe. Se alguém "consertar" o
+    `tg: null` para o canal de fallback, é aqui que aparece.
+    """
+    r = rodar("salao", tmp_path)
+    assert r["botaoTelegram"] == "none"
+    assert r["abertas"] == ["https://chat.whatsapp.com/CfN9CT2HnWGGpK2qaQ2KFm"]
+    assert r["fetches"][0]["corpo"]["categoria"] == "salao"
+
+
 # ── envio rápido (antibot) ───────────────────────────────────────────────────
 
 def test_envio_rapido_nao_finge_sucesso(tmp_path):

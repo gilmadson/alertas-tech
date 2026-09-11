@@ -1,7 +1,7 @@
 {
   "_leia_antes": [
     "Fonte única de verdade dos grupos de WhatsApp da landing.",
-    "18 slugs são exatamente as categorias que o motor publica (mapa CANAIS de monitor/config.py no repo trading_c_agente, conferido em 09/09/2026); o 19º, 'geral', é o grupo de super desconto, que recebe por número e não por assunto.",
+    "19 slugs são exatamente as categorias que o motor publica (mapa CANAIS de monitor/config.py no repo trading_c_agente, conferido em 10/09/2026); o 20º, 'geral', é o grupo de super desconto, que recebe por número e não por assunto.",
     "Os links que aparecem no index.html NÃO se escrevem aqui: rode `scripts/sincronizar_landing.py`, que busca o convite atual de cada grupo no gateway OpenWA.",
     "A chave do gateway vem da variável de ambiente OPENWA_API_KEY. Nunca escreva a chave neste arquivo."
   ],
@@ -169,6 +169,16 @@
       "jid": "120363430523142176@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
       "telegram": "https://t.me/alertatechoutrosprodutos"
+    },
+    {
+      "slug": "salao",
+      "nome": "Salão de Beleza",
+      "emoji": "💇",
+      "exemplos": "Shampoo profissional · Botox · Secador",
+      "jid": "120363430066666952@g.us",
+      "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "telegram": "https://t.me/alertatechoutrosprodutos",
+      "_por_que": "Primeiro nicho de PRESTADOR DE SERVIÇO (10/09/2026): fala com quem compra para atender cliente, não para si — por isso é grupo separado de 'beleza', e não uma linha dentro dele. Nasce só no WhatsApp: não existe canal de Telegram para salão, então o botão do Telegram some sozinho (mesmo caminho de 'geral')."
     },
     {
       "slug": "moda",
