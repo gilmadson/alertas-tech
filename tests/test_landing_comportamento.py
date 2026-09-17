@@ -27,8 +27,14 @@ pytestmark = pytest.mark.skipif(shutil.which("node") is None,
 
 
 def js_da_landing():
+    """O ÚLTIMO bloco `<script>` do arquivo — o da lógica da página.
+
+    Desde o Pixel do Meta (16/09/2026) o `<head>` também tem um `<script>`
+    inline; pegar o primeiro-ao-último por regex gulosa juntaria os dois
+    blocos (e tudo entre eles) numa string que não é JS válido nenhum.
+    """
     html = INDEX.read_text(encoding="utf-8")
-    return re.search(r"<script>(.*)</script>", html, re.S).group(1)
+    return re.findall(r"<script>(.*?)</script>", html, re.S)[-1]
 
 
 def rodar(cenario, tmp_path, **mundo):
