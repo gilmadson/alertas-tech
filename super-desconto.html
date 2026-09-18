@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Super Desconto — o maior desconto do dia em qualquer loja | AlertasTech</title>
+<meta name="description" content="Grupo de Super Desconto: qualquer produto com desconto grande, em qualquer loja e categoria. Direto no seu WhatsApp.">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1137836155269322');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="landing.css">
+</head>
+<!-- Sem `data-lojas`: o grupo "geral" recebe por TAMANHO de desconto, de
+     qualquer loja — ao contrário do Imperdíveis (100% Mercado Livre), aqui a
+     escolha de loja faz sentido e fica igual ao index.html (6 caixas).
+     `data-auto-abrir="geral"` reaproveita o slug que já existe em
+     grupos.json (categoria "Ofertas gerais", grupo Super Descontos #1,
+     testado e no ar) — não precisa de categoria nova nem de novo convite. -->
+<body data-auto-abrir="geral">
+
+<header>
+  <div class="logo-dot"></div>
+  <div class="logo-text">Alertas<span>Tech</span></div>
+</header>
+
+<main>
+
+<section class="hero">
+  <div class="container">
+    <div class="badge"><span class="badge-dot"></span>Todas as lojas</div>
+    <h1>O <em>super desconto</em> do dia, de qualquer loja</h1>
+    <p>Um grupo só, com o maior desconto do dia em qualquer categoria e qualquer uma das 6 lojas que monitoramos — direto no seu WhatsApp.</p>
+
+    <div class="lojas-hero">
+      <span class="loja-badge"><span class="loja-badge-dot ml"></span>Mercado Livre</span>
+      <span class="loja-badge"><span class="loja-badge-dot amz"></span>Amazon</span>
+      <span class="loja-badge"><span class="loja-badge-dot mag"></span>Magalu</span>
+      <span class="loja-badge"><span class="loja-badge-dot shp"></span>Shopee</span>
+      <span class="loja-badge"><span class="loja-badge-dot ali"></span>AliExpress</span>
+      <span class="loja-badge"><span class="loja-badge-dot kbm"></span>KaBuM!</span>
+    </div>
+  </div>
+</section>
+
+<!-- Mesmo padrão enxuto do imperdiveis.html: card oculto só existe pro
+     auto-clique (ver landing.js), o formulário aparece direto embaixo do
+     hero. -->
+<section class="categorias">
+  <div class="categorias-grid">
+
+    <div class="cat-card full destaque" data-slug="geral" onclick="abrirModal('🔥','Ofertas gerais','geral')">
+      <span class="cat-emoji">🔥</span>
+      <div class="cat-info">
+        <div class="cat-name">Entrar no grupo de Super Desconto</div>
+        <div class="cat-count">O maior desconto do dia, de qualquer loja e categoria</div>
+      </div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>Mercado Livre · Amazon · Magalu · Shopee · AliExpress · KaBuM!</p>
+  <p style="margin-top:4px">Alertas gratuitos · Sem spam</p>
+  <p style="margin-top:8px">Preços verificados diretamente nas lojas.<br>Comissionado pelos programas de afiliados.</p>
+  <!-- A política mora no index.html: uma só, para todas as páginas. -->
+  <p style="margin-top:8px"><a href="index.html#privacidade">Privacidade e uso dos dados</a></p>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="fecharModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-cat">
+      <span class="modal-cat-emoji" id="modal-emoji">🔥</span>
+      <span class="modal-cat-name" id="modal-nome">Ofertas gerais</span>
+    </div>
+    <p class="modal-subtitle">Deixa seu contato e escolha de quais lojas quer receber alertas.</p>
+
+    <form id="lead-form" onsubmit="submeterLead(event)">
+      <input type="text" id="hp-field" name="website" tabindex="-1"
+        autocomplete="off" style="position:absolute;left:-9999px;opacity:0;height:0">
+
+      <div class="field-group">
+        <input type="text" id="lead-nome" placeholder="Seu nome (opcional)"
+          autocomplete="name" maxlength="60" oninput="checarCampos()">
+        <input type="email" id="lead-email" placeholder="E-mail (opcional)"
+          autocomplete="email" maxlength="100" oninput="checarCampos()">
+        <input type="tel" id="lead-tel" placeholder="WhatsApp com DDD (obrigatório)"
+          autocomplete="tel" required oninput="checarCampos()">
+      </div>
+
+      <div class="lojas-section">
+        <span class="lojas-label">De quais lojas quer alertas?</span>
+        <div class="lojas-grid">
+          <label class="loja-check ml">
+            <input type="checkbox" id="loja-ml" value="mercadolivre" checked onchange="checarCampos()">
+            <span class="loja-check-ui"></span>
+            <span class="loja-check-name">Mercado Livre</span>
+          </label>
+          <label class="loja-check amz">
+            <input type="checkbox" id="loja-amz" value="amazon" onchange="checarCampos()">
+            <span class="loja-check-ui"></span>
+            <span class="loja-check-name">Amazon</span>
+          </label>
+          <label class="loja-check mag">
+            <input type="checkbox" id="loja-mag" value="magalu" onchange="checarCampos()">
+            <span class="loja-check-ui"></span>
+            <span class="loja-check-name">Magalu</span>
+          </label>
+          <label class="loja-check shp">
+            <input type="checkbox" id="loja-shp" value="shopee" onchange="checarCampos()">
+            <span class="loja-check-ui"></span>
+            <span class="loja-check-name">Shopee</span>
+          </label>
+          <label class="loja-check ali">
+            <input type="checkbox" id="loja-ali" value="aliexpress" onchange="checarCampos()">
+            <span class="loja-check-ui"></span>
+            <span class="loja-check-name">AliExpress</span>
+          </label>
+          <label class="loja-check kbm">
+            <input type="checkbox" id="loja-kbm" value="kabum" onchange="checarCampos()">
+            <span class="loja-check-ui"></span>
+            <span class="loja-check-name">KaBuM!</span>
+          </label>
+        </div>
+      </div>
+
+      <label class="captcha-box" id="captcha-label">
+        <input type="checkbox" id="captcha-check" onchange="checarCampos()">
+        <span class="captcha-check-ui"></span>
+        <div class="captcha-text">
+          <span class="captcha-label-txt">Não sou um robô</span>
+          <span class="captcha-sub">Verificação de segurança</span>
+        </div>
+        <div class="captcha-logo">🛡️</div>
+      </label>
+
+      <label class="captcha-box consent-box">
+        <input type="checkbox" id="consent-check" onchange="marcarConsentimento()">
+        <span class="captcha-check-ui"></span>
+        <div class="captcha-text">
+          <span class="captcha-label-txt">Autorizo receber as ofertas</span>
+          <span class="captcha-sub">Guardar meu nome, e-mail e WhatsApp para me
+            mandar ofertas e me colocar no grupo de
+            <strong id="consent-cat">Ofertas gerais</strong>. Posso pedir a
+            exclusão quando quiser.</span>
+        </div>
+      </label>
+      <p class="consent-link"><a href="index.html#privacidade" target="_blank" rel="noopener">O que fazemos com seus dados</a></p>
+
+      <p id="form-erro" class="form-erro"></p>
+      <div class="modal-btns">
+        <button type="submit" class="btn btn-whatsapp" id="btn-whatsapp"
+          data-plat="wpp" disabled>
+          <span class="btn-icon">💬</span> Entrar pelo WhatsApp
+        </button>
+        <!-- O grupo "geral" não tem canal no Telegram (`telegram: null` no
+             grupos.json): o landing.js esconde o botão sozinho. -->
+        <button type="submit" class="btn btn-telegram" id="btn-telegram"
+          data-plat="tg" disabled>
+          <span class="btn-icon">✈️</span> Entrar pelo Telegram
+        </button>
+      </div>
+      <p id="tg-nota" class="tg-nota"></p>
+      <p id="form-aviso" class="form-aviso"></p>
+    </form>
+
+    <button class="modal-close" onclick="fecharModal()">Cancelar</button>
+  </div>
+</div>
+
+<script src="landing.js"></script>
+</body>
+</html>

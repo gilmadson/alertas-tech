@@ -26,6 +26,7 @@ import sincronizar_landing as sinc
 RAIZ = Path(__file__).resolve().parents[1]
 INDEX = RAIZ / "index.html"
 IMPERDIVEIS = RAIZ / "imperdiveis.html"
+SUPER_DESCONTO = RAIZ / "super-desconto.html"
 LANDING_JS = RAIZ / "landing.js"
 LANDING_CSS = RAIZ / "landing.css"
 VERCEL = RAIZ / "vercel.json"
@@ -33,7 +34,7 @@ GRUPOS_JSON = RAIZ / "grupos.json"
 
 # Toda página que capta lead entra nesta lista. Quem esquecer de acrescentar
 # aqui a próxima página exclusiva perde todas as travas de uma vez.
-PAGINAS = ("index.html", "imperdiveis.html")
+PAGINAS = ("index.html", "imperdiveis.html", "super-desconto.html")
 
 
 @pytest.fixture(scope="module")
@@ -217,6 +218,36 @@ def test_a_loja_fixa_e_a_mesma_string_que_o_banco_ja_recebe(imperdiveis):
     assert declarada == do_index
 
 
+# ── a página exclusiva do Super Desconto ─────────────────────────────────────
+
+@pytest.fixture(scope="module")
+def super_desconto():
+    return SUPER_DESCONTO.read_text(encoding="utf-8")
+
+
+def test_super_desconto_abre_o_modal_com_o_slug_do_grupos_json(super_desconto, dados):
+    """Reaproveita o slug 'geral' (grupo Super Descontos #1, já testado) em
+    vez de criar categoria nova — o motor já publica lá por tamanho de
+    desconto, não por assunto."""
+    cat = entrada(dados, "geral")
+    padrao = r"abrirModal\('%s',\s*'%s',\s*'geral'\)" % (
+        re.escape(cat["emoji"]), re.escape(cat["nome"]))
+    assert re.search(padrao, super_desconto), "a chamada não bate com o grupos.json"
+
+
+def test_super_desconto_nao_tem_grade_de_categoria(super_desconto):
+    """Ela existe para uma coisa só: quem chega já escolheu."""
+    assert set(re.findall(r'data-slug="([^"]+)"', super_desconto)) == {"geral"}
+
+
+def test_super_desconto_nao_declara_loja_fixa(super_desconto):
+    """Ao contrário do Imperdíveis (100% ML), o grupo 'geral' recebe de
+    QUALQUER loja — travar numa loja só aqui seria a promessa errada. Por
+    isso ela mantém a escolha (coberta pelas 6 caixas em
+    test_pagina_com_caixas_de_loja_tem_todas_as_do_js)."""
+    assert not re.search(r"<body[^>]*data-lojas=", super_desconto)
+
+
 # ── publicação (Vercel) ──────────────────────────────────────────────────────
 
 @pytest.fixture(scope="module")
@@ -241,6 +272,11 @@ def test_o_catch_all_e_sempre_a_ultima_regra(vercel):
 def test_o_imperdiveis_tem_rota_propria_antes_do_catch_all(vercel):
     assert "/imperdiveis" in fontes(vercel)
     assert fontes(vercel).index("/imperdiveis") < fontes(vercel).index(CATCH_ALL)
+
+
+def test_o_super_desconto_tem_rota_propria_antes_do_catch_all(vercel):
+    assert "/super-desconto" in fontes(vercel)
+    assert fontes(vercel).index("/super-desconto") < fontes(vercel).index(CATCH_ALL)
 
 
 def test_todo_destino_de_rewrite_e_um_arquivo_que_existe(vercel):
