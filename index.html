@@ -766,6 +766,15 @@ footer a { color: var(--accent); text-decoration: none; }
       <span class="cat-arrow">↗</span>
     </div>
 
+    <div class="cat-card full destaque" data-slug="imperdiveis" onclick="abrirModal('⚡','Imperdíveis ML','imperdiveis')">
+      <span class="cat-emoji">⚡</span>
+      <div class="cat-info">
+        <div class="cat-name">Imperdíveis ML</div>
+        <div class="cat-count">O maior desconto do dia, revezando entre 9 categorias de tech</div>
+      </div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
     <div class="cat-card" data-slug="smartphone" onclick="abrirModal('📱','Smartphones','smartphone')">
       <span class="cat-emoji">📱</span>
       <div class="cat-name">Smartphones</div>
@@ -1094,6 +1103,7 @@ const TELEGRAM_FALLBACK = 'https://t.me/alertatechoutrosprodutos';
 // GRUPOS:INICIO (gerado por scripts/sincronizar_landing.py)
 const GRUPOS = {
   'geral':           { tg: null, wpp: 'https://chat.whatsapp.com/JaSa6KFkq30Ea24cJWx2za' },
+  'imperdiveis':     { tg: null, wpp: 'https://chat.whatsapp.com/IqTCyshHhzkEkN7cNbG2mC' },
   'smartphone':      { tg: 'https://t.me/alertatech_smartphone', wpp: 'https://chat.whatsapp.com/F2jZYz7jPjP9JFKTvl83F9' },
   'notebook':        { tg: 'https://t.me/alertatechnotebook', wpp: 'https://chat.whatsapp.com/BDBWJS2sBvA2oGk7UfCt5L' },
   'smart-tv':        { tg: 'https://t.me/alertatechsmarttvs', wpp: 'https://chat.whatsapp.com/K1Ib4Mn00vZApwLvF6d7ST' },

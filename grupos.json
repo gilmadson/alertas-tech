@@ -11,7 +11,8 @@
     "rota_convite": "/api/sessions/{sessao}/groups/{jid}/invite-code"
   },
   "sessoes": {
-    "alertastech": "70bee236-4d02-48d6-8b8f-f99bec706af7"
+    "alertastech": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+    "ml-imperdiveis": "d0eada95-e029-4e2a-a1b6-b9ea05d80b69"
   },
   "telegram_fallback": "https://t.me/alertatechoutrosprodutos",
   "_telegram_fallback_por_que": "As 8 categorias criadas em 25/08/2026 ainda não têm canal próprio no Telegram; o motor manda todas para o canal de 'outros'. A landing diz a mesma coisa que a produção faz.",
@@ -25,6 +26,16 @@
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
       "telegram": null,
       "_por_que": "Grupo de SUPER DESCONTO do motor (GRUPOS_SUPER_DESCONTO no .env): recebe por NÚMERO, não por assunto — qualquer produto acima do piso de desconto, de qualquer loja. É o destino de quem não quer escolher categoria. Não existe canal equivalente no Telegram."
+    },
+    {
+      "slug": "imperdiveis",
+      "nome": "Imperdíveis ML",
+      "emoji": "⚡",
+      "exemplos": "O maior desconto do dia, revezando entre 9 categorias de tech",
+      "jid": "120363409939807033@g.us",
+      "sessao": "d0eada95-e029-4e2a-a1b6-b9ea05d80b69",
+      "telegram": null,
+      "_por_que": "Motor separado (chip e cadência próprios, monitor/imperdiveis.py do repo trading_c_agente, ativo desde 01/09/2026): revezamento das 9 categorias de vitrine do Mercado Livre pelo maior desconto do dia. Sem canal de Telegram equivalente; o botão some sozinho, mesmo caminho de 'geral'."
     },
     {
       "slug": "smartphone",
@@ -177,8 +188,8 @@
       "exemplos": "Shampoo profissional · Botox · Secador",
       "jid": "120363430066666952@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
-      "telegram": "https://t.me/alertatechoutrosprodutos",
-      "_por_que": "Primeiro nicho de PRESTADOR DE SERVIÇO (10/09/2026): fala com quem compra para atender cliente, não para si — por isso é grupo separado de 'beleza', e não uma linha dentro dele. Nasce só no WhatsApp: não existe canal de Telegram para salão, então o botão do Telegram some sozinho (mesmo caminho de 'geral')."
+      "telegram": null,
+      "_por_que": "Primeiro nicho de PRESTADOR DE SERVIÇO (10/09/2026): fala com quem compra para atender cliente, não para si — por isso é grupo separado de 'beleza', e não uma linha dentro dele. Nasce só no WhatsApp: não existe canal de Telegram para salão, então o botão do Telegram some sozinho (mesmo caminho de 'geral'). Corrigido em 18/09/2026: o campo tinha o link de fallback 'outros' por engano, contradizendo este próprio comentário — o teste `test_salao_esconde_o_telegram_e_entrega_o_grupo_certo` pegou a divergência."
     },
     {
       "slug": "moda",

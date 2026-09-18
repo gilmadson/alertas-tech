@@ -37,11 +37,14 @@ CATEGORIAS_DO_MOTOR = (
     "beleza", "salao", "moda", "outros",
 )
 
-# `geral` não é categoria do motor: é o grupo de SUPER DESCONTO
-# (GRUPOS_SUPER_DESCONTO no .env do motor), que recebe qualquer produto de
-# qualquer loja acima do piso — por número, não por assunto. É o destino de
-# quem não quer escolher categoria.
-GRUPOS_EXTRAS = ("geral",)
+# `geral` e `imperdiveis` não são categoria do motor principal: `geral` é o
+# grupo de SUPER DESCONTO (GRUPOS_SUPER_DESCONTO no .env do motor), que recebe
+# qualquer produto de qualquer loja acima do piso — por número, não por
+# assunto. `imperdiveis` é o motor separado (`monitor/imperdiveis.py`, chip e
+# cadência próprios, ativo desde 01/09/2026) que reveza as 9 categorias de
+# vitrine do Mercado Livre pelo maior desconto do dia. Os dois são o destino
+# de quem não quer escolher categoria fixa.
+GRUPOS_EXTRAS = ("geral", "imperdiveis")
 
 
 @pytest.fixture(scope="module")
