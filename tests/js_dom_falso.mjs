@@ -8,7 +8,15 @@ const valores = {
   'loja-shp': 'shopee', 'loja-ali': 'aliexpress', 'loja-kbm': 'kabum',
 };
 
+// As páginas exclusivas (Imperdíveis ML) não têm seção de lojas. Com
+// DOM_SEM_LOJAS o dublê se recusa a inventar essas caixas: encostar nelas
+// quebra o cenário, como quebraria no navegador de verdade.
+const semLojas = !!process.env.DOM_SEM_LOJAS;
+
 function elemento(id) {
+  if (semLojas && id.startsWith('loja-')) {
+    throw new Error('esta página não tem a caixa ' + id);
+  }
   if (!elementos[id]) {
     const classes = new Set();
     elementos[id] = {
@@ -77,7 +85,9 @@ export function responderSupabase(resp) { respostaDoSupabase = resp; }
 
 globalThis.document = {
   getElementById: elemento,
-  body: { style: {} },
+  // `data-lojas` no <body> é como a página exclusiva declara a loja fixa dela.
+  // Vazio = página com seção de lojas (o index.html).
+  body: { style: {}, dataset: { lojas: amb.BODY_LOJAS || '' } },
   referrer: amb.REFERRER || '',
 };
 globalThis.window = {

@@ -94,6 +94,23 @@ if (cenario === 'cadastro') {
   preencher();
   await submeter('wpp');
 
+} else if (cenario === 'imperdiveis') {
+  // Página exclusiva: sem grade e sem seção de lojas. Roda com o dublê
+  // estrito (DOM_SEM_LOJAS), então qualquer toque numa caixa `loja-*` mata o
+  // cenário — que é o ponto.
+  abrirModal('⚡', 'Imperdíveis ML', 'imperdiveis');
+  avancarRelogio(5000);
+  preencher();
+  extra.botaoLiberado = !el('btn-whatsapp').disabled;
+  await submeter('wpp');
+
+} else if (cenario === 'imperdiveis_falha_http') {
+  responderSupabase({ ok: false, status: 500 });
+  abrirModal('⚡', 'Imperdíveis ML', 'imperdiveis');
+  avancarRelogio(5000);
+  preencher();
+  await submeter('wpp');
+
 } else if (cenario === 'telegram_categoria_nova') {
   abrirModal('👜', 'Moda & Acessórios', 'moda');
   avancarRelogio(5000);

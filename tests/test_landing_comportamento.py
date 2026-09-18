@@ -10,7 +10,6 @@ passou o que não rodou.
 
 import json
 import os
-import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -18,7 +17,10 @@ from pathlib import Path
 import pytest
 
 RAIZ = Path(__file__).resolve().parents[1]
-INDEX = RAIZ / "index.html"
+# Até 18/09/2026 este arquivo recortava o último `<script>` do index.html. O JS
+# agora mora fora do HTML (`landing.js`), compartilhado pelas páginas — ler o
+# arquivo direto é ler exatamente o que vai para o ar, sem recorte nenhum.
+LANDING_JS = RAIZ / "landing.js"
 DOM_FALSO = Path(__file__).parent / "js_dom_falso.mjs"
 CENARIOS = Path(__file__).parent / "js_cenarios.mjs"
 
@@ -27,17 +29,10 @@ pytestmark = pytest.mark.skipif(shutil.which("node") is None,
 
 
 def js_da_landing():
-    """O ÚLTIMO bloco `<script>` do arquivo — o da lógica da página.
-
-    Desde o Pixel do Meta (16/09/2026) o `<head>` também tem um `<script>`
-    inline; pegar o primeiro-ao-último por regex gulosa juntaria os dois
-    blocos (e tudo entre eles) numa string que não é JS válido nenhum.
-    """
-    html = INDEX.read_text(encoding="utf-8")
-    return re.findall(r"<script>(.*?)</script>", html, re.S)[-1]
+    return LANDING_JS.read_text(encoding="utf-8")
 
 
-def rodar(cenario, tmp_path, **mundo):
+def _executar(cenario, tmp_path, **mundo):
     arquivo = tmp_path / "cenario.mjs"
     arquivo.write_text("\n".join([DOM_FALSO.read_text(encoding="utf-8"),
                                   js_da_landing(),
@@ -46,10 +41,21 @@ def rodar(cenario, tmp_path, **mundo):
     # O node no Windows precisa do ambiente inteiro (SystemRoot e companhia):
     # com um env recortado ele morre com fatal error antes de rodar linha.
     ambiente = dict(os.environ, CENARIO=cenario, **mundo)
-    saida = subprocess.run(["node", str(arquivo)], capture_output=True, text=True,
-                           encoding="utf-8", env=ambiente)
+    return subprocess.run(["node", str(arquivo)], capture_output=True, text=True,
+                          encoding="utf-8", env=ambiente)
+
+
+def rodar(cenario, tmp_path, **mundo):
+    saida = _executar(cenario, tmp_path, **mundo)
     assert saida.returncode == 0, saida.stderr
     return json.loads(saida.stdout.strip().splitlines()[-1])
+
+
+def rodar_esperando_erro(cenario, tmp_path, **mundo):
+    """Para provar que o dublê estrito realmente morde."""
+    saida = _executar(cenario, tmp_path, **mundo)
+    assert saida.returncode != 0, "esperava o cenário quebrar e ele passou"
+    return saida.stderr
 
 
 @pytest.fixture(scope="module")
@@ -325,6 +331,60 @@ def test_telemetria_quebrada_nao_perde_o_lead(tmp_path):
     assert c["consentimento"] is True
     assert c["origem"] == "direto"
     assert r["modalAtivo"] is False, "o cadastro seguiu normal"
+
+
+# ── página exclusiva do Imperdíveis ML ───────────────────────────────────────
+# A página não tem seção de lojas (o motor dos imperdíveis é 100% Mercado
+# Livre): ela declara a loja fixa em `<body data-lojas="...">`. Aqui o dublê de
+# DOM roda ESTRITO — se o JS encostar numa caixa `loja-*` que a página não tem,
+# o cenário morre. É o que aconteceria no navegador de verdade.
+
+MUNDO_IMPERDIVEIS = {"BODY_LOJAS": "mercadolivre", "DOM_SEM_LOJAS": "1"}
+
+
+@pytest.fixture(scope="module")
+def imperdiveis(tmp_path_factory):
+    return rodar("imperdiveis", tmp_path_factory.mktemp("imp"), **MUNDO_IMPERDIVEIS)
+
+
+def test_imperdiveis_grava_o_lead_na_categoria_certa(imperdiveis):
+    assert corpo(imperdiveis)["categoria"] == "imperdiveis"
+
+
+def test_imperdiveis_grava_a_loja_fixa_sem_caixa_nenhuma(imperdiveis):
+    """O grupo só recebe Mercado Livre: o lead tem de sair dizendo isso."""
+    assert corpo(imperdiveis)["lojas"] == "mercadolivre"
+
+
+def test_imperdiveis_abre_o_grupo_do_motor_de_imperdiveis(imperdiveis):
+    assert imperdiveis["abertas"] == [
+        "https://chat.whatsapp.com/IqTCyshHhzkEkN7cNbG2mC"]
+
+
+def test_imperdiveis_libera_o_botao_mesmo_sem_secao_de_lojas(imperdiveis):
+    """`checarCampos` exige pelo menos uma loja: sem a loja fixa o botão
+    ficaria travado para sempre e a página nova não captaria ninguém."""
+    assert imperdiveis["botaoLiberado"] is True
+    assert imperdiveis["modalAtivo"] is False
+
+
+def test_imperdiveis_esconde_o_botao_do_telegram(imperdiveis):
+    assert imperdiveis["botaoTelegram"] == "none"
+
+
+def test_falha_de_cadastro_no_imperdiveis_tambem_aparece(tmp_path):
+    """Página nova não pode trazer de volta o sucesso fingido."""
+    r = rodar("imperdiveis_falha_http", tmp_path, **MUNDO_IMPERDIVEIS)
+    assert r["avisoVisivel"] is True
+    assert r["modalAtivo"] is True
+    assert r["abertas"] == ["https://chat.whatsapp.com/IqTCyshHhzkEkN7cNbG2mC"]
+
+
+def test_sem_a_loja_declarada_a_pagina_sem_caixas_quebra_na_cara(tmp_path):
+    """Prova que o dublê estrito morde — senão os testes acima não provariam
+    nada. Página exclusiva que esquecer o `data-lojas` falha aqui, não no ar."""
+    erro = rodar_esperando_erro("imperdiveis", tmp_path, DOM_SEM_LOJAS="1")
+    assert "loja-" in erro
 
 
 # ── Telegram das categorias novas ────────────────────────────────────────────

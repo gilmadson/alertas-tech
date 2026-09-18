@@ -21,6 +21,10 @@ import sincronizar_landing as sinc
 
 RAIZ = Path(__file__).resolve().parents[1]
 INDEX = RAIZ / "index.html"
+# Desde 18/09/2026 a lógica mora fora do HTML, compartilhada pelas páginas. O
+# que é marcação continua sendo cobrado no `index.html`; o que é comportamento
+# é cobrado aqui, no arquivo que as duas páginas carregam.
+LANDING_JS = RAIZ / "landing.js"
 GRUPOS_JSON = RAIZ / "grupos.json"
 
 # Espelho da lista de categorias do motor (`monitor/config.py`, mapa CANAIS do
@@ -53,14 +57,19 @@ def html():
 
 
 @pytest.fixture(scope="module")
+def js():
+    return LANDING_JS.read_text(encoding="utf-8")
+
+
+@pytest.fixture(scope="module")
 def dados():
     return sinc.carregar_grupos(GRUPOS_JSON)
 
 
 @pytest.fixture(scope="module")
-def mapa(html):
-    """O objeto GRUPOS do index.html, já parseado."""
-    return sinc.parse_bloco(sinc.ler_bloco(html))
+def mapa(js):
+    """O objeto GRUPOS do landing.js, já parseado."""
+    return sinc.parse_bloco(sinc.ler_bloco(js))
 
 
 # ── grupos.json ──────────────────────────────────────────────────────────────
@@ -153,19 +162,26 @@ def test_telegram_so_repete_no_canal_de_fallback(mapa, dados):
     assert not repetidos, f"canal de Telegram repetido fora do fallback: {repetidos}"
 
 
-def test_o_bloco_gerado_tem_as_marcas_que_o_script_procura(html):
-    assert sinc.MARCA_INICIO in html
-    assert sinc.MARCA_FIM in html
+def test_o_bloco_gerado_tem_as_marcas_que_o_script_procura(js):
+    assert sinc.MARCA_INICIO in js
+    assert sinc.MARCA_FIM in js
+
+
+def test_o_bloco_gerado_saiu_do_html_de_vez(html):
+    """Duas cópias do mapa de grupos = uma delas com convite morto. O
+    sincronizador escreve num lugar só."""
+    assert sinc.MARCA_INICIO not in html
+    assert "const GRUPOS" not in html
 
 
 # ── Supabase: a falha silenciosa não pode voltar ─────────────────────────────
 
-def test_placeholder_da_chave_nao_voltou(html):
-    assert "__SUPABASE_ANON_KEY__" not in html
+def test_placeholder_da_chave_nao_voltou(js):
+    assert "__SUPABASE_ANON_KEY__" not in js
 
 
-def test_a_chave_embutida_e_anon_do_projeto_certo(html):
-    chave = re.search(r"const SUPABASE_ANON\s*=\s*'([^']+)'", html).group(1)
+def test_a_chave_embutida_e_anon_do_projeto_certo(js):
+    chave = re.search(r"const SUPABASE_ANON\s*=\s*'([^']+)'", js).group(1)
     payload = chave.split(".")[1]
     payload += "=" * (-len(payload) % 4)
     dados = json.loads(base64.urlsafe_b64decode(payload))
@@ -173,13 +189,13 @@ def test_a_chave_embutida_e_anon_do_projeto_certo(html):
     assert dados["ref"] == "jfuqmjbxzhoceycauhys"
 
 
-def test_nao_existe_guarda_que_pule_o_post(html):
+def test_nao_existe_guarda_que_pule_o_post(js):
     """Era isto que fingia sucesso: `if (SUPABASE_ANON !== '__...__')`."""
-    assert not re.search(r"if\s*\(\s*SUPABASE_ANON\s*[!=]==", html)
+    assert not re.search(r"if\s*\(\s*SUPABASE_ANON\s*[!=]==", js)
 
 
-def test_a_resposta_do_supabase_e_conferida(html):
-    assert "res.ok" in html or "resposta.ok" in html
+def test_a_resposta_do_supabase_e_conferida(js):
+    assert "res.ok" in js or "resposta.ok" in js
 
 
 def test_a_plataforma_enviada_respeita_o_check_do_banco(html):
@@ -199,60 +215,60 @@ COLUNAS_DE_LEADS = {
 }
 
 
-def test_o_cadastro_so_manda_coluna_que_existe(html):
-    corpo = re.search(r"await salvarLead\(\{(.*?)\n  \}\)", html, re.S)
+def test_o_cadastro_so_manda_coluna_que_existe(js):
+    corpo = re.search(r"await salvarLead\(\{(.*?)\n  \}\)", js, re.S)
     assert corpo, "não achei a chamada de salvarLead"
     # `[:,]` porque o JS aceita atalho: `email,` é a chave `email`.
     chaves = set(re.findall(r"^\s{4}(\w+)\s*[:,]", corpo.group(1), re.M))
     assert chaves == COLUNAS_DE_LEADS
 
 
-def test_o_consentimento_nunca_vai_sem_data(html):
+def test_o_consentimento_nunca_vai_sem_data(js):
     """`consentimento: true` com `consentimento_em` vazio não prova nada."""
-    assert "consentimento_em: consentimentoEm || new Date().toISOString()" in html
+    assert "consentimento_em: consentimentoEm || new Date().toISOString()" in js
 
 
-def test_o_instante_do_aceite_e_o_da_caixa_marcada(html):
+def test_o_instante_do_aceite_e_o_da_caixa_marcada(html, js):
     """Quem grava a data é o onchange da caixa, não a submissão."""
     assert 'onchange="marcarConsentimento()"' in html
-    fn = re.search(r"function marcarConsentimento\(\)\s*\{(.*?)\n\}", html, re.S)
+    fn = re.search(r"function marcarConsentimento\(\)\s*\{(.*?)\n\}", js, re.S)
     assert fn and "toISOString" in fn.group(1)
 
 
-def test_todo_utm_passa_pela_limpeza_antes_de_ir_ao_banco(html):
+def test_todo_utm_passa_pela_limpeza_antes_de_ir_ao_banco(js):
     """Valor de URL é texto do mundo: nada entra cru no banco."""
     for campo in ("utm_source", "utm_medium", "utm_campaign"):
-        assert re.search(r"limparUtm\(params\.get\('%s'\)\)" % campo, html), campo
-    guardada = re.search(r"function lerOrigemGuardada\(\)\s*\{(.*?)\n\}", html, re.S)
+        assert re.search(r"limparUtm\(params\.get\('%s'\)\)" % campo, js), campo
+    guardada = re.search(r"function lerOrigemGuardada\(\)\s*\{(.*?)\n\}", js, re.S)
     assert guardada and guardada.group(1).count("limparUtm") >= 3, \
         "a sessão é do visitante: o que vem dela também precisa ser limpo"
 
 
-def test_a_limpeza_de_utm_tem_teto_e_lista_do_que_aceita(html):
-    assert re.search(r"const UTM_MAX = \d+;", html)
-    assert re.search(r"const UTM_ACEITO = /\^\[[^/]+\]\+\$/;", html)
+def test_a_limpeza_de_utm_tem_teto_e_lista_do_que_aceita(js):
+    assert re.search(r"const UTM_MAX = \d+;", js)
+    assert re.search(r"const UTM_ACEITO = /\^\[[^/]+\]\+\$/;", js)
 
 
-def test_envio_rapido_nao_pula_o_cadastro(html):
+def test_envio_rapido_nao_pula_o_cadastro(js):
     """O ramo antibot antigo abria o grupo e fechava o modal SEM tentar gravar:
     sucesso perfeito para quem visita, zero linha no banco."""
     ramo = re.search(
         r"if \(Date\.now\(\) - modalAbertaEm < BOT_THRESHOLD_MS\) \{(.*?)\n  \}",
-        html, re.S)
+        js, re.S)
     assert ramo, "sumiu a trava antibot"
     assert "abrirDestino" not in ramo.group(1), "não pode entregar convite sem tentar gravar"
     assert "fecharModal" not in ramo.group(1), "não pode fingir sucesso fechando o modal"
 
 
-def test_falha_do_post_aparece_para_o_visitante(html):
+def test_falha_do_post_aparece_para_o_visitante(html, js):
     """Regra 1 da casa: falha silenciosa é o inimigo."""
     assert 'id="form-aviso"' in html
-    assert "mostrarFalhaDeCadastro" in html
+    assert "mostrarFalhaDeCadastro" in js
 
 
-def test_o_convite_e_entregue_mesmo_quando_o_cadastro_falha(html):
+def test_o_convite_e_entregue_mesmo_quando_o_cadastro_falha(js):
     """Não punir o visitante por um problema que é nosso."""
-    corpo = html[html.index("async function submeterLead"):]
+    corpo = js[js.index("async function submeterLead"):]
     assert "abrirDestino" in corpo
 
 
@@ -270,8 +286,8 @@ def test_o_consentimento_declara_a_finalidade(html):
     assert "grupo" in trecho.lower()
 
 
-def test_sem_consentimento_o_botao_nao_libera(html):
-    checagem = re.search(r"function checarCampos\(\)\s*\{.*?\n\}", html, re.S).group(0)
+def test_sem_consentimento_o_botao_nao_libera(js):
+    checagem = re.search(r"function checarCampos\(\)\s*\{.*?\n\}", js, re.S).group(0)
     assert "consent-check" in checagem
 
 
@@ -307,13 +323,14 @@ def test_ofertas_gerais_e_uma_categoria_como_as_outras(mapa):
     assert mapa["geral"]["wpp"].startswith("https://chat.whatsapp.com/")
 
 
-def test_nao_sobrou_caminho_especial_para_o_ofertas_gerais(html):
+def test_nao_sobrou_caminho_especial_para_o_ofertas_gerais(html, js):
     """A lista embutida escondia o #form-aviso ao ocultar o formulário."""
-    assert "mostrarListaGeral" not in html
-    assert "montarListaGeral" not in html
-    assert "lista-geral" not in html
+    for texto in (html, js):
+        assert "mostrarListaGeral" not in texto
+        assert "montarListaGeral" not in texto
+        assert "lista-geral" not in texto
 
 
-def test_o_aviso_de_falha_nao_mora_em_lugar_que_alguem_esconde(html):
+def test_o_aviso_de_falha_nao_mora_em_lugar_que_alguem_esconde(js):
     """#form-aviso é filho do formulário: ninguém pode dar display:none nele."""
-    assert "getElementById('lead-form').style.display = 'none'" not in html
+    assert "getElementById('lead-form').style.display = 'none'" not in js

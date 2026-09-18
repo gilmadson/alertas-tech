@@ -1,15 +1,37 @@
 # AlertasTech — landing
 
-Página única e estática (`index.html`, sem framework e sem build) que capta
-quem quer entrar nos grupos de oferta do AlertasTech.
+Site estático (sem framework e sem build) que capta quem quer entrar nos grupos
+de oferta do AlertasTech.
 
-Ela está publicada em **dois** lugares:
+| Arquivo | O que é |
+|---|---|
+| `index.html` | a landing completa, com as 21 categorias |
+| `imperdiveis.html` | página exclusiva do grupo Imperdíveis ML (`/imperdiveis`) |
+| `landing.js` | **toda** a lógica, compartilhada pelas páginas |
+| `landing.css` | o tema, compartilhado pelas páginas |
+
+O JS e o CSS saíram de dentro do `index.html` em 18/09/2026, quando nasceu a
+segunda página: cópia do mesmo código em duas páginas é como elas ficam
+diferentes sem ninguém ver. Duas regras de quem incluir os compartilhados:
+**caminho relativo** (`src="landing.js"` — o GitHub Pages serve de
+`/alertas-tech/`, e um `/landing.js` quebraria só lá, calado) e o `landing.js`
+**no fim do `<body>`**, porque ele lê o `document.body` no carregamento.
+
+Elas estão publicadas em **dois** lugares:
 
 - <https://alertastech-landing.vercel.app> — projeto Vercel `alertastech-landing`,
   **não ligado ao GitHub**: o deploy é manual.
 - <https://gilmadson.github.io/alertas-tech/> — GitHub Pages, servido do repo.
 
 Publicar num e esquecer o outro é como os dois ficam diferentes. São dois passos.
+
+A página exclusiva tem endereço diferente em cada um, porque só a Vercel tem
+rewrite:
+
+| | Vercel | GitHub Pages |
+|---|---|---|
+| landing | `/` | `/alertas-tech/` |
+| Imperdíveis ML | `/imperdiveis` | `/alertas-tech/imperdiveis.html` |
 
 ## O que quebrou em 09/09/2026 (e por que existe a trava)
 
@@ -42,17 +64,21 @@ e é o destino de quem não quer escolher categoria. Ele passa exatamente pelo
 mesmo fluxo das outras: caminho especial foi o que já trouxe a falha silenciosa
 de volta uma vez.
 
-Os links de convite **não** se escrevem aqui nem à mão no HTML: eles vivem no
-bloco entre `// GRUPOS:INICIO` e `// GRUPOS:FIM` do `index.html`, que é
-reescrito pelo sincronizador.
+Os links de convite **não** se escrevem aqui nem à mão: eles vivem no bloco
+entre `// GRUPOS:INICIO` e `// GRUPOS:FIM` do `landing.js`, que é reescrito pelo
+sincronizador. É um bloco só para todas as páginas — duas cópias do mapa de
+grupos seria uma delas com convite morto.
 
 ## Sincronizar os links
 
 ```bash
 export OPENWA_API_KEY=...            # chave do gateway OpenWA (X-API-Key)
 python scripts/sincronizar_landing.py --dry-run   # mostra o que mudaria
-python scripts/sincronizar_landing.py             # grava no index.html
+python scripts/sincronizar_landing.py             # grava no landing.js
 ```
+
+O alvo padrão é o `landing.js` (`--alvo` troca). Era o `index.html` até
+18/09/2026, quando o JS saiu de dentro da página.
 
 Variáveis de ambiente:
 
@@ -69,7 +95,7 @@ Duas regras do script, as duas nascidas de dor:
 - **Se qualquer categoria falhar, nada é escrito.** Link vazio é pior que link
   velho: quem cai num convite morto some sem reclamar. A gravação também é
   atômica (temporário + `os.replace`), para que uma interrupção no meio não
-  deixe o `index.html` truncado no ar.
+  deixe o arquivo truncado no ar.
 - **Pausa entre as consultas.** Medido em 09/09/2026: 18 pedidos de convite em
   sequência começam a voltar HTTP 500 a partir do 12º (o WhatsApp limita), e os
   mesmos grupos respondem 200 quando consultados devagar. O padrão é 2s de
@@ -90,18 +116,25 @@ Neste notebook o interpretador é
 `C:\Users\EmanuelleMiranda\.claude\ai-tools\Scripts\python.exe` — o `python` do
 PATH é o stub da Microsoft Store.
 
-São três frentes, todas **sem rede**:
+São quatro frentes, todas **sem rede**:
 
 - `tests/test_landing.py` — a landing bate com o `grupos.json`: toda categoria
   tem card e link, nenhum convite repetido, o placeholder da chave não voltou, a
   chave publicada é mesmo a `anon` do projeto certo, o bloco de consentimento
   existe.
+- `tests/test_paginas.py` — o que vale para **toda** página publicada: incluir
+  o compartilhado em vez de copiar, por caminho relativo; ter todos os
+  elementos que o `landing.js` procura (id que falta é `null.checked`, e o
+  cadastro inteiro morre calado); levar a uma política de privacidade que
+  existe de verdade; e as rotas do `vercel.json` (regra específica sempre
+  antes do catch-all, compartilhado sem cache).
 - `tests/test_sincronizar_landing.py` — o script, com o gateway em dublê.
-- `tests/test_landing_comportamento.py` — o JS do `index.html` rodando de
-  verdade no `node` contra um DOM de mentira: falha de cadastro aparece na tela,
-  o convite é entregue mesmo assim, sem consentimento nada é enviado. Se não
-  houver `node` no PATH, estes testes são **pulados** (não silenciosamente
-  aprovados).
+- `tests/test_landing_comportamento.py` — o `landing.js` rodando de verdade no
+  `node` contra um DOM de mentira: falha de cadastro aparece na tela, o convite
+  é entregue mesmo assim, sem consentimento nada é enviado, e a página sem
+  seção de lojas grava a loja fixa (com o DOM se recusando a inventar as caixas
+  que ela não tem). Se não houver `node` no PATH, estes testes são **pulados**
+  (não silenciosamente aprovados).
 
 ## Cadastro (Supabase)
 

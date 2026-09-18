@@ -9,7 +9,8 @@ revoga, e a landing não tinha como saber — o desencontro só apareceria em qu
 clicasse e caísse num convite morto, calado.
 
 Este script vai ao gateway do OpenWA, pega o convite de cada grupo listado no
-`grupos.json` e reescreve o bloco `GRUPOS` do `index.html`.
+`grupos.json` e reescreve o bloco `GRUPOS` do `landing.js` — o arquivo que
+TODAS as páginas carregam (o JS morava dentro do `index.html` até 18/09/2026).
 
 A regra dura: **se qualquer categoria falhar, nada é escrito**. Link vazio é
 pior que link velho.
@@ -34,7 +35,10 @@ import time
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[1]
-INDEX_PADRAO = RAIZ / "index.html"
+# O alvo é o `landing.js`, não uma página: o mapa de grupos é um só e as
+# páginas o carregam. Apontar isto para um HTML de novo faria a sincronização
+# escrever onde ninguém lê, e os convites publicados envelheceriam calados.
+ALVO_PADRAO = RAIZ / "landing.js"
 GRUPOS_PADRAO = RAIZ / "grupos.json"
 
 # O bloco entre as marcas é território do script. Editar à mão ali é o mesmo
@@ -75,16 +79,16 @@ def carregar_grupos(caminho: Path | str = GRUPOS_PADRAO) -> dict:
     return dados
 
 
-# ── bloco GRUPOS dentro do index.html ────────────────────────────────────────
+# ── bloco GRUPOS dentro do landing.js ────────────────────────────────────────
 
-def ler_bloco(html: str) -> str:
-    inicio = html.find(MARCA_INICIO)
-    fim = html.find(MARCA_FIM)
+def ler_bloco(texto: str) -> str:
+    inicio = texto.find(MARCA_INICIO)
+    fim = texto.find(MARCA_FIM)
     if inicio < 0 or fim < 0 or fim < inicio:
         raise ErroSincronizacao(
-            "index.html sem as marcas do bloco GRUPOS "
+            "arquivo sem as marcas do bloco GRUPOS "
             f"({MARCA_INICIO!r} .. {MARCA_FIM!r})")
-    return html[inicio + len(MARCA_INICIO):fim]
+    return texto[inicio + len(MARCA_INICIO):fim]
 
 
 _ENTRADA = re.compile(
@@ -113,11 +117,11 @@ def montar_bloco(categorias: list[dict], convites: dict[str, str]) -> str:
     return "\n".join(linhas)
 
 
-def substituir_bloco(html: str, bloco: str) -> str:
-    ler_bloco(html)  # valida as marcas antes de mexer
-    inicio = html.find(MARCA_INICIO) + len(MARCA_INICIO)
-    fim = html.find(MARCA_FIM)
-    return html[:inicio] + bloco + html[fim:]
+def substituir_bloco(texto: str, bloco: str) -> str:
+    ler_bloco(texto)  # valida as marcas antes de mexer
+    inicio = texto.find(MARCA_INICIO) + len(MARCA_INICIO)
+    fim = texto.find(MARCA_FIM)
+    return texto[:inicio] + bloco + texto[fim:]
 
 
 # ── gateway ──────────────────────────────────────────────────────────────────
@@ -246,7 +250,8 @@ def resumir(antes: dict[str, dict], depois: dict[str, str]) -> list[str]:
 
 def main(argv=None, buscador=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--index", default=str(INDEX_PADRAO))
+    parser.add_argument("--alvo", default=str(ALVO_PADRAO),
+                        help="arquivo com o bloco GRUPOS (padrão: landing.js)")
     parser.add_argument("--grupos", default=str(GRUPOS_PADRAO))
     parser.add_argument("--dry-run", action="store_true",
                         help="mostra o que mudaria e não grava")
@@ -266,9 +271,9 @@ def main(argv=None, buscador=None) -> int:
     try:
         dados = carregar_grupos(args.grupos)
         categorias = dados["categorias"]
-        index = Path(args.index)
-        html = index.read_text(encoding="utf-8")
-        antes = parse_bloco(ler_bloco(html))
+        alvo = Path(args.alvo)
+        texto = alvo.read_text(encoding="utf-8")
+        antes = parse_bloco(ler_bloco(texto))
 
         if buscador is None:  # pragma: no cover - caminho com rede de verdade
             base_url = os.environ.get(BASE_URL_ENV) or dados["gateway"]["base_url"]
@@ -278,7 +283,7 @@ def main(argv=None, buscador=None) -> int:
 
         convites = coletar_convites(categorias, buscador, pausa=args.pausa,
                                     tentativas=args.tentativas)
-        novo_html = substituir_bloco(html, montar_bloco(categorias, convites))
+        novo_texto = substituir_bloco(texto, montar_bloco(categorias, convites))
     except ErroSincronizacao as e:
         print(f"ERRO: {e}", file=sys.stderr)
         return 1
@@ -287,17 +292,17 @@ def main(argv=None, buscador=None) -> int:
     print("\n".join(resumir(antes, convites)))
 
     if args.dry_run:
-        print("\n--dry-run: index.html NÃO foi tocado.")
+        print(f"\n--dry-run: {alvo.name} NÃO foi tocado.")
         return 0
-    if novo_html == html:
+    if novo_texto == texto:
         print("\nNada a fazer: a landing já estava sincronizada.")
         return 0
     try:
-        gravar_atomico(index, novo_html)
+        gravar_atomico(alvo, novo_texto)
     except ErroSincronizacao as e:
         print(f"ERRO: {e}", file=sys.stderr)
         return 1
-    print(f"\n{index} atualizado.")
+    print(f"\n{alvo} atualizado.")
     return 0
 
 

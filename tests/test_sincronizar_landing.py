@@ -25,16 +25,18 @@ CATS = [
      "telegram": None},
 ]
 
-HTML_BASE = (
-    "<html><body><p>antes</p>\n"
-    "<script>\n"
+# Desde 18/09/2026 o alvo do script é o `landing.js` (o JS saiu do HTML e passou
+# a ser compartilhado pelas páginas). O script só enxerga as marcas, mas o dublê
+# tem de ter a cara do arquivo de verdade.
+JS_BASE = (
+    "// antes\n"
     + sinc.MARCA_INICIO + "\n"
     "const GRUPOS = {\n"
     "  'smartphone': { tg: 'https://t.me/alertatech_smartphone', wpp: 'https://chat.whatsapp.com/VELHOvelhovelho1' },\n"
     "  'moda':       { tg: null, wpp: 'https://chat.whatsapp.com/VELHOvelhovelho2' },\n"
     "};\n"
     + sinc.MARCA_FIM + "\n"
-    "</script><p>depois</p></body></html>\n"
+    "// depois\n"
 )
 
 
@@ -58,8 +60,8 @@ NOVOS = {
 
 @pytest.fixture
 def landing(tmp_path):
-    alvo = tmp_path / "index.html"
-    alvo.write_text(HTML_BASE, encoding="utf-8")
+    alvo = tmp_path / "landing.js"
+    alvo.write_text(JS_BASE, encoding="utf-8")
     return alvo
 
 
@@ -110,7 +112,7 @@ def test_carregar_grupos_recusa_json_quebrado(tmp_path):
 
 
 def test_ler_bloco_devolve_so_o_miolo():
-    bloco = sinc.ler_bloco(HTML_BASE)
+    bloco = sinc.ler_bloco(JS_BASE)
     assert "const GRUPOS" in bloco
     assert "antes" not in bloco
 
@@ -121,7 +123,7 @@ def test_ler_bloco_sem_marca_falha():
 
 
 def test_parse_bloco_le_links_e_telegram_nulo():
-    mapa = sinc.parse_bloco(sinc.ler_bloco(HTML_BASE))
+    mapa = sinc.parse_bloco(sinc.ler_bloco(JS_BASE))
     assert mapa["smartphone"]["wpp"].endswith("VELHOvelhovelho1")
     assert mapa["smartphone"]["tg"] == "https://t.me/alertatech_smartphone"
     assert mapa["moda"]["tg"] is None
@@ -209,11 +211,11 @@ def test_bloco_montado_volta_igual_no_parse():
     assert sinc.MARCA_INICIO not in bloco
 
 
-def test_substituir_bloco_preserva_o_resto_da_pagina():
+def test_substituir_bloco_preserva_o_resto_do_arquivo():
     bloco = sinc.montar_bloco(CATS, {"smartphone": NOVOS[CATS[0]["jid"]],
                                      "moda": NOVOS[CATS[1]["jid"]]})
-    novo = sinc.substituir_bloco(HTML_BASE, bloco)
-    assert "<p>antes</p>" in novo and "<p>depois</p>" in novo
+    novo = sinc.substituir_bloco(JS_BASE, bloco)
+    assert "// antes" in novo and "// depois" in novo
     assert "VELHOvelhovelho1" not in novo
     assert sinc.parse_bloco(sinc.ler_bloco(novo))["smartphone"]["wpp"] == NOVOS[CATS[0]["jid"]]
 
@@ -379,15 +381,23 @@ def test_main_avisa_quando_nao_consegue_gravar(landing, grupos_json, monkeypatch
     codigo = sinc.main(argv(landing, grupos_json), buscador=buscador_falso(NOVOS))
     assert codigo == 1
     assert "disco cheio" in capsys.readouterr().err
-    assert landing.read_text(encoding="utf-8") == HTML_BASE
+    assert landing.read_text(encoding="utf-8") == JS_BASE
 
 
 # ── main ─────────────────────────────────────────────────────────────────────
 
 def argv(landing, grupos_json, *extra):
     # --pausa 0: a espera existe para o gateway de verdade, não para o dublê.
-    return ["--index", str(landing), "--grupos", str(grupos_json),
+    return ["--alvo", str(landing), "--grupos", str(grupos_json),
             "--pausa", "0", *extra]
+
+
+def test_o_alvo_padrao_e_o_landing_js():
+    """O JS saiu do HTML em 18/09/2026. Se o padrão tivesse ficado no
+    `index.html`, a próxima sincronização de convites escreveria no arquivo
+    errado e as 21 categorias publicadas parariam de ser atualizadas — sem
+    erro nenhum na tela."""
+    assert sinc.ALVO_PADRAO.name == "landing.js"
 
 
 def test_main_grava_os_convites_novos(landing, grupos_json, monkeypatch, capsys):
@@ -414,7 +424,7 @@ def test_main_nao_escreve_nada_quando_uma_categoria_falha(landing, grupos_json, 
     quebrado[CATS[1]["jid"]] = sinc.ErroSincronizacao("HTTP 500")
     codigo = sinc.main(argv(landing, grupos_json), buscador=buscador_falso(quebrado))
     assert codigo == 1
-    assert landing.read_text(encoding="utf-8") == HTML_BASE
+    assert landing.read_text(encoding="utf-8") == JS_BASE
     assert "moda" in capsys.readouterr().err
 
 
@@ -423,7 +433,7 @@ def test_main_exige_a_chave_no_ambiente(landing, grupos_json, monkeypatch, capsy
     codigo = sinc.main(argv(landing, grupos_json))
     assert codigo == 2
     assert "OPENWA_API_KEY" in capsys.readouterr().err
-    assert landing.read_text(encoding="utf-8") == HTML_BASE
+    assert landing.read_text(encoding="utf-8") == JS_BASE
 
 
 def test_dry_run_mostra_mas_nao_grava(landing, grupos_json, monkeypatch, capsys):
@@ -431,7 +441,7 @@ def test_dry_run_mostra_mas_nao_grava(landing, grupos_json, monkeypatch, capsys)
     codigo = sinc.main(argv(landing, grupos_json, "--dry-run"),
                        buscador=buscador_falso(NOVOS))
     assert codigo == 0
-    assert landing.read_text(encoding="utf-8") == HTML_BASE
+    assert landing.read_text(encoding="utf-8") == JS_BASE
     assert "F2jZYz7jPjP9JFKTvl83F9" in capsys.readouterr().out
 
 
