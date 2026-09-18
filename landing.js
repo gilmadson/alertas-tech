@@ -354,28 +354,17 @@ async function submeterLead(e) {
   if (btn) { btn.disabled = false; btn.textContent = plataformaEscolhida === 'tg' ? '✈️ Entrar pelo Telegram' : '💬 Entrar pelo WhatsApp'; }
 }
 
-// ── ENTRADA DIRETA (páginas de propósito único) ──────
-// Pedido do Gilmadson (18/09/2026, depois de ver o concorrente com 280 mil
-// membros): "algo mais direcional e rápido, com apenas clicks já resolva".
-// Sem formulário, sem nome/e-mail/telefone — um toque abre o grupo. Não
-// grava lead (não há dado pessoal pra proteger), mas ainda mede clique real
-// via Pixel, então a campanha continua com número, não vira gasto cego.
-function entrarDireto(slug) {
-  const links = GRUPOS[slug] || {};
-  const destino = links.wpp || null;
-  if (!destino) return;
-  const abriu = !!window.open(destino, '_blank');
-  try {
-    if (typeof fbq === 'function') fbq('track', 'Lead', { content_category: slug, content_name: 'entrada_direta' });
-  } catch (_) {}
-  if (!abriu) {
-    const aviso = document.getElementById('direto-aviso-' + slug);
-    if (aviso) {
-      aviso.innerHTML = 'O navegador segurou a aba. <a href="' + destino +
-        '" target="_blank" rel="noopener">Toca aqui pra abrir o grupo</a>.';
-      aviso.classList.add('ativo');
-    }
-  }
+// ── ABERTURA AUTOMÁTICA (páginas de propósito único) ─
+// `data-auto-abrir="<slug>"` no <body> clica sozinho no card dessa categoria
+// ao carregar. Corrigido 18/09/2026 à noite: tentei um botão sem formulário
+// ("entrada direta"), mas ele PARA de capturar o lead — o Gilmadson quer o
+// contrário: nome/e-mail/telefone visíveis (autopreenchidos pelo celular
+// sempre que ele tiver salvo antes — os 3 campos já têm autocomplete
+// correto), marca "não sou robô", o botão habilita. Volta a ser isto.
+const autoAbrir = document.body.dataset.autoAbrir;
+if (autoAbrir) {
+  const card = document.querySelector(`.cat-card[data-slug="${autoAbrir}"]`);
+  if (card) card.click();
 }
 
 // Guarda a origem já no carregamento: se a pessoa chegou por campanha e só se
