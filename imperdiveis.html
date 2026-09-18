@@ -32,8 +32,12 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
 <!-- `data-lojas` é a loja FIXA desta página: o motor dos Imperdíveis é 100%
      Mercado Livre, então não há o que escolher e o lead sai já dizendo isso.
      A declaração é explícita de propósito — a ausência da seção de lojas não
-     vale como decisão, porque elemento que some é drift e não escolha. -->
-<body data-lojas="mercadolivre">
+     vale como decisão, porque elemento que some é drift e não escolha.
+     `data-auto-abrir` pede pro landing.js clicar sozinho no card desta
+     categoria ao carregar — pedido dele (18/09/2026): campos aparecem direto,
+     sem precisar tocar em nada antes. O botão só habilita com tudo
+     preenchido porque essa regra já mora em checarCampos(), sem duplicar. -->
+<body data-lojas="mercadolivre" data-auto-abrir="imperdiveis">
 
 <header>
   <div class="logo-dot"></div>

@@ -681,3 +681,17 @@ footer a { color: var(--accent); text-decoration: none; }
   50% { transform: scale(.96); }
 }
 .tapped { animation: tapVibrate .15s ease; }
+
+/* PÁGINA DE PROPÓSITO ÚNICO — pedido dele (18/09/2026): quem chega já
+   escolheu, então o formulário é o conteúdo, não um modal por cima do card.
+   Escopado por `data-auto-abrir` no <body> (ver landing.js) — não afeta a
+   landing principal, que continua abrindo o modal por clique, por cima da
+   grade de 21 categorias. */
+body[data-auto-abrir] .categorias { display: none; }
+body[data-auto-abrir] #modal.modal-overlay {
+  position: static; background: none; backdrop-filter: none;
+  padding: 0 20px 24px;
+}
+body[data-auto-abrir] #modal .modal {
+  animation: none; border-radius: 24px; max-width: 480px; margin: 0 auto; width: 100%;
+}

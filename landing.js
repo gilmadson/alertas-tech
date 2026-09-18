@@ -354,6 +354,18 @@ async function submeterLead(e) {
   if (btn) { btn.disabled = false; btn.textContent = plataformaEscolhida === 'tg' ? '✈️ Entrar pelo Telegram' : '💬 Entrar pelo WhatsApp'; }
 }
 
+// ── ABERTURA AUTOMÁTICA (páginas de propósito único) ─
+// `data-auto-abrir="<slug>"` no <body> pede pra clicar sozinho no card dessa
+// categoria ao carregar — pedido do Gilmadson (18/09/2026): numa página
+// exclusiva, os campos já aparecem direto, sem precisar tocar em nada antes.
+// Clica no card de verdade (em vez de chamar abrirModal direto) pra não
+// duplicar emoji/nome/slug em lugar nenhum — o card já tem tudo no onclick.
+const autoAbrir = document.body.dataset.autoAbrir;
+if (autoAbrir) {
+  const card = document.querySelector(`.cat-card[data-slug="${autoAbrir}"]`);
+  if (card) card.click();
+}
+
 // Guarda a origem já no carregamento: se a pessoa chegou por campanha e só se
 // cadastrar depois de dar uma volta pela página, a origem real dela não se perde.
 origemParaEnviar();
