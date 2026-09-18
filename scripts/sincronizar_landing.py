@@ -52,6 +52,14 @@ BASE_URL_ENV = "OPENWA_BASE_URL"
 CONVITE_VALIDO = re.compile(r"^https://chat\.whatsapp\.com/[A-Za-z0-9]{15,}$")
 TIMEOUT_S = 30
 
+# O WhatsApp barra convite em grupo com 1024 membros. A margem existe porque
+# a contagem que lemos e o convite que geramos não são atômicos — alguém pode
+# entrar entre as duas chamadas. Pedido dele (18/09/2026): quando o grupo
+# ativo de uma categoria bater o limite, usar o próximo da lista `overflow`
+# do grupos.json — sem isso a landing continuaria mandando gente para um
+# grupo que já não aceita mais ninguém.
+LIMITE_PADRAO_OVERFLOW = 1000
+
 
 class ErroSincronizacao(Exception):
     """Qualquer motivo para NÃO escrever no index.html."""
@@ -76,6 +84,11 @@ def carregar_grupos(caminho: Path | str = GRUPOS_PADRAO) -> dict:
             if not cat.get(campo):
                 raise ErroSincronizacao(
                     f"categoria {cat.get('slug', '?')} sem campo '{campo}'")
+        for extra in cat.get("overflow") or []:
+            for campo in ("jid", "sessao"):
+                if not extra.get(campo):
+                    raise ErroSincronizacao(
+                        f"categoria {cat['slug']}: item de overflow sem '{campo}'")
     return dados
 
 
@@ -122,6 +135,71 @@ def substituir_bloco(texto: str, bloco: str) -> str:
     inicio = texto.find(MARCA_INICIO) + len(MARCA_INICIO)
     fim = texto.find(MARCA_FIM)
     return texto[:inicio] + bloco + texto[fim:]
+
+
+# ── overflow (grupo 2, 3... quando o ativo lota) ────────────────────────────
+
+def contar_participantes(sessao: str, jid: str, *, base_url: str, api_key: str,
+                         http=None) -> int:
+    """Quantos membros o grupo tem agora. Levanta ErroSincronizacao em qualquer
+    tropeço — mesma dureza de `buscar_convite`, mesmo formato de erro."""
+    if http is None:  # pragma: no cover - caminho com rede de verdade
+        import requests
+        http = requests
+    url = f"{base_url.rstrip('/')}/api/sessions/{sessao}/groups/{jid}"
+    try:
+        resp = http.get(url, headers={"X-API-Key": api_key}, timeout=TIMEOUT_S)
+    except Exception as e:
+        raise ErroSincronizacao(f"gateway não respondeu ({type(e).__name__})") from e
+    if resp.status_code != 200:
+        raise ErroSincronizacao(f"gateway devolveu HTTP {resp.status_code}")
+    try:
+        corpo = resp.json()
+    except Exception as e:
+        raise ErroSincronizacao("gateway devolveu resposta que não é JSON") from e
+    participantes = corpo.get("participants") if isinstance(corpo, dict) else None
+    if not isinstance(participantes, list):
+        raise ErroSincronizacao("gateway respondeu sem lista de participantes")
+    return len(participantes)
+
+
+def resolver_grupo_ativo(categorias: list[dict], contador, *,
+                         limite: int = LIMITE_PADRAO_OVERFLOW) -> list[dict]:
+    """Para cada categoria com `overflow`, decide se o grupo principal ainda
+    tem vaga ou se é hora de promover o próximo da lista.
+
+    Categoria sem `overflow` não sofre NENHUMA chamada extra — o custo desta
+    função é zero para quem não usa a feature, e o comportamento é idêntico
+    ao de antes dela existir.
+
+    Contagem que falha (gateway fora, timeout) NUNCA impede a sincronização:
+    cai para o grupo principal, do mesmo jeito que sempre funcionou. Overflow
+    é uma otimização — não pode virar um novo motivo para "nada foi escrito".
+    """
+    resolvidas = []
+    for cat in categorias:
+        candidatos = [{"jid": cat["jid"], "sessao": cat["sessao"]}, *(cat.get("overflow") or [])]
+        if len(candidatos) == 1:
+            resolvidas.append(cat)
+            continue
+
+        escolhido = candidatos[0]
+        for candidato in candidatos:
+            try:
+                cheio = contador(candidato["sessao"], candidato["jid"]) >= limite
+            except ErroSincronizacao:
+                break  # não deu para confirmar: fica no que já foi escolhido até aqui
+            escolhido = candidato
+            if not cheio:
+                break
+            # candidato lotado: tenta o próximo da lista (ou fica no último, se
+            # este já era o último — grupo cheio ainda é melhor que nenhum).
+
+        nova = dict(cat)
+        nova["jid"] = escolhido["jid"]
+        nova["sessao"] = escolhido["sessao"]
+        resolvidas.append(nova)
+    return resolvidas
 
 
 # ── gateway ──────────────────────────────────────────────────────────────────
@@ -248,7 +326,7 @@ def resumir(antes: dict[str, dict], depois: dict[str, str]) -> list[str]:
 
 # ── linha de comando ─────────────────────────────────────────────────────────
 
-def main(argv=None, buscador=None) -> int:
+def main(argv=None, buscador=None, contador=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--alvo", default=str(ALVO_PADRAO),
                         help="arquivo com o bloco GRUPOS (padrão: landing.js)")
@@ -281,6 +359,10 @@ def main(argv=None, buscador=None) -> int:
             def buscador(sessao, jid):
                 return buscar_convite(sessao, jid, base_url=base_url, api_key=api_key)
 
+            def contador(sessao, jid):
+                return contar_participantes(sessao, jid, base_url=base_url, api_key=api_key)
+
+        categorias = resolver_grupo_ativo(categorias, contador)
         convites = coletar_convites(categorias, buscador, pausa=args.pausa,
                                     tentativas=args.tentativas)
         novo_texto = substituir_bloco(texto, montar_bloco(categorias, convites))

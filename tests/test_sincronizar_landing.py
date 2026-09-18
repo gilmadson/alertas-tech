@@ -200,6 +200,113 @@ def test_mesmo_convite_em_duas_categorias_conta_como_falha():
     assert "repetido" in str(erro.value).lower()
 
 
+# ── overflow (grupo 2, 3... quando o ativo lota) ─────────────────────────────
+
+def contador_falso(mapa):
+    """Devolve um contador que responde por (sessao, jid), como o gateway
+    responderia a `GET /groups/{jid}`. Um valor `Exception` simula tropeço."""
+    def contar(sessao, jid):
+        valor = mapa.get((sessao, jid))
+        if valor is None:
+            raise sinc.ErroSincronizacao(f"grupo {jid} não respondeu")
+        if isinstance(valor, Exception):
+            raise valor
+        return valor
+    return contar
+
+
+def cat_com_overflow(*, principal=("s1", "p@g.us"), extras=(("s1", "o2@g.us"),)):
+    return {"slug": "x", "nome": "X", "emoji": "🔥", "exemplos": "a",
+            "jid": principal[1], "sessao": principal[0], "telegram": None,
+            "overflow": [{"sessao": s, "jid": j} for s, j in extras]}
+
+
+def test_categoria_sem_overflow_nao_gasta_chamada_de_contagem():
+    cat = dict(CATS[0])
+    chamadas = []
+
+    def contar(sessao, jid):
+        chamadas.append((sessao, jid))
+        return 5
+
+    resolvidas = sinc.resolver_grupo_ativo([cat], contar)
+    assert resolvidas == [cat]
+    assert chamadas == []
+
+
+def test_overflow_mantem_o_principal_quando_ha_vaga():
+    cat = cat_com_overflow()
+    contar = contador_falso({("s1", "p@g.us"): 3})
+    resolvida = sinc.resolver_grupo_ativo([cat], contar, limite=1000)[0]
+    assert resolvida["jid"] == "p@g.us" and resolvida["sessao"] == "s1"
+
+
+def test_overflow_promove_quando_o_principal_esta_cheio():
+    cat = cat_com_overflow()
+    contar = contador_falso({("s1", "p@g.us"): 1000, ("s1", "o2@g.us"): 4})
+    resolvida = sinc.resolver_grupo_ativo([cat], contar, limite=1000)[0]
+    assert resolvida["jid"] == "o2@g.us"
+
+
+def test_overflow_anda_a_cadeia_ate_achar_vaga():
+    cat = cat_com_overflow(extras=(("s1", "o2@g.us"), ("s1", "o3@g.us")))
+    contar = contador_falso({
+        ("s1", "p@g.us"): 1000, ("s1", "o2@g.us"): 1000, ("s1", "o3@g.us"): 2,
+    })
+    resolvida = sinc.resolver_grupo_ativo([cat], contar, limite=1000)[0]
+    assert resolvida["jid"] == "o3@g.us"
+
+
+def test_overflow_fica_no_ultimo_quando_todos_estao_cheios():
+    """Grupo cheio ainda é melhor que sincronização travada — a categoria não
+    pode desaparecer da landing só porque toda a cadeia lotou no mesmo dia."""
+    cat = cat_com_overflow()
+    contar = contador_falso({("s1", "p@g.us"): 1000, ("s1", "o2@g.us"): 1000})
+    resolvida = sinc.resolver_grupo_ativo([cat], contar, limite=1000)[0]
+    assert resolvida["jid"] == "o2@g.us"
+
+
+def test_overflow_ignora_contagem_que_falha_e_fica_no_principal():
+    """Gateway fora do ar não pode ser um NOVO motivo para nada ser escrito —
+    a categoria cai para o grupo principal, exatamente como antes de o
+    overflow existir."""
+    cat = cat_com_overflow()
+    contar = contador_falso({("s1", "p@g.us"): sinc.ErroSincronizacao("HTTP 500")})
+    resolvida = sinc.resolver_grupo_ativo([cat], contar, limite=1000)[0]
+    assert resolvida["jid"] == "p@g.us"
+
+
+def test_overflow_preserva_os_outros_campos_da_categoria():
+    cat = cat_com_overflow()
+    contar = contador_falso({("s1", "p@g.us"): 1000, ("s1", "o2@g.us"): 4})
+    resolvida = sinc.resolver_grupo_ativo([cat], contar, limite=1000)[0]
+    assert resolvida["slug"] == "x" and resolvida["nome"] == "X"
+
+
+def test_contar_participantes_monta_rota_e_header():
+    http = HttpFalso(RespostaFalsa(200, {"participants": [{"id": "a"}, {"id": "b"}]}))
+    total = sinc.contar_participantes("sessao-1", "123@g.us",
+                                      base_url="http://gw:2785/", api_key="segredo", http=http)
+    assert total == 2
+    chamada = http.chamadas[0]
+    assert chamada["url"] == "http://gw:2785/api/sessions/sessao-1/groups/123@g.us"
+    assert chamada["headers"]["X-API-Key"] == "segredo"
+
+
+def test_contar_participantes_falha_em_status_diferente_de_200():
+    http = HttpFalso(RespostaFalsa(404, {"message": "not found"}))
+    with pytest.raises(sinc.ErroSincronizacao) as erro:
+        sinc.contar_participantes("s", "1@g.us", base_url="http://gw", api_key="k", http=http)
+    assert "404" in str(erro.value)
+
+
+def test_contar_participantes_falha_sem_lista_de_participantes():
+    http = HttpFalso(RespostaFalsa(200, {"id": "1@g.us"}))
+    with pytest.raises(sinc.ErroSincronizacao) as erro:
+        sinc.contar_participantes("s", "1@g.us", base_url="http://gw", api_key="k", http=http)
+    assert "participantes" in str(erro.value)
+
+
 # ── montagem e escrita ───────────────────────────────────────────────────────
 
 def test_bloco_montado_volta_igual_no_parse():

@@ -12,8 +12,10 @@
   },
   "sessoes": {
     "alertastech": "70bee236-4d02-48d6-8b8f-f99bec706af7",
-    "ml-imperdiveis": "d0eada95-e029-4e2a-a1b6-b9ea05d80b69"
+    "ml-imperdiveis": "d0eada95-e029-4e2a-a1b6-b9ea05d80b69",
+    "divulgacao-81": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96"
   },
+  "_overflow_por_que": "Levantado em 18/09/2026 via GroupFindAll: já existe um grupo '#2' criado e vazio para praticamente toda categoria (a maioria com 1 único participante, o dono), mais um '#3' para Super Desconto — infraestrutura pronta que ninguém tinha plugado na landing, mesma doença de outros achados desta memória. `scripts/sincronizar_landing.py` promove sozinho para o próximo da lista `overflow` quando o grupo ativo bate ~1000 membros (LIMITE_PADRAO_OVERFLOW); hoje o mais cheio de todos tem 10, então nada muda visivelmente ainda — o mecanismo só entra em ação quando (se) algum grupo realmente lotar.",
   "telegram_fallback": "https://t.me/alertatechoutrosprodutos",
   "_telegram_fallback_por_que": "As 8 categorias criadas em 25/08/2026 ainda não têm canal próprio no Telegram; o motor manda todas para o canal de 'outros'. A landing diz a mesma coisa que a produção faz.",
   "categorias": [
@@ -24,6 +26,10 @@
       "exemplos": "Desconto grande de qualquer loja e categoria",
       "jid": "120363430022168681@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "overflow": [
+        { "sessao": "d0eada95-e029-4e2a-a1b6-b9ea05d80b69", "jid": "120363429266931439@g.us" },
+        { "sessao": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96", "jid": "120363410653812153@g.us" }
+      ],
       "telegram": null,
       "_por_que": "Grupo de SUPER DESCONTO do motor (GRUPOS_SUPER_DESCONTO no .env): recebe por NÚMERO, não por assunto — qualquer produto acima do piso de desconto, de qualquer loja. É o destino de quem não quer escolher categoria. Não existe canal equivalente no Telegram."
     },
@@ -34,6 +40,9 @@
       "exemplos": "O maior desconto do dia, revezando entre 9 categorias de tech",
       "jid": "120363409939807033@g.us",
       "sessao": "d0eada95-e029-4e2a-a1b6-b9ea05d80b69",
+      "overflow": [
+        { "sessao": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96", "jid": "120363411092089341@g.us" }
+      ],
       "telegram": null,
       "_por_que": "Motor separado (chip e cadência próprios, monitor/imperdiveis.py do repo trading_c_agente, ativo desde 01/09/2026): revezamento das 9 categorias de vitrine do Mercado Livre pelo maior desconto do dia. Sem canal de Telegram equivalente; o botão some sozinho, mesmo caminho de 'geral'."
     },
@@ -44,6 +53,9 @@
       "exemplos": "iPhone · Samsung · Motorola",
       "jid": "120363426129841177@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "overflow": [
+        { "sessao": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96", "jid": "120363414859544406@g.us" }
+      ],
       "telegram": "https://t.me/alertatech_smartphone"
     },
     {
@@ -53,6 +65,9 @@
       "exemplos": "Dell · Lenovo · MacBook",
       "jid": "120363408590298129@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "overflow": [
+        { "sessao": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96", "jid": "120363412256959378@g.us" }
+      ],
       "telegram": "https://t.me/alertatechnotebook"
     },
     {
@@ -62,6 +77,9 @@
       "exemplos": "4K · QLED · OLED",
       "jid": "120363429283704274@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "overflow": [
+        { "sessao": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96", "jid": "120363427554012690@g.us" }
+      ],
       "telegram": "https://t.me/alertatechsmarttvs"
     },
     {
@@ -71,6 +89,9 @@
       "exemplos": "JBL · Sony · AirPods",
       "jid": "120363425595035144@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "overflow": [
+        { "sessao": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96", "jid": "120363412251688658@g.us" }
+      ],
       "telegram": "https://t.me/alertatechFoneseAudio"
     },
     {
@@ -80,6 +101,9 @@
       "exemplos": "Galaxy Watch · Apple Watch",
       "jid": "120363429335303648@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "overflow": [
+        { "sessao": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96", "jid": "120363432038055089@g.us" }
+      ],
       "telegram": "https://t.me/alertarechsmartwatch"
     },
     {
@@ -89,6 +113,9 @@
       "exemplos": "iPad · Galaxy Tab · Xiaomi",
       "jid": "120363410090253435@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "overflow": [
+        { "sessao": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96", "jid": "120363431092213058@g.us" }
+      ],
       "telegram": "https://t.me/alertatechtablet"
     },
     {
@@ -98,6 +125,9 @@
       "exemplos": "Monitor · Teclado · Mouse",
       "jid": "120363411385130078@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "overflow": [
+        { "sessao": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96", "jid": "120363413118655693@g.us" }
+      ],
       "telegram": "https://t.me/monitoreperiferico"
     },
     {
@@ -107,6 +137,9 @@
       "exemplos": "SSD · HD externo · Pendrive",
       "jid": "120363412224872167@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "overflow": [
+        { "sessao": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96", "jid": "120363428041876604@g.us" }
+      ],
       "telegram": "https://t.me/alertatecharmazenamento"
     },
     {
@@ -116,6 +149,9 @@
       "exemplos": "Câmera · GoPro · Drone",
       "jid": "120363430110179072@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "overflow": [
+        { "sessao": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96", "jid": "120363410108194768@g.us" }
+      ],
       "telegram": "https://t.me/alertatechcameras"
     },
     {
@@ -125,6 +161,9 @@
       "exemplos": "Box · Capa dura · Best-seller",
       "jid": "120363410902978258@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "overflow": [
+        { "sessao": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96", "jid": "120363429469158960@g.us" }
+      ],
       "telegram": "https://t.me/alertatechoutrosprodutos"
     },
     {
@@ -134,6 +173,9 @@
       "exemplos": "Air fryer · Liquidificador · Mixer",
       "jid": "120363430123371811@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "overflow": [
+        { "sessao": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96", "jid": "120363428612045971@g.us" }
+      ],
       "telegram": "https://t.me/alertatechoutrosprodutos"
     },
     {
@@ -143,6 +185,9 @@
       "exemplos": "Jogo de panelas · Aparelho de jantar",
       "jid": "120363410852776610@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "overflow": [
+        { "sessao": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96", "jid": "120363412117862129@g.us" }
+      ],
       "telegram": "https://t.me/alertatechoutrosprodutos"
     },
     {
@@ -152,6 +197,9 @@
       "exemplos": "Faqueiro · Jogo de copos",
       "jid": "120363431518947255@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "overflow": [
+        { "sessao": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96", "jid": "120363430234612060@g.us" }
+      ],
       "telegram": "https://t.me/alertatechoutrosprodutos"
     },
     {
@@ -161,6 +209,9 @@
       "exemplos": "Sofá · Rack · Cadeira",
       "jid": "120363429832085460@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "overflow": [
+        { "sessao": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96", "jid": "120363411802174888@g.us" }
+      ],
       "telegram": "https://t.me/alertatechoutrosprodutos"
     },
     {
@@ -170,6 +221,9 @@
       "exemplos": "Whey · Creatina · Colchonete",
       "jid": "120363427911666074@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "overflow": [
+        { "sessao": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96", "jid": "120363428803627154@g.us" }
+      ],
       "telegram": "https://t.me/alertatechoutrosprodutos"
     },
     {
@@ -179,6 +233,9 @@
       "exemplos": "Perfume · Skincare · Prancha",
       "jid": "120363430523142176@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "overflow": [
+        { "sessao": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96", "jid": "120363428216406013@g.us" }
+      ],
       "telegram": "https://t.me/alertatechoutrosprodutos"
     },
     {
@@ -188,6 +245,9 @@
       "exemplos": "Shampoo profissional · Botox · Secador",
       "jid": "120363430066666952@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "overflow": [
+        { "sessao": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96", "jid": "120363410762476700@g.us" }
+      ],
       "telegram": null,
       "_por_que": "Primeiro nicho de PRESTADOR DE SERVIÇO (10/09/2026): fala com quem compra para atender cliente, não para si — por isso é grupo separado de 'beleza', e não uma linha dentro dele. Nasce só no WhatsApp: não existe canal de Telegram para salão, então o botão do Telegram some sozinho (mesmo caminho de 'geral'). Corrigido em 18/09/2026: o campo tinha o link de fallback 'outros' por engano, contradizendo este próprio comentário — o teste `test_salao_esconde_o_telegram_e_entrega_o_grupo_certo` pegou a divergência."
     },
@@ -198,6 +258,9 @@
       "exemplos": "Mochila · Óculos · Mala",
       "jid": "120363412462127930@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "overflow": [
+        { "sessao": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96", "jid": "120363428686334118@g.us" }
+      ],
       "telegram": "https://t.me/alertatechoutrosprodutos"
     },
     {
@@ -207,6 +270,9 @@
       "exemplos": "Impressora · Roteador · Mais",
       "jid": "120363430336835895@g.us",
       "sessao": "70bee236-4d02-48d6-8b8f-f99bec706af7",
+      "overflow": [
+        { "sessao": "fb4442d0-26cc-4abc-8316-8fb4b0cb2a96", "jid": "120363411085930156@g.us" }
+      ],
       "telegram": "https://t.me/alertatechoutrosprodutos"
     }
   ]
