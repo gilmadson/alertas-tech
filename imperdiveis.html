@@ -32,12 +32,8 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
 <!-- `data-lojas` é a loja FIXA desta página: o motor dos Imperdíveis é 100%
      Mercado Livre, então não há o que escolher e o lead sai já dizendo isso.
      A declaração é explícita de propósito — a ausência da seção de lojas não
-     vale como decisão, porque elemento que some é drift e não escolha.
-     `data-auto-abrir` pede pro landing.js clicar sozinho no card desta
-     categoria ao carregar — pedido dele (18/09/2026): campos aparecem direto,
-     sem precisar tocar em nada antes. O botão só habilita com tudo
-     preenchido porque essa regra já mora em checarCampos(), sem duplicar. -->
-<body data-lojas="mercadolivre" data-auto-abrir="imperdiveis">
+     vale como decisão, porque elemento que some é drift e não escolha. -->
+<body data-lojas="mercadolivre">
 
 <header>
   <div class="logo-dot"></div>
@@ -70,6 +66,14 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
         <span class="stat-label">S&oacute; Mercado Livre</span>
       </div>
     </div>
+
+    <!-- Entrada direta: pedido dele (18/09/2026) — um toque, sem formulário.
+         Não hardcoda o link: entrarDireto() lê GRUPOS no landing.js, a mesma
+         fonte que o sincronizador mantém em dia. -->
+    <button class="btn btn-whatsapp" style="width:100%;font-size:1.05rem;padding:20px;margin-top:8px;" onclick="entrarDireto('imperdiveis')">
+      <span class="btn-icon">⚡</span> Entrar direto no grupo
+    </button>
+    <p id="direto-aviso-imperdiveis" class="form-aviso" style="margin-top:12px;"></p>
   </div>
 </section>
 
@@ -77,10 +81,10 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
   <div class="categorias-grid">
 
     <div class="cat-card full destaque" data-slug="imperdiveis" onclick="abrirModal('⚡','Imperdíveis ML','imperdiveis')">
-      <span class="cat-emoji">⚡</span>
+      <span class="cat-emoji">✉️</span>
       <div class="cat-info">
-        <div class="cat-name">Entrar no grupo dos Imperdíveis</div>
-        <div class="cat-count">O maior desconto do dia, revezando entre 9 categorias de tech</div>
+        <div class="cat-name">Quer receber por e-mail também?</div>
+        <div class="cat-count">Opcional — deixa nome e e-mail além do WhatsApp</div>
       </div>
       <span class="cat-arrow">↗</span>
     </div>

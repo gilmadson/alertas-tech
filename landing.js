@@ -354,16 +354,28 @@ async function submeterLead(e) {
   if (btn) { btn.disabled = false; btn.textContent = plataformaEscolhida === 'tg' ? '✈️ Entrar pelo Telegram' : '💬 Entrar pelo WhatsApp'; }
 }
 
-// ── ABERTURA AUTOMÁTICA (páginas de propósito único) ─
-// `data-auto-abrir="<slug>"` no <body> pede pra clicar sozinho no card dessa
-// categoria ao carregar — pedido do Gilmadson (18/09/2026): numa página
-// exclusiva, os campos já aparecem direto, sem precisar tocar em nada antes.
-// Clica no card de verdade (em vez de chamar abrirModal direto) pra não
-// duplicar emoji/nome/slug em lugar nenhum — o card já tem tudo no onclick.
-const autoAbrir = document.body.dataset.autoAbrir;
-if (autoAbrir) {
-  const card = document.querySelector(`.cat-card[data-slug="${autoAbrir}"]`);
-  if (card) card.click();
+// ── ENTRADA DIRETA (páginas de propósito único) ──────
+// Pedido do Gilmadson (18/09/2026, depois de ver o concorrente com 280 mil
+// membros): "algo mais direcional e rápido, com apenas clicks já resolva".
+// Sem formulário, sem nome/e-mail/telefone — um toque abre o grupo. Não
+// grava lead (não há dado pessoal pra proteger), mas ainda mede clique real
+// via Pixel, então a campanha continua com número, não vira gasto cego.
+function entrarDireto(slug) {
+  const links = GRUPOS[slug] || {};
+  const destino = links.wpp || null;
+  if (!destino) return;
+  const abriu = !!window.open(destino, '_blank');
+  try {
+    if (typeof fbq === 'function') fbq('track', 'Lead', { content_category: slug, content_name: 'entrada_direta' });
+  } catch (_) {}
+  if (!abriu) {
+    const aviso = document.getElementById('direto-aviso-' + slug);
+    if (aviso) {
+      aviso.innerHTML = 'O navegador segurou a aba. <a href="' + destino +
+        '" target="_blank" rel="noopener">Toca aqui pra abrir o grupo</a>.';
+      aviso.classList.add('ativo');
+    }
+  }
 }
 
 // Guarda a origem já no carregamento: se a pessoa chegou por campanha e só se
