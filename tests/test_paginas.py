@@ -168,6 +168,23 @@ def test_toda_pagina_leva_a_uma_politica_que_existe(paginas):
                 f"{nome} aponta para uma política que não existe em {alvo}"
 
 
+def test_toda_pagina_declara_qual_pagina_ela_e(paginas):
+    """A contagem de visita grava `pagina`, e a página DECLARA o próprio nome —
+    como já faz com `data-lojas`. Deduzir do caminho não serve: o Vercel serve
+    `/imperdiveis` e o GitHub Pages serve `/alertas-tech/imperdiveis.html`; o
+    mesmo arquivo viraria duas linhas diferentes no relatório."""
+    for nome, texto in paginas.items():
+        assert re.search(r'<body[^>]*data-pagina="[a-z0-9-]+"', texto), nome
+
+
+def test_cada_pagina_declara_um_nome_diferente(paginas):
+    """Duas páginas no mesmo balde e a taxa de conversão de cada uma vira
+    invenção."""
+    nomes = [re.search(r'<body[^>]*data-pagina="([^"]+)"', texto).group(1)
+             for texto in paginas.values()]
+    assert len(set(nomes)) == len(PAGINAS), nomes
+
+
 def test_toda_pagina_carrega_o_mesmo_pixel(paginas):
     """Página de campanha sem Pixel é gasto sem medida; Pixel diferente por
     página é relatório partido em dois."""

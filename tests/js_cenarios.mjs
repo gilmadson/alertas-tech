@@ -111,6 +111,20 @@ if (cenario === 'cadastro') {
   preencher();
   await submeter('wpp');
 
+} else if (cenario === 'visita') {
+  // Só o carregamento, ninguém toca em nada: a contagem de visita tem de sair
+  // sozinha. É o caso de quem entra e vai embora — exatamente quem nunca
+  // aparece na tabela de leads, e por isso faltava no denominador.
+  await Promise.resolve();
+  await Promise.resolve();
+
+} else if (cenario === 'visita_recarregada') {
+  // A visita do carregamento já saiu lá em cima. Espera ela assentar e chama
+  // de novo: é o F5 na mesma sessão.
+  await Promise.resolve();
+  await Promise.resolve();
+  await registrarVisita();
+
 } else if (cenario === 'telegram_categoria_nova') {
   abrirModal('👜', 'Moda & Acessórios', 'moda');
   avancarRelogio(5000);
