@@ -254,8 +254,28 @@ const LOJA_IDS = ['loja-ml', 'loja-amz', 'loja-mag', 'loja-shp', 'loja-ali', 'lo
 const LOJAS_FIXAS = (document.body.dataset.lojas || '')
   .split(',').map(s => s.trim()).filter(Boolean);
 
+// "Ofertas gerais" promete "qualquer loja, não quero escolher" — mas até
+// 22/09/2026 pedia pra marcar as 6 caixas de loja uma por uma mesmo assim.
+// Foi exatamente esse contraste que o Gilmadson gravou no próprio teste
+// (22/09/2026): tocou "não quero escolher" e teve que escolher assim mesmo.
+// Agora as duas categorias "sem escolha" não mostram a seção de lojas — a
+// loja gravada é a verdadeira de cada grupo (todas pro Ofertas gerais, só
+// Mercado Livre pro Imperdíveis ML), nunca uma lista genérica. E quem clica
+// em "Ofertas gerais" é sorteado, sem ver a escolha, entre os dois grupos que
+// já existem pra quem não quer escolher — pedido dele, pra não lotar sempre
+// o mesmo.
+const LOJAS_SEM_ESCOLHA = {
+  geral:       ['mercadolivre', 'amazon', 'magalu', 'shopee', 'aliexpress', 'kabum'],
+  imperdiveis: ['mercadolivre'],
+};
+
+function sortearCategoriaSemEscolha() {
+  return Math.random() < 0.5 ? 'geral' : 'imperdiveis';
+}
+
 function getLojasEscolhidas() {
   if (LOJAS_FIXAS.length) return LOJAS_FIXAS;
+  if (LOJAS_SEM_ESCOLHA[categoriaAtual]) return LOJAS_SEM_ESCOLHA[categoriaAtual];
   return LOJA_IDS
     .map(id => document.getElementById(id))
     .filter(el => el.checked)
@@ -274,7 +294,11 @@ function checarCampos() {
 
 // ── MODAL ────────────────────────────────────────────
 function abrirModal(emoji, nome, slug) {
-  categoriaAtual = slug;
+  // O sorteio acontece aqui, uma vez, e o resultado vira a categoria de
+  // verdade pro resto da função — GRUPOS, loja gravada e destino do convite
+  // são todos do grupo sorteado. `slug`/`nome` continuam sendo o que a
+  // pessoa clicou (o card não muda de nome na tela: ela não vê o sorteio).
+  categoriaAtual = slug === 'geral' ? sortearCategoriaSemEscolha() : slug;
   document.getElementById('modal-emoji').textContent = emoji;
   document.getElementById('modal-nome').textContent = nome;
   document.getElementById('form-erro').textContent = '';
@@ -290,18 +314,26 @@ function abrirModal(emoji, nome, slug) {
   limparAviso();
   // As categorias novas ainda não têm canal próprio no Telegram. Dizer isso é
   // melhor que a pessoa entrar num canal com outro nome e achar que errou.
-  const links = GRUPOS[slug] || {};
+  const links = GRUPOS[categoriaAtual] || {};
   document.getElementById('tg-nota').textContent =
-    (links.tg === TELEGRAM_FALLBACK && slug !== 'outros')
+    (links.tg === TELEGRAM_FALLBACK && categoriaAtual !== 'outros')
       ? 'No Telegram esta categoria sai no canal Outros Tech — o canal próprio ainda não existe.'
       : '';
   // Sem canal no Telegram (é o caso das ofertas gerais) o botão some: botão que
   // não leva a lugar nenhum é promessa quebrada.
   document.getElementById('btn-telegram').style.display = links.tg ? '' : 'none';
   // Página com loja fixa não tem essas caixas: procurar por elas ali seria
-  // `null.checked` e o modal morria antes de abrir.
+  // `null.checked` e o modal morria antes de abrir. Mesmo raciocínio vale pra
+  // categoria sorteada: a seção some, e o texto conta o que é verdade agora.
   if (!LOJAS_FIXAS.length) {
-    LOJA_IDS.forEach(id => document.getElementById(id).checked = id === 'loja-ml');
+    const semEscolha = !!LOJAS_SEM_ESCOLHA[categoriaAtual];
+    document.getElementById('lojas-section').style.display = semEscolha ? 'none' : '';
+    document.getElementById('modal-subtitle').textContent = semEscolha
+      ? 'Deixa seu contato — a gente cuida do resto.'
+      : 'Deixa seu contato e escolha de quais lojas quer receber alertas.';
+    if (!semEscolha) {
+      LOJA_IDS.forEach(id => document.getElementById(id).checked = id === 'loja-ml');
+    }
   }
   document.getElementById('btn-whatsapp').disabled = true;
   document.getElementById('btn-telegram').disabled = true;
@@ -324,10 +356,25 @@ function destinoDaCategoria() {
   return links.wpp || null;
 }
 
-function abrirDestino(destino) {
-  if (!destino) return false;
-  const aba = window.open(destino, '_blank');
-  return !!aba;   // false = o navegador barrou a aba
+// iOS Safari só deixa `window.open` criar aba dentro do mesmo gesto síncrono
+// do toque. Uma chamada depois de um `await` (o POST no Supabase, por
+// exemplo) é barrada em silêncio, sem erro nenhum para capturar — foi
+// exatamente o que aconteceu com o Gilmadson em 22/09/2026: tocou "Entrar
+// pelo WhatsApp", o cadastro gravou (linha 16 da `leads`), e a aba do grupo
+// nunca abriu. Por isso a abertura virou duas etapas: `abrirJanela` cria a
+// aba em branco ainda dentro do toque (síncrono, nunca barrado), e
+// `apontarJanela` só manda essa aba já existente para o destino depois que o
+// cadastro terminar — apontar uma aba que já existe não é gesto novo, então
+// o Safari deixa.
+function abrirJanela(destino) {
+  if (!destino) return null;
+  return window.open('', '_blank');
+}
+
+function apontarJanela(janela, destino) {
+  if (!janela || !destino) return false;
+  janela.location = destino;
+  return true;
 }
 
 function limparAviso() {
@@ -417,6 +464,8 @@ async function submeterLead(e) {
 
   btn && (btn.disabled = true, btn.textContent = 'Entrando...');
 
+  const janela = abrirJanela(destino);   // síncrono: ainda dentro do toque
+
   const origem = origemParaEnviar();
   const resultado = await salvarLead({
     nome: nome || null,
@@ -433,7 +482,7 @@ async function submeterLead(e) {
     conteudo: origem.conteudo,
   });
 
-  const abriu = abrirDestino(destino);
+  const abriu = apontarJanela(janela, destino);
 
   if (!resultado.ok) {
     mostrarFalhaDeCadastro(resultado.detalhe, destino);

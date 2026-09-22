@@ -119,6 +119,23 @@ def test_aba_barrada_pelo_navegador_vira_link_visivel(tmp_path):
     assert "chat.whatsapp.com" in r["aviso"]
 
 
+def test_a_janela_abre_antes_do_post_para_nao_ser_barrada_pelo_safari(sucesso):
+    """Achado de 22/09/2026: o Gilmadson tocou "Entrar pelo WhatsApp", o
+    cadastro gravou (linha 16 da `leads`, testado e confirmado no banco), e o
+    Safari do iPhone dele nunca abriu o grupo — sem erro nenhum na tela.
+
+    Causa: `window.open` só é permitido pelo Safari dentro do mesmo gesto
+    síncrono do toque. Chamar depois de um `await` (o POST no Supabase) é
+    barrado em silêncio. A prova certa não é "abriu ou não abriu" — isso o
+    `popup_bloqueado` já cobria — é a ORDEM: a janela tem de abrir ANTES do
+    POST começar, não depois dele terminar."""
+    ordem = sucesso["ordemDeChamadas"]
+    assert "abrir-janela" in ordem, "a janela nunca abriu"
+    assert "fetch:leads" in ordem, "o POST do cadastro nunca aconteceu"
+    assert ordem.index("abrir-janela") < ordem.index("fetch:leads"), \
+        "abriu a janela DEPOIS do POST — é exatamente o que o Safari barra"
+
+
 # ── consentimento ────────────────────────────────────────────────────────────
 
 def test_sem_consentimento_o_botao_fica_travado(tmp_path):
@@ -184,6 +201,56 @@ def test_ofertas_gerais_esconde_o_botao_do_telegram(tmp_path):
 
 def test_categoria_com_canal_mantem_o_botao_do_telegram(sucesso):
     assert sucesso["botaoTelegram"] == ""
+
+
+# ── sorteio de quem não quer escolher (achado de 22/09/2026) ────────────────
+# "Ofertas gerais" promete "qualquer loja, não quero escolher" — mas pedia pra
+# marcar as 6 caixas de loja uma por uma mesmo assim. O Gilmadson pediu pra
+# tirar essa escolha e sortear, sem o usuário ver, entre os dois grupos que já
+# existem pra quem não quer escolher: Ofertas gerais (geral) e Imperdíveis ML.
+
+def test_categoria_comum_continua_mostrando_a_secao_de_lojas(sucesso):
+    """Só as categorias "sem escolha" mudam — o resto do grid (Smartphones
+    aqui) continua pedindo loja como sempre."""
+    assert sucesso["secaoLojas"] != "none"
+    assert sucesso["subtituloModal"] == \
+        "Deixa seu contato e escolha de quais lojas quer receber alertas."
+
+
+def test_ofertas_gerais_esconde_a_secao_de_lojas(tmp_path):
+    r = rodar("geral", tmp_path)
+    assert r["secaoLojas"] == "none"
+    assert r["subtituloModal"] == "Deixa seu contato — a gente cuida do resto."
+
+
+def test_ofertas_gerais_grava_todas_as_lojas_quando_o_sorteio_fica_nele(tmp_path):
+    """Sem forçar o sorteio, o dublê cai sempre no mesmo lado (< 0,5): é o
+    "geral" de sempre, com a promessa de "qualquer loja" batendo de verdade."""
+    r = rodar("geral", tmp_path)
+    assert corpo(r)["lojas"] == "mercadolivre,amazon,magalu,shopee,aliexpress,kabum"
+
+
+def test_sorteio_pode_cair_no_imperdiveis_sem_o_usuario_escolher(tmp_path):
+    """Mesmo clique de sempre em "Ofertas gerais" — o card não muda de nome,
+    só o destino de verdade muda, e a pessoa nunca vê essa escolha."""
+    r = rodar("geral_sorteado_imperdiveis", tmp_path, SORTEIO_FORCA_IMPERDIVEIS="1")
+    c = corpo(r)
+    assert c["categoria"] == "imperdiveis"
+    assert c["lojas"] == "mercadolivre", "a loja gravada tem de ser a verdadeira do grupo sorteado"
+    assert r["abertas"] == ["https://chat.whatsapp.com/IqTCyshHhzkEkN7cNbG2mC"]
+    assert r["secaoLojas"] == "none"
+
+
+def test_imperdiveis_clicado_direto_no_grid_tambem_fica_sem_escolha_de_loja(tmp_path):
+    """"Imperdíveis ML" é card comum do grid nesta página (não a exclusiva) —
+    antes pedia loja como qualquer outro, mas o grupo só manda Mercado Livre
+    aqui também. Clicar direto tem de valer a mesma regra do sorteio."""
+    r = rodar("imperdiveis_direto_no_grid", tmp_path)
+    c = corpo(r)
+    assert c["categoria"] == "imperdiveis"
+    assert c["lojas"] == "mercadolivre"
+    assert r["secaoLojas"] == "none"
+    assert r["abertas"] == ["https://chat.whatsapp.com/IqTCyshHhzkEkN7cNbG2mC"]
 
 
 def test_salao_esconde_o_telegram_e_entrega_o_grupo_certo(tmp_path):
@@ -381,11 +448,27 @@ def test_falha_de_cadastro_no_imperdiveis_tambem_aparece(tmp_path):
     assert r["abertas"] == ["https://chat.whatsapp.com/IqTCyshHhzkEkN7cNbG2mC"]
 
 
-def test_sem_a_loja_declarada_a_pagina_sem_caixas_quebra_na_cara(tmp_path):
+def test_categoria_sem_fallback_proprio_ainda_quebra_sem_a_loja_declarada(tmp_path):
     """Prova que o dublê estrito morde — senão os testes acima não provariam
-    nada. Página exclusiva que esquecer o `data-lojas` falha aqui, não no ar."""
-    erro = rodar_esperando_erro("imperdiveis", tmp_path, DOM_SEM_LOJAS="1")
+    nada. Só Imperdíveis ML (e Ofertas gerais) têm um segundo dono da verdade
+    sobre a loja (`LOJAS_SEM_ESCOLHA`, 22/09/2026); qualquer categoria
+    exclusiva FUTURA que esquecer o `data-lojas` ainda cai aqui, não no ar —
+    'smartphone' aqui representa essa categoria futura."""
+    erro = rodar_esperando_erro("sucesso", tmp_path, DOM_SEM_LOJAS="1")
     assert "loja-" in erro
+
+
+def test_imperdiveis_tem_fallback_proprio_mesmo_sem_data_lojas(tmp_path):
+    """Achado de 22/09/2026: Imperdíveis ML ganhou um segundo dono da verdade
+    sobre a própria loja fixa (`LOJAS_SEM_ESCOLHA['imperdiveis']`), porque o
+    sorteio de "Ofertas gerais" pode cair nele em páginas que não têm — nem
+    podem ter — `data-lojas` fixo (index.html e super-desconto.html servem
+    várias categorias). Redundância proposital: mesmo que a declaração da
+    página exclusiva suma, o valor gravado continua correto."""
+    r = rodar("imperdiveis", tmp_path, DOM_SEM_LOJAS="1")
+    c = corpo(r)
+    assert c["categoria"] == "imperdiveis"
+    assert c["lojas"] == "mercadolivre"
 
 
 # ── Telegram das categorias novas ────────────────────────────────────────────

@@ -54,6 +54,14 @@ globalThis.Date = class extends DataReal {
 
 // ── mundo de fora, configurado por variável de ambiente ──────────────────────
 const amb = process.env;
+
+// O sorteio entre "sem escolha" (Ofertas gerais / Imperdíveis ML) usa
+// `Math.random()`. Sob dado de verdade um teste não prova nada — cada lado do
+// sorteio precisa de um cenário que force ESSE lado e afirme com certeza.
+// `SORTEIO_FORCA_IMPERDIVEIS=1` empurra o dado pra >= 0.5 (cai em
+// 'imperdiveis'); qualquer outro valor cai em 'geral' (< 0.5) — mesmo default
+// do código de produção (`Math.random() < 0.5 ? 'geral' : 'imperdiveis'`).
+globalThis.Math.random = () => (amb.SORTEIO_FORCA_IMPERDIVEIS === '1' ? 0.9 : 0.1);
 // A mesma página é servida por DUAS hospedagens (Vercel e GitHub Pages), e as
 // duas recebem gente de verdade. Trocar o host aqui é como se prova que a
 // medição vê as duas, em vez de metade da casa.
@@ -92,6 +100,13 @@ export const chamadasFetch = [];
 export let janelaLiberada = true;
 export function bloquearJanela() { janelaLiberada = false; }
 
+// Prova de ORDEM, não só de resultado: o bug de 22/09/2026 não era "a aba não
+// abre", era "abre tarde demais". iOS Safari só permite `window.open` dentro
+// do mesmo gesto síncrono do toque — uma chamada depois de um `await` (o POST
+// no Supabase, por exemplo) é barrada em silêncio, sem erro para capturar.
+// `abertas`/`janelaLiberada` provam o QUE aconteceu; isto prova QUANDO.
+export const ordemDeChamadas = [];
+
 // Por variável de ambiente porque a contagem de visita sai no CARREGAMENTO,
 // antes de o roteiro do cenário rodar: um `responderSupabase()` lá embaixo
 // chegaria tarde para ela.
@@ -114,10 +129,19 @@ globalThis.document = {
   referrer: amb.REFERRER || '',
 };
 globalThis.window = {
-  open: (url) => { abertas.push(url); return janelaLiberada ? {} : null; },
+  open: (url) => {
+    ordemDeChamadas.push('abrir-janela');
+    if (!janelaLiberada) return null;
+    // Janela de verdade: abrir não é apontar. `abertas` só recebe o destino
+    // quando alguém navega ESTA janela para lá — igual ao navegador de
+    // verdade, onde `window.open('', '_blank')` e um `janela.location = url`
+    // depois são dois atos separados, e só o primeiro precisa do gesto.
+    return { set location(destino) { abertas.push(destino); } };
+  },
 };
 globalThis.setTimeout = () => {};   // o focus() atrasado do modal
 globalThis.fetch = async (url, opcoes) => {
+  ordemDeChamadas.push('fetch:' + (String(url).includes('/leads') ? 'leads' : 'visitas'));
   chamadasFetch.push({ url, opcoes });
   if (respostaDoSupabase instanceof Error) throw respostaDoSupabase;
   return respostaDoSupabase;
@@ -145,9 +169,12 @@ export function estado() {
     consentTexto: el('consent-cat').textContent,
     consentMarcado: el('consent-check').checked,
     botaoTelegram: el('btn-telegram').style.display,
+    secaoLojas: el('lojas-section').style.display,
+    subtituloModal: el('modal-subtitle').textContent,
     fetchesTentados: doLead.length,
     origemGuardada: naSessao[CHAVE_ORIGEM_TESTE] ?? null,
     abertas,
+    ordemDeChamadas,
     fetches: doLead.map((c) => ({
       url: c.url,
       corpo: JSON.parse(c.opcoes.body),

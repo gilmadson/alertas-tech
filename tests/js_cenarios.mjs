@@ -78,6 +78,23 @@ if (cenario === 'cadastro') {
   preencher();
   await submeter('wpp');
 
+} else if (cenario === 'geral_sorteado_imperdiveis') {
+  // Mesmo clique de sempre em "Ofertas gerais" (card e nome não mudam) — só o
+  // dado (forçado por SORTEIO_FORCA_IMPERDIVEIS) cai do outro lado.
+  abrirModal('🔥', 'Ofertas gerais', 'geral');
+  avancarRelogio(5000);
+  preencher();
+  await submeter('wpp');
+
+} else if (cenario === 'imperdiveis_direto_no_grid') {
+  // "Imperdíveis ML" clicado na página com TODAS as categorias (não a
+  // exclusiva) — antes pedia loja igual qualquer card comum; devia ser fixo
+  // em Mercado Livre desde sempre, já que o grupo só manda ML mesmo aqui.
+  abrirModal('⚡', 'Imperdíveis ML', 'imperdiveis');
+  avancarRelogio(5000);
+  preencher();
+  await submeter('wpp');
+
 } else if (cenario === 'envio_rapido') {
   // Sem avancarRelogio: é o envio em menos de 1,5s. Autofill do telefone e
   // dois toques cabem nisso num aparelho rápido.
