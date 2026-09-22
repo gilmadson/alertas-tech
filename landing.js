@@ -51,12 +51,18 @@ const GRUPOS = {
 // Campanha sem medir origem não é campanha, é gasto. Todo lead sai daqui com
 // origem preenchida: UTM da URL, senão o domínio de quem indicou, senão
 // 'direto'. Lead sem origem é o que estraga relatório de campanha.
+//
+// `conteudo` (o `utm_content`, 22/09/2026) é o degrau seguinte: origem, meio e
+// campanha dizem de qual CAMPANHA a pessoa veio, e nenhum deles diz de qual
+// POST. Sem esse campo, dois criativos da mesma campanha viram um número só e
+// não dá para ver qual traz gente. Aqui só o dado bruto é gravado — quem
+// decide o que é eficiente é ele, olhando os números depois.
 const UTM_MAX = 120;
 // O valor vem da URL — ou seja, do mundo — e vai para o banco. Só passa o
 // inocente; o resto é descartado, não "consertado".
 const UTM_ACEITO = /^[A-Za-z0-9._+ -]+$/;
 const CHAVE_ORIGEM = 'alertastech:origem';
-const SEM_ORIGEM = { origem: 'direto', meio: null, campanha: null };
+const SEM_ORIGEM = { origem: 'direto', meio: null, campanha: null, conteudo: null };
 
 function limparUtm(valor) {
   if (typeof valor !== 'string') return null;
@@ -73,6 +79,7 @@ function origemDaUrl() {
     origem,
     meio: limparUtm(params.get('utm_medium')),
     campanha: limparUtm(params.get('utm_campaign')),
+    conteudo: limparUtm(params.get('utm_content')),
   };
 }
 
@@ -80,7 +87,7 @@ function origemDoReferrer() {
   try {
     const host = new URL(document.referrer).hostname.replace(/^www\./, '');
     if (!host || host === location.hostname) return null;   // navegação interna
-    return { origem: host, meio: 'referrer', campanha: null };
+    return { origem: host, meio: 'referrer', campanha: null, conteudo: null };
   } catch (_) {
     return null;
   }
@@ -92,7 +99,14 @@ function lerOrigemGuardada() {
     // A sessão é do visitante: dá para editar à mão. Limpa de novo na leitura.
     const origem = bruto && limparUtm(bruto.origem);
     if (!origem) return null;
-    return { origem, meio: limparUtm(bruto.meio), campanha: limparUtm(bruto.campanha) };
+    return {
+      origem,
+      meio: limparUtm(bruto.meio),
+      campanha: limparUtm(bruto.campanha),
+      // Sessão aberta antes de 22/09/2026 não tem este campo: `undefined` sai
+      // daqui como null, sem derrubar a origem que ela já guardava.
+      conteudo: limparUtm(bruto.conteudo),
+    };
   } catch (_) {
     return null;
   }
@@ -187,6 +201,7 @@ async function registrarVisita() {
     origem: daVisita.origem,
     meio: daVisita.meio,
     campanha: daVisita.campanha,
+    conteudo: daVisita.conteudo,
   };
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/visitas`, {
@@ -415,6 +430,7 @@ async function submeterLead(e) {
     origem: origem.origem,
     meio: origem.meio,
     campanha: origem.campanha,
+    conteudo: origem.conteudo,
   });
 
   const abriu = abrirDestino(destino);
