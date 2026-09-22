@@ -119,6 +119,23 @@ def test_aba_barrada_pelo_navegador_vira_link_visivel(tmp_path):
     assert "chat.whatsapp.com" in r["aviso"]
 
 
+def test_a_janela_abre_antes_do_post_para_nao_ser_barrada_pelo_safari(sucesso):
+    """Achado de 22/09/2026: o Gilmadson tocou "Entrar pelo WhatsApp", o
+    cadastro gravou (linha 16 da `leads`, testado e confirmado no banco), e o
+    Safari do iPhone dele nunca abriu o grupo — sem erro nenhum na tela.
+
+    Causa: `window.open` só é permitido pelo Safari dentro do mesmo gesto
+    síncrono do toque. Chamar depois de um `await` (o POST no Supabase) é
+    barrado em silêncio. A prova certa não é "abriu ou não abriu" — isso o
+    `popup_bloqueado` já cobria — é a ORDEM: a janela tem de abrir ANTES do
+    POST começar, não depois dele terminar."""
+    ordem = sucesso["ordemDeChamadas"]
+    assert "abrir-janela" in ordem, "a janela nunca abriu"
+    assert "fetch:leads" in ordem, "o POST do cadastro nunca aconteceu"
+    assert ordem.index("abrir-janela") < ordem.index("fetch:leads"), \
+        "abriu a janela DEPOIS do POST — é exatamente o que o Safari barra"
+
+
 # ── consentimento ────────────────────────────────────────────────────────────
 
 def test_sem_consentimento_o_botao_fica_travado(tmp_path):

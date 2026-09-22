@@ -258,7 +258,7 @@ def test_envio_rapido_nao_pula_o_cadastro(js):
         r"if \(Date\.now\(\) - modalAbertaEm < BOT_THRESHOLD_MS\) \{(.*?)\n  \}",
         js, re.S)
     assert ramo, "sumiu a trava antibot"
-    assert "abrirDestino" not in ramo.group(1), "não pode entregar convite sem tentar gravar"
+    assert "abrirJanela" not in ramo.group(1), "não pode entregar convite sem tentar gravar"
     assert "fecharModal" not in ramo.group(1), "não pode fingir sucesso fechando o modal"
 
 
@@ -271,7 +271,8 @@ def test_falha_do_post_aparece_para_o_visitante(html, js):
 def test_o_convite_e_entregue_mesmo_quando_o_cadastro_falha(js):
     """Não punir o visitante por um problema que é nosso."""
     corpo = js[js.index("async function submeterLead"):]
-    assert "abrirDestino" in corpo
+    assert "abrirJanela" in corpo
+    assert "apontarJanela" in corpo
 
 
 # ── LGPD ─────────────────────────────────────────────────────────────────────

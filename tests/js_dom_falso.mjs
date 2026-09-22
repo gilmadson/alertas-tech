@@ -92,6 +92,13 @@ export const chamadasFetch = [];
 export let janelaLiberada = true;
 export function bloquearJanela() { janelaLiberada = false; }
 
+// Prova de ORDEM, não só de resultado: o bug de 22/09/2026 não era "a aba não
+// abre", era "abre tarde demais". iOS Safari só permite `window.open` dentro
+// do mesmo gesto síncrono do toque — uma chamada depois de um `await` (o POST
+// no Supabase, por exemplo) é barrada em silêncio, sem erro para capturar.
+// `abertas`/`janelaLiberada` provam o QUE aconteceu; isto prova QUANDO.
+export const ordemDeChamadas = [];
+
 // Por variável de ambiente porque a contagem de visita sai no CARREGAMENTO,
 // antes de o roteiro do cenário rodar: um `responderSupabase()` lá embaixo
 // chegaria tarde para ela.
@@ -114,10 +121,19 @@ globalThis.document = {
   referrer: amb.REFERRER || '',
 };
 globalThis.window = {
-  open: (url) => { abertas.push(url); return janelaLiberada ? {} : null; },
+  open: (url) => {
+    ordemDeChamadas.push('abrir-janela');
+    if (!janelaLiberada) return null;
+    // Janela de verdade: abrir não é apontar. `abertas` só recebe o destino
+    // quando alguém navega ESTA janela para lá — igual ao navegador de
+    // verdade, onde `window.open('', '_blank')` e um `janela.location = url`
+    // depois são dois atos separados, e só o primeiro precisa do gesto.
+    return { set location(destino) { abertas.push(destino); } };
+  },
 };
 globalThis.setTimeout = () => {};   // o focus() atrasado do modal
 globalThis.fetch = async (url, opcoes) => {
+  ordemDeChamadas.push('fetch:' + (String(url).includes('/leads') ? 'leads' : 'visitas'));
   chamadasFetch.push({ url, opcoes });
   if (respostaDoSupabase instanceof Error) throw respostaDoSupabase;
   return respostaDoSupabase;
@@ -148,6 +164,7 @@ export function estado() {
     fetchesTentados: doLead.length,
     origemGuardada: naSessao[CHAVE_ORIGEM_TESTE] ?? null,
     abertas,
+    ordemDeChamadas,
     fetches: doLead.map((c) => ({
       url: c.url,
       corpo: JSON.parse(c.opcoes.body),

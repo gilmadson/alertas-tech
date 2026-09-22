@@ -324,10 +324,25 @@ function destinoDaCategoria() {
   return links.wpp || null;
 }
 
-function abrirDestino(destino) {
-  if (!destino) return false;
-  const aba = window.open(destino, '_blank');
-  return !!aba;   // false = o navegador barrou a aba
+// iOS Safari só deixa `window.open` criar aba dentro do mesmo gesto síncrono
+// do toque. Uma chamada depois de um `await` (o POST no Supabase, por
+// exemplo) é barrada em silêncio, sem erro nenhum para capturar — foi
+// exatamente o que aconteceu com o Gilmadson em 22/09/2026: tocou "Entrar
+// pelo WhatsApp", o cadastro gravou (linha 16 da `leads`), e a aba do grupo
+// nunca abriu. Por isso a abertura virou duas etapas: `abrirJanela` cria a
+// aba em branco ainda dentro do toque (síncrono, nunca barrado), e
+// `apontarJanela` só manda essa aba já existente para o destino depois que o
+// cadastro terminar — apontar uma aba que já existe não é gesto novo, então
+// o Safari deixa.
+function abrirJanela(destino) {
+  if (!destino) return null;
+  return window.open('', '_blank');
+}
+
+function apontarJanela(janela, destino) {
+  if (!janela || !destino) return false;
+  janela.location = destino;
+  return true;
 }
 
 function limparAviso() {
@@ -417,6 +432,8 @@ async function submeterLead(e) {
 
   btn && (btn.disabled = true, btn.textContent = 'Entrando...');
 
+  const janela = abrirJanela(destino);   // síncrono: ainda dentro do toque
+
   const origem = origemParaEnviar();
   const resultado = await salvarLead({
     nome: nome || null,
@@ -433,7 +450,7 @@ async function submeterLead(e) {
     conteudo: origem.conteudo,
   });
 
-  const abriu = abrirDestino(destino);
+  const abriu = apontarJanela(janela, destino);
 
   if (!resultado.ok) {
     mostrarFalhaDeCadastro(resultado.detalhe, destino);
