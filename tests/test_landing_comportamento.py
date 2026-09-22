@@ -78,7 +78,8 @@ def test_o_corpo_enviado_respeita_o_banco(sucesso):
     assert corpo["lojas"] == "mercadolivre"
     assert set(corpo) == {"nome", "email", "telefone", "categoria", "plataforma",
                           "lojas", "consentimento", "consentimento_em", "origem",
-                          "meio", "campanha"}, "coluna que o banco não tem = HTTP 400"
+                          "meio", "campanha", "conteudo"}, \
+        "coluna que o banco não tem = HTTP 400"
 
 
 def test_o_grupo_certo_abre(sucesso):
@@ -450,9 +451,10 @@ def test_pagina_que_esquecer_de_se_declarar_grita_no_relatorio(tmp_path):
 
 def test_a_visita_nao_carrega_dado_pessoal(visita_do_index):
     """Visita não é lead: nada de telefone, e-mail, nome ou IP. Só instante
-    (do banco), qual página, de onde veio e em qual hospedagem."""
+    (do banco), qual página, de onde veio, por qual post e em qual hospedagem."""
     c = visita(visita_do_index)
-    assert set(c) == {"pagina", "hospedagem", "origem", "meio", "campanha"}
+    assert set(c) == {"pagina", "hospedagem", "origem", "meio", "campanha",
+                      "conteudo"}
 
 
 def test_a_visita_carrega_a_mesma_origem_que_o_lead_carregaria(tmp_path):
@@ -540,3 +542,97 @@ def test_contagem_de_visita_no_chao_nao_derruba_o_cadastro(tmp_path):
     assert len(r["fetches"]) == 1, "e o cadastro seguiu o caminho normal"
     assert r["avisoVisivel"] is True
     assert r["abertas"] == ["https://chat.whatsapp.com/F2jZYz7jPjP9JFKTvl83F9"]
+
+
+# ── qual POST trouxe (utm_content → `conteudo`) ──────────────────────────────
+# `origem`/`meio`/`campanha` dizem de qual CAMPANHA a pessoa veio; nenhum deles
+# diz de qual POST. Dois criativos da mesma campanha viram um número só, e não
+# há como ver qual traz gente e qual só faz volume. Aqui só o dado bruto entra:
+# `utm_content` da URL, pela MESMA limpeza dos outros UTM, nos dois lados da
+# conta (visita e cadastro). Nada de cálculo de eficiência — isso é leitura
+# dele nos números, não do código.
+
+UTM_COM_CONTEUDO = UTM_COMPLETO + "&utm_content=post-carrossel-01"
+
+
+def test_o_utm_content_da_url_vira_conteudo_no_lead(tmp_path):
+    c = corpo(rodar("cadastro", tmp_path, URL_BUSCA=UTM_COM_CONTEUDO))
+    assert c["conteudo"] == "post-carrossel-01"
+    assert (c["origem"], c["meio"], c["campanha"]) == ("instagram", "cpc", "piloto")
+
+
+def test_a_visita_carrega_o_mesmo_conteudo_do_lead(tmp_path):
+    """Numerador e denominador têm de quebrar pelo mesmo campo: `conteudo` só
+    na `leads` daria cadastro por post sem saber quanta gente aquele post
+    trouxe — de novo o numerador sem o denominador."""
+    r = rodar("visita", tmp_path, URL_BUSCA=UTM_COM_CONTEUDO, **MUNDO_INDEX)
+    assert visita(r)["conteudo"] == "post-carrossel-01"
+
+
+def test_sem_utm_content_o_conteudo_vai_nulo_e_nada_mais_muda(cadastro_com_utm):
+    """Quem chega sem `utm_content` na URL segue exatamente como antes."""
+    c = corpo(cadastro_com_utm)
+    assert c["conteudo"] is None
+    assert (c["origem"], c["meio"], c["campanha"]) == ("instagram", "cpc", "piloto")
+
+
+def test_visita_sem_utm_content_tambem_vai_nula(visita_do_index):
+    assert visita(visita_do_index)["conteudo"] is None
+
+
+def test_conteudo_sujo_nao_passa_e_nao_leva_a_campanha_junto(tmp_path):
+    """Texto de URL vem do mundo e vai para o banco: mesma limpeza dos outros."""
+    sujo = UTM_COMPLETO + "&utm_content=%3Cscript%3Ealert(1)%3C/script%3E"
+    c = corpo(rodar("cadastro", tmp_path, URL_BUSCA=sujo))
+    assert c["conteudo"] is None
+    assert c["campanha"] == "piloto", "conteúdo sujo não pode derrubar a campanha"
+
+
+def test_conteudo_gigante_e_cortado_em_120(tmp_path):
+    c = corpo(rodar("cadastro", tmp_path,
+                    URL_BUSCA=UTM_COMPLETO + "&utm_content=" + "b" * 300))
+    assert len(c["conteudo"]) == 120
+
+
+def test_o_conteudo_fica_guardado_na_sessao(tmp_path):
+    import json as _json
+    r = rodar("cadastro", tmp_path, URL_BUSCA=UTM_COM_CONTEUDO)
+    assert _json.loads(r["origemGuardada"])["conteudo"] == "post-carrossel-01"
+
+
+def test_recarregar_sem_utm_mantem_o_conteudo_da_primeira_visita(tmp_path):
+    guardado = ('{"origem":"instagram","meio":"cpc","campanha":"piloto",'
+                '"conteudo":"reel-03"}')
+    c = corpo(rodar("cadastro", tmp_path, SESSION_GUARDADO=guardado))
+    assert c["conteudo"] == "reel-03"
+
+
+def test_conteudo_adulterado_na_sessao_nao_passa(tmp_path):
+    """sessionStorage é do visitante: dá para editar à mão."""
+    guardado = ('{"origem":"instagram","meio":"cpc","campanha":"piloto",'
+                '"conteudo":"<script>x</script>"}')
+    c = corpo(rodar("cadastro", tmp_path, SESSION_GUARDADO=guardado))
+    assert c["conteudo"] is None
+    assert c["origem"] == "instagram", "o resto da origem continua valendo"
+
+
+def test_sessao_antiga_sem_o_campo_novo_nao_quebra(tmp_path):
+    """Quem já estava com a página aberta quando isto subir tem na sessão um
+    JSON sem `conteudo`. Não pode quebrar o cadastro: grava nulo e segue."""
+    guardado = '{"origem":"tiktok","meio":"cpc","campanha":"lancamento"}'
+    c = corpo(rodar("cadastro", tmp_path, SESSION_GUARDADO=guardado))
+    assert c["conteudo"] is None
+    assert (c["origem"], c["meio"], c["campanha"]) == ("tiktok", "cpc", "lancamento")
+
+
+def test_utm_content_sem_utm_source_nao_inventa_campanha(tmp_path):
+    """Sem `utm_source` não há campanha para atribuir — regra que já existia. O
+    post sozinho na URL não muda isso: origem 'direto' e conteúdo nulo."""
+    c = corpo(rodar("cadastro", tmp_path, URL_BUSCA="?utm_content=post-solto"))
+    assert (c["origem"], c["conteudo"]) == ("direto", None)
+
+
+def test_telemetria_quebrada_manda_conteudo_nulo_sem_perder_o_cadastro(tmp_path):
+    r = rodar("cadastro", tmp_path, SESSION_QUEBRADO="1", LOCATION_QUEBRADA="1")
+    assert corpo(r)["conteudo"] is None
+    assert r["modalAtivo"] is False, "o cadastro seguiu normal"

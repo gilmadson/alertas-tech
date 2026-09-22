@@ -142,7 +142,8 @@ São quatro frentes, todas **sem rede**:
 HTML de qualquer jeito. A policy do banco deixa **inserir** e não deixa **ler**.
 
 Colunas: `nome`, `email`, `telefone`, `categoria`, `plataforma`, `lojas`,
-`consentimento`, `consentimento_em`, `origem`, `meio`, `campanha`, `criado_em`.
+`consentimento`, `consentimento_em`, `origem`, `meio`, `campanha`, `conteudo`,
+`criado_em`.
 Atenção: `plataforma` tem CHECK e só aceita `'wpp'` ou `'tg'` — qualquer outro
 valor devolve HTTP 400 e o lead se perde. Mandar coluna que não existe dá o
 mesmo 400, por isso o espelho do schema está em `tests/test_landing.py`
@@ -158,9 +159,9 @@ tipo de comunicação "desde que tais comunicações sejam solicitadas".
 ### Origem da visita (para medir campanha)
 
 Campanha sem medir origem não é campanha, é gasto. Todo lead sai com
-`origem`/`meio`/`campanha`, nesta ordem de preferência:
+`origem`/`meio`/`campanha`/`conteudo`, nesta ordem de preferência:
 
-1. `?utm_source=`, `utm_medium=`, `utm_campaign=` da URL;
+1. `?utm_source=`, `utm_medium=`, `utm_campaign=`, `utm_content=` da URL;
 2. o que ficou no `sessionStorage` da primeira visita (recarregar sem UTM não
    apaga a origem real — mas um clique NOVO de campanha vence o guardado);
 3. o domínio de `document.referrer` (ex.: `instagram.com`) com `meio: 'referrer'`;
@@ -173,6 +174,13 @@ do `sessionStorage`, que é do visitante e dá para editar à mão. Se qualquer
 parte disso falhar — Safari privado bloqueando storage, por exemplo — o
 cadastro segue e a origem vira `'direto'`: telemetria nunca custa um lead.
 
+`conteudo` (o `utm_content`, 22/09/2026) é **qual post** trouxe a pessoa: os
+outros três dizem de qual campanha ela veio e nenhum deles separa dois
+criativos da mesma campanha. Ele vai nos dois lados da conta (visita e
+cadastro), passa pela mesma limpeza, e quem chega sem `utm_content` grava
+`null` — nada muda para quem não usa. É só o dado bruto: não há cálculo de
+"eficiência" no código nem no banco. Migration em `docs/conteudo.sql`.
+
 ## Contagem de visita (o denominador)
 
 Até 22/09/2026 o projeto contava **cadastro** e não contava **visita**: o
@@ -181,9 +189,9 @@ taxa de conversão visita→cadastro, e sem taxa nenhuma mudança na landing pod
 ser provada boa ou ruim — foi por isso que um redesenho inteiro foi vetado.
 
 `POST /rest/v1/visitas`, mesma chave `anon`, mesma policy: **inserir sim, ler
-não**. Colunas: `pagina`, `hospedagem`, `origem`, `meio`, `campanha` e o
-`criado_em` do banco. **Nenhum dado pessoal** — não há pessoa identificada
-aqui, e por isso não há consentimento a pedir.
+não**. Colunas: `pagina`, `hospedagem`, `origem`, `meio`, `campanha`,
+`conteudo` e o `criado_em` do banco. **Nenhum dado pessoal** — não há pessoa
+identificada aqui, e por isso não há consentimento a pedir.
 
 Ficou no Supabase, e não no Analytics do Vercel, porque a mesma página é
 servida por **duas** hospedagens (Vercel e o espelho do GitHub Pages) e as duas
@@ -193,7 +201,10 @@ origem, e a taxa por campanha é uma consulta em vez de duas telas.
 
 - **Antes de funcionar, a migration tem de ser aplicada uma vez**:
   `docs/visitas.sql` no SQL Editor do Supabase. Sem isso o POST devolve 404, a
-  visita simplesmente não é contada e o cadastro segue igual.
+  visita simplesmente não é contada e o cadastro segue igual. Depois dela,
+  `docs/conteudo.sql` (a coluna `conteudo`, nas duas tabelas) — esta muda o
+  cadastro: sem ela o POST de lead devolve **400** e o lead se perde, então
+  aplique **antes** de publicar a landing.
 - **Cada página declara o próprio nome** em `<body data-pagina="...">`. Deduzir
   do caminho não serve: o Vercel serve `/imperdiveis` e o GitHub Pages serve
   `/alertas-tech/imperdiveis.html` — o mesmo arquivo viraria duas linhas no
@@ -205,8 +216,10 @@ origem, e a taxa por campanha é uma consulta em vez de duas telas.
   Pixel. Não segura a página e não pode custar um cadastro.
 
 A taxa, quando a tabela tiver dados. Atenção: `leads` **não** tem coluna
-`pagina` — o que as duas tabelas têm em comum é `origem`/`meio`/`campanha`, e é
-por aí que a conversão se quebra sem inventar número:
+`pagina` — o que as duas tabelas têm em comum é
+`origem`/`meio`/`campanha`/`conteudo`, e é por aí que a conversão se quebra sem
+inventar número (a mesma consulta abaixo, com `conteudo` no lugar de `origem`,
+vira a conversão por post):
 
 ```sql
 -- conversão por origem (7 dias)

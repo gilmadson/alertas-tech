@@ -206,12 +206,14 @@ def test_a_plataforma_enviada_respeita_o_check_do_banco(html):
 
 
                                             # ── colunas da tabela `leads` ──
-# Espelho do schema (migration `leads_consentimento_e_origem`, 09/09/2026).
+# Espelho do schema (migration `leads_consentimento_e_origem`, 09/09/2026;
+# `conteudo` chegou depois, por `docs/conteudo.sql`, em 22/09/2026).
 # `id` e `criado_em` são do banco. Mandar coluna que não existe devolve HTTP
 # 400 e o lead se perde — por isso o espelho vive aqui, sem depender de rede.
 COLUNAS_DE_LEADS = {
     "nome", "email", "telefone", "categoria", "plataforma", "lojas",
     "consentimento", "consentimento_em", "origem", "meio", "campanha",
+    "conteudo",
 }
 
 
@@ -237,10 +239,10 @@ def test_o_instante_do_aceite_e_o_da_caixa_marcada(html, js):
 
 def test_todo_utm_passa_pela_limpeza_antes_de_ir_ao_banco(js):
     """Valor de URL é texto do mundo: nada entra cru no banco."""
-    for campo in ("utm_source", "utm_medium", "utm_campaign"):
+    for campo in ("utm_source", "utm_medium", "utm_campaign", "utm_content"):
         assert re.search(r"limparUtm\(params\.get\('%s'\)\)" % campo, js), campo
     guardada = re.search(r"function lerOrigemGuardada\(\)\s*\{(.*?)\n\}", js, re.S)
-    assert guardada and guardada.group(1).count("limparUtm") >= 3, \
+    assert guardada and guardada.group(1).count("limparUtm") >= 4, \
         "a sessão é do visitante: o que vem dela também precisa ser limpo"
 
 
@@ -342,7 +344,8 @@ def test_o_aviso_de_falha_nao_mora_em_lugar_que_alguem_esconde(js):
 # página pode ser provada. A tabela é criada por `docs/visitas.sql`, e é DELE
 # que saem as colunas conferidas aqui — coluna que o banco não tem devolve HTTP
 # 400 e a visita se perde, igual ao lead.
-VISITAS_SQL = RAIZ / "docs" / "visitas.sql"
+DOCS = RAIZ / "docs"
+VISITAS_SQL = DOCS / "visitas.sql"
 # `id` e `criado_em` são do banco, não do navegador.
 COLUNAS_DO_BANCO = {"id", "criado_em"}
 
@@ -352,23 +355,41 @@ def sql_visitas():
     return VISITAS_SQL.read_text(encoding="utf-8")
 
 
-def colunas_de_visitas(sql):
-    corpo = re.search(r"create table[^(]*\(\s*\n(.*?)\n\);", sql, re.S | re.I)
-    assert corpo, "não achei o `create table` em docs/visitas.sql"
-    return set(re.findall(r"^\s+(\w+)\s+", corpo.group(1), re.M))
+def sem_comentarios(sql):
+    """Só o SQL que o banco executa: comentário explica, não roda."""
+    return "\n".join(l for l in sql.splitlines() if not l.strip().startswith("--"))
+
+
+def colunas_de(tabela):
+    """A tabela como ela fica DEPOIS de todas as migrations de `docs/`: o
+    `create table` mais cada `add column` que veio depois. Conferir só o
+    primeiro arquivo seria mirar num schema que não existe mais — e coluna que
+    o banco não tem devolve HTTP 400 igual ao lead."""
+    colunas = set()
+    for arquivo in sorted(DOCS.glob("*.sql")):
+        sql = sem_comentarios(arquivo.read_text(encoding="utf-8"))
+        criada = re.search(r"create table[^(]*\b%s\s*\(\s*\n(.*?)\n\);" % tabela,
+                           sql, re.S | re.I)
+        if criada:
+            colunas |= set(re.findall(r"^\s+(\w+)\s+", criada.group(1), re.M))
+        colunas |= set(re.findall(
+            r"alter table\s+(?:public\.)?%s\s+add column(?:\s+if not exists)?\s+(\w+)"
+            % tabela, sql, re.I))
+    assert colunas, f"não achei o schema da tabela `{tabela}` em docs/"
+    return colunas
 
 
 def test_a_migration_da_tabela_de_visitas_esta_no_repositorio(sql_visitas):
     """Schema que só existe no painel do Supabase é schema que ninguém revisa
     e que não volta depois de um acidente."""
-    assert colunas_de_visitas(sql_visitas) >= COLUNAS_DO_BANCO | {"pagina"}
+    assert colunas_de("visitas") >= COLUNAS_DO_BANCO | {"pagina"}
 
 
-def test_a_contagem_de_visita_manda_exatamente_as_colunas_da_tabela(js, sql_visitas):
+def test_a_contagem_de_visita_manda_exatamente_as_colunas_da_tabela(js):
     corpo = re.search(r"const visita = \{(.*?)\n  \};", js, re.S)
     assert corpo, "não achei o corpo do POST de visita"
     chaves = set(re.findall(r"^\s{4}(\w+)\s*[:,]", corpo.group(1), re.M))
-    assert chaves == colunas_de_visitas(sql_visitas) - COLUNAS_DO_BANCO
+    assert chaves == colunas_de("visitas") - COLUNAS_DO_BANCO
 
 
 def test_a_tabela_de_visitas_liga_o_rls(sql_visitas):
@@ -386,9 +407,63 @@ def test_a_visita_e_insert_only_pela_chave_anonima(sql_visitas):
 def test_a_tabela_de_visitas_nao_tem_coluna_de_dado_pessoal(sql_visitas):
     """Visita não é lead. Sem consentimento não se guarda pessoa — e aqui não
     há consentimento nenhum para pedir, porque não há pessoa para identificar."""
-    colunas = colunas_de_visitas(sql_visitas)
+    colunas = colunas_de("visitas")
     for pessoal in ("nome", "email", "telefone", "ip", "user_agent", "cpf"):
         assert pessoal not in colunas, pessoal
+
+
+                                     # ── coluna `conteudo` (qual post) ──
+# 22/09/2026, logo depois do denominador: `origem`/`meio`/`campanha` dizem de
+# qual campanha a pessoa veio, mas não de qual POST. Sem isso não dá para saber
+# qual publicação traz gente e qual só faz volume. É só o dado bruto — quem
+# decide o que é eficiente é ele, olhando os números.
+CONTEUDO_SQL = DOCS / "conteudo.sql"
+
+
+@pytest.fixture(scope="module")
+def sql_conteudo():
+    return CONTEUDO_SQL.read_text(encoding="utf-8")
+
+
+def test_a_coluna_conteudo_entra_nas_duas_tabelas(sql_conteudo):
+    """Nas duas ou em nenhuma: `visitas` sem `conteudo` é denominador que não
+    quebra por post, e `leads` sem `conteudo` é numerador que não quebra —
+    qualquer um dos dois sozinho não vira taxa."""
+    alvos = set(re.findall(
+        r"alter table\s+public\.(\w+)\s+add column\s+if not exists\s+conteudo\s+text",
+        sem_comentarios(sql_conteudo), re.I))
+    assert alvos == {"visitas", "leads"}
+    assert "conteudo" in colunas_de("visitas")
+
+
+def test_a_migration_do_conteudo_pode_rodar_duas_vezes(sql_conteudo):
+    """Ele aplica à mão, no SQL Editor. Colar de novo por engano não pode dar
+    erro no meio do arquivo e deixar metade aplicada."""
+    sql = sem_comentarios(sql_conteudo)
+    assert not re.search(r"add column(?!\s+if not exists)", sql, re.I)
+
+
+def test_a_migration_do_conteudo_so_acrescenta(sql_conteudo):
+    """Insert-only e policy já existem nas duas tabelas: esta migration não
+    mexe em segurança nem apaga nada. O que está escrito aqui vai ser colado no
+    banco de produção — uma linha destrutiva no meio não tem como ser desfeita."""
+    sql = sem_comentarios(sql_conteudo)
+    for proibido in ("drop", "delete", "truncate", "update", "policy", "insert"):
+        assert not re.search(r"\b%s\b" % proibido, sql, re.I), proibido
+
+
+def test_a_migration_do_conteudo_diz_como_aplicar(sql_conteudo):
+    """Migration que ninguém sabe rodar é migration que fica parada — e o campo
+    chega nulo para sempre sem ninguém entender por quê."""
+    assert "jfuqmjbxzhoceycauhys" in sql_conteudo, "sem o projeto, qual banco?"
+    assert re.search(r"SQL Editor", sql_conteudo, re.I)
+
+
+def test_o_cadastro_e_a_visita_mandam_o_mesmo_conteudo(js):
+    """O campo tem de sair dos DOIS POSTs pela mesma origem calculada: se um
+    lado gravar e o outro não, a taxa por post fica torta e ninguém vê."""
+    assert re.search(r"^\s{4}conteudo: origem\.conteudo,$", js, re.M)
+    assert re.search(r"^\s{4}conteudo: daVisita\.conteudo,$", js, re.M)
 
 
 def test_a_contagem_de_visita_nao_e_esperada_por_ninguem(js):
