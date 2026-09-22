@@ -397,3 +397,146 @@ def test_categoria_sem_canal_proprio_avisa_no_modal(tmp_path):
 def test_categoria_sem_canal_proprio_manda_para_o_canal_de_outros(tmp_path):
     r = rodar("telegram_categoria_nova", tmp_path)
     assert r["abertas"] == ["https://t.me/alertatechoutrosprodutos"]
+
+
+# ── contagem de visita (o denominador) ───────────────────────────────────────
+# Até 22/09/2026 o projeto contava CADASTRO e não contava VISITA. Sem saber
+# quanta gente entrou na página não existe taxa de conversão — e sem taxa,
+# nenhuma mudança na landing pode ser provada boa ou ruim. Foi por isso que o
+# redesenho foi vetado: não havia como mostrar que melhoraria algo.
+#
+# Aqui a contagem roda de verdade: sai sozinha no carregamento, sai sem dado
+# pessoal, e não encosta no caminho do lead.
+
+MUNDO_INDEX = {"BODY_PAGINA": "index"}
+
+
+@pytest.fixture(scope="module")
+def visita_do_index(tmp_path_factory):
+    return rodar("visita", tmp_path_factory.mktemp("visita"), **MUNDO_INDEX)
+
+
+def visita(resultado):
+    assert resultado["visitas"], "nenhuma visita foi contada"
+    return resultado["visitas"][0]["corpo"]
+
+
+def test_a_visita_e_contada_sozinha_no_carregamento(visita_do_index):
+    """Ninguém clicou em nada no cenário: quem abre a página já conta."""
+    assert len(visita_do_index["visitas"]) == 1
+    assert visita_do_index["visitas"][0]["url"].endswith("/rest/v1/visitas")
+
+
+def test_a_visita_vai_com_a_chave_anonima(visita_do_index):
+    assert visita_do_index["visitas"][0]["apikey"] == "eyJhbGciOiJI"
+
+
+def test_a_visita_diz_qual_pagina_foi(visita_do_index):
+    assert visita(visita_do_index)["pagina"] == "index"
+
+
+def test_cada_pagina_conta_no_proprio_nome(tmp_path):
+    r = rodar("visita", tmp_path, BODY_PAGINA="imperdiveis")
+    assert visita(r)["pagina"] == "imperdiveis"
+
+
+def test_pagina_que_esquecer_de_se_declarar_grita_no_relatorio(tmp_path):
+    """Ausência de declaração não vale como decisão. Se alguém publicar uma
+    página nova sem `data-pagina`, o dado diz isso em vez de somar no balde
+    errado — e `tests/test_paginas.py` pega antes de ir para o ar."""
+    r = rodar("visita", tmp_path)
+    assert visita(r)["pagina"] == "nao-declarada"
+
+
+def test_a_visita_nao_carrega_dado_pessoal(visita_do_index):
+    """Visita não é lead: nada de telefone, e-mail, nome ou IP. Só instante
+    (do banco), qual página, de onde veio e em qual hospedagem."""
+    c = visita(visita_do_index)
+    assert set(c) == {"pagina", "hospedagem", "origem", "meio", "campanha"}
+
+
+def test_a_visita_carrega_a_mesma_origem_que_o_lead_carregaria(tmp_path):
+    """O denominador tem de ser quebrável por campanha, senão só dá para medir
+    o site inteiro — e campanha nenhuma consegue se defender."""
+    r = rodar("visita", tmp_path, URL_BUSCA=UTM_COMPLETO, **MUNDO_INDEX)
+    c = visita(r)
+    assert (c["origem"], c["meio"], c["campanha"]) == ("instagram", "cpc", "piloto")
+
+
+def test_visita_sem_utm_e_sem_referrer_e_direto(visita_do_index):
+    c = visita(visita_do_index)
+    assert (c["origem"], c["meio"], c["campanha"]) == ("direto", None, None)
+
+
+def test_a_visita_diz_de_qual_hospedagem_ela_veio(visita_do_index):
+    assert visita(visita_do_index)["hospedagem"] == "alertastech-landing.vercel.app"
+
+
+def test_o_espelho_do_github_pages_tambem_e_contado(tmp_path):
+    """A página vive em DUAS hospedagens, e as duas recebem gente. Foi este o
+    motivo de a contagem ficar no Supabase e não no Analytics do Vercel: medida
+    que só vê metade da casa é a medida que engana."""
+    r = rodar("visita", tmp_path, HOSTNAME="gilmadson.github.io", **MUNDO_INDEX)
+    assert visita(r)["hospedagem"] == "gilmadson.github.io"
+
+
+def test_recarregar_na_mesma_sessao_nao_conta_visita_de_novo(tmp_path):
+    """F5 não é visita nova. Denominador inflado por recarregamento faz a taxa
+    de conversão parecer pior do que é."""
+    r = rodar("visita_recarregada", tmp_path, **MUNDO_INDEX)
+    assert len(r["visitas"]) == 1
+
+
+def test_quem_ja_foi_contado_na_sessao_nao_conta_outra_vez(tmp_path):
+    r = rodar("visita", tmp_path, VISITA_CONTADA_EM="index", **MUNDO_INDEX)
+    assert r["visitas"] == []
+
+
+def test_outra_pagina_na_mesma_sessao_conta_a_propria_visita(tmp_path):
+    """A marca é por página: quem foi contado no index e depois abre o
+    /imperdiveis é visita daquela página também."""
+    r = rodar("visita", tmp_path, VISITA_CONTADA_EM="index",
+              BODY_PAGINA="imperdiveis")
+    assert visita(r)["pagina"] == "imperdiveis"
+
+
+def test_tabela_fora_do_ar_nao_marca_a_visita_como_contada(tmp_path):
+    """Se o POST não passou, a visita não existe para o banco: o próximo
+    carregamento tenta de novo em vez de dar a contagem por feita. É também o
+    que acontece enquanto a migration de `docs/visitas.sql` não foi aplicada."""
+    r = rodar("visita_recarregada", tmp_path, RESPOSTA_STATUS="404",
+              **MUNDO_INDEX)
+    assert len(r["visitas"]) == 2
+
+
+def test_storage_bloqueado_nao_apaga_a_contagem(tmp_path):
+    """Safari privado bloqueia sessionStorage. Contar um F5 duas vezes é ruim;
+    perder o denominador inteiro é pior — então sem storage, conta. E com o
+    `location` bloqueado a hospedagem vira nula em vez de derrubar a contagem."""
+    r = rodar("visita", tmp_path, SESSION_QUEBRADO="1", LOCATION_QUEBRADA="1",
+              **MUNDO_INDEX)
+    assert len(r["visitas"]) == 1
+    c = visita(r)
+    assert c["origem"] == "direto"
+    assert c["hospedagem"] is None
+    assert c["pagina"] == "index", "a página não depende do location"
+
+
+# ── a contagem de visita não pode custar um cadastro ─────────────────────────
+
+def test_a_contagem_de_visita_nao_entra_no_caminho_do_lead(sucesso):
+    """O cadastro continua sendo UM POST em /leads. Telemetria misturada ao
+    caminho do lead é telemetria que pode custar um cadastro."""
+    assert len(sucesso["fetches"]) == 1
+    assert sucesso["fetches"][0]["url"].endswith("/rest/v1/leads")
+    assert len(sucesso["visitas"]) == 1
+
+
+def test_contagem_de_visita_no_chao_nao_derruba_o_cadastro(tmp_path):
+    """Rede fora derruba os dois POSTs. Mesmo assim o cadastro é tentado, a
+    falha aparece na tela e o convite é entregue — como antes desta fatia."""
+    r = rodar("falha_rede", tmp_path, **MUNDO_INDEX)
+    assert r["visitas"] != [], "a visita foi tentada"
+    assert len(r["fetches"]) == 1, "e o cadastro seguiu o caminho normal"
+    assert r["avisoVisivel"] is True
+    assert r["abertas"] == ["https://chat.whatsapp.com/F2jZYz7jPjP9JFKTvl83F9"]

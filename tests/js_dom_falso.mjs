@@ -54,17 +54,29 @@ globalThis.Date = class extends DataReal {
 
 // ── mundo de fora, configurado por variável de ambiente ──────────────────────
 const amb = process.env;
-export const HOST = 'alertastech-landing.vercel.app';
+// A mesma página é servida por DUAS hospedagens (Vercel e GitHub Pages), e as
+// duas recebem gente de verdade. Trocar o host aqui é como se prova que a
+// medição vê as duas, em vez de metade da casa.
+export const HOST = amb.HOSTNAME || 'alertastech-landing.vercel.app';
 // Mesma chave que o index.html usa: se la mudar de nome, os testes de sessao
 // caem -- que e o aviso certo.
 const CHAVE_ORIGEM_TESTE = 'alertastech:origem';
+// Idem para a marca de visita já contada: a chave é por página.
+const CHAVE_VISITA_TESTE = 'alertastech:visita:';
 
+// Bloqueada é bloqueada: o `hostname` cai junto com o `search`, senão a
+// contagem de visita pareceria coberta num caminho que no navegador estoura.
 globalThis.location = amb.LOCATION_QUEBRADA
-  ? { get search() { throw new Error('location bloqueada'); }, hostname: HOST }
+  ? {
+      get search() { throw new Error('location bloqueada'); },
+      get hostname() { throw new Error('location bloqueada'); },
+    }
   : { search: amb.URL_BUSCA || '', hostname: HOST };
 
 const naSessao = {};
 if (amb.SESSION_GUARDADO) naSessao[CHAVE_ORIGEM_TESTE] = amb.SESSION_GUARDADO;
+// `VISITA_CONTADA_EM=index` = alguém já foi contado NAQUELA página nesta sessão.
+if (amb.VISITA_CONTADA_EM) naSessao[CHAVE_VISITA_TESTE + amb.VISITA_CONTADA_EM] = '1';
 globalThis.sessionStorage = amb.SESSION_QUEBRADO
   ? {
       getItem() { throw new Error('storage bloqueado'); },
@@ -80,14 +92,25 @@ export const chamadasFetch = [];
 export let janelaLiberada = true;
 export function bloquearJanela() { janelaLiberada = false; }
 
-export let respostaDoSupabase = { ok: true, status: 201 };
+// Por variável de ambiente porque a contagem de visita sai no CARREGAMENTO,
+// antes de o roteiro do cenário rodar: um `responderSupabase()` lá embaixo
+// chegaria tarde para ela.
+export let respostaDoSupabase = amb.RESPOSTA_STATUS
+  ? { ok: false, status: Number(amb.RESPOSTA_STATUS) }
+  : { ok: true, status: 201 };
 export function responderSupabase(resp) { respostaDoSupabase = resp; }
 
 globalThis.document = {
   getElementById: elemento,
   // `data-lojas` no <body> é como a página exclusiva declara a loja fixa dela.
   // Vazio = página com seção de lojas (o index.html).
-  body: { style: {}, dataset: { lojas: amb.BODY_LOJAS || '' } },
+  // `data-pagina` é como a página declara o próprio nome para a contagem de
+  // visita. Vazio de propósito: o dublê não inventa declaração que a página
+  // não fez — é assim que o teste vê o esquecimento.
+  body: {
+    style: {},
+    dataset: { lojas: amb.BODY_LOJAS || '', pagina: amb.BODY_PAGINA || '' },
+  },
   referrer: amb.REFERRER || '',
 };
 globalThis.window = {
@@ -102,7 +125,14 @@ globalThis.fetch = async (url, opcoes) => {
 
 export function el(id) { return elemento(id); }
 
+// A contagem de visita sai no carregamento de toda página, antes de qualquer
+// cadastro. Ela fica em `visitas`, separada: as provas do LEAD contam POST de
+// lead, e se a telemetria entrar nessa conta elas passam a medir outra coisa.
+const ehVisita = (c) => String(c.url).includes('/rest/v1/visitas');
+
 export function estado() {
+  const doLead = chamadasFetch.filter((c) => !ehVisita(c));
+  const daVisita = chamadasFetch.filter(ehVisita);
   return {
     aviso: el('form-aviso').innerHTML,
     avisoVisivel: el('form-aviso').classList.contains('ativo'),
@@ -115,10 +145,15 @@ export function estado() {
     consentTexto: el('consent-cat').textContent,
     consentMarcado: el('consent-check').checked,
     botaoTelegram: el('btn-telegram').style.display,
-    fetchesTentados: chamadasFetch.length,
+    fetchesTentados: doLead.length,
     origemGuardada: naSessao[CHAVE_ORIGEM_TESTE] ?? null,
     abertas,
-    fetches: chamadasFetch.map((c) => ({
+    fetches: doLead.map((c) => ({
+      url: c.url,
+      corpo: JSON.parse(c.opcoes.body),
+      apikey: (c.opcoes.headers.apikey || '').slice(0, 12),
+    })),
+    visitas: daVisita.map((c) => ({
       url: c.url,
       corpo: JSON.parse(c.opcoes.body),
       apikey: (c.opcoes.headers.apikey || '').slice(0, 12),

@@ -334,3 +334,65 @@ def test_nao_sobrou_caminho_especial_para_o_ofertas_gerais(html, js):
 def test_o_aviso_de_falha_nao_mora_em_lugar_que_alguem_esconde(js):
     """#form-aviso é filho do formulário: ninguém pode dar display:none nele."""
     assert "getElementById('lead-form').style.display = 'none'" not in js
+
+
+                                          # ── colunas da tabela `visitas` ──
+# O denominador (22/09/2026). Havia contagem de cadastro e nenhuma de visita:
+# sem denominador não existe taxa de conversão, e sem taxa nenhuma mudança na
+# página pode ser provada. A tabela é criada por `docs/visitas.sql`, e é DELE
+# que saem as colunas conferidas aqui — coluna que o banco não tem devolve HTTP
+# 400 e a visita se perde, igual ao lead.
+VISITAS_SQL = RAIZ / "docs" / "visitas.sql"
+# `id` e `criado_em` são do banco, não do navegador.
+COLUNAS_DO_BANCO = {"id", "criado_em"}
+
+
+@pytest.fixture(scope="module")
+def sql_visitas():
+    return VISITAS_SQL.read_text(encoding="utf-8")
+
+
+def colunas_de_visitas(sql):
+    corpo = re.search(r"create table[^(]*\(\s*\n(.*?)\n\);", sql, re.S | re.I)
+    assert corpo, "não achei o `create table` em docs/visitas.sql"
+    return set(re.findall(r"^\s+(\w+)\s+", corpo.group(1), re.M))
+
+
+def test_a_migration_da_tabela_de_visitas_esta_no_repositorio(sql_visitas):
+    """Schema que só existe no painel do Supabase é schema que ninguém revisa
+    e que não volta depois de um acidente."""
+    assert colunas_de_visitas(sql_visitas) >= COLUNAS_DO_BANCO | {"pagina"}
+
+
+def test_a_contagem_de_visita_manda_exatamente_as_colunas_da_tabela(js, sql_visitas):
+    corpo = re.search(r"const visita = \{(.*?)\n  \};", js, re.S)
+    assert corpo, "não achei o corpo do POST de visita"
+    chaves = set(re.findall(r"^\s{4}(\w+)\s*[:,]", corpo.group(1), re.M))
+    assert chaves == colunas_de_visitas(sql_visitas) - COLUNAS_DO_BANCO
+
+
+def test_a_tabela_de_visitas_liga_o_rls(sql_visitas):
+    assert re.search(r"enable row level security", sql_visitas, re.I)
+
+
+def test_a_visita_e_insert_only_pela_chave_anonima(sql_visitas):
+    """Mesmo desenho da `leads`: a chave `anon` é pública por desenho (vai no
+    HTML de qualquer jeito), então a policy deixa INSERIR e não deixa LER."""
+    assert re.search(r"for insert", sql_visitas, re.I)
+    assert re.search(r"to anon", sql_visitas, re.I)
+    assert not re.search(r"for\s+(select|all|update|delete)", sql_visitas, re.I)
+
+
+def test_a_tabela_de_visitas_nao_tem_coluna_de_dado_pessoal(sql_visitas):
+    """Visita não é lead. Sem consentimento não se guarda pessoa — e aqui não
+    há consentimento nenhum para pedir, porque não há pessoa para identificar."""
+    colunas = colunas_de_visitas(sql_visitas)
+    for pessoal in ("nome", "email", "telefone", "ip", "user_agent", "cpf"):
+        assert pessoal not in colunas, pessoal
+
+
+def test_a_contagem_de_visita_nao_e_esperada_por_ninguem(js):
+    """`await` aqui seria a página esperando o banco para existir — e, num
+    erro, telemetria custando cadastro. Mesma regra do Pixel e da origem."""
+    assert re.search(r"^registrarVisita\(\);", js, re.M), "sumiu a chamada"
+    assert "await registrarVisita" not in js

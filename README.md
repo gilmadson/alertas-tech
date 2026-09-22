@@ -172,3 +172,59 @@ O texto do UTM vem da URL, ou seja, do mundo, e vai para o banco: passa por
 do `sessionStorage`, que é do visitante e dá para editar à mão. Se qualquer
 parte disso falhar — Safari privado bloqueando storage, por exemplo — o
 cadastro segue e a origem vira `'direto'`: telemetria nunca custa um lead.
+
+## Contagem de visita (o denominador)
+
+Até 22/09/2026 o projeto contava **cadastro** e não contava **visita**: o
+numerador sem o denominador. Sem saber quanta gente entra na página não existe
+taxa de conversão visita→cadastro, e sem taxa nenhuma mudança na landing pode
+ser provada boa ou ruim — foi por isso que um redesenho inteiro foi vetado.
+
+`POST /rest/v1/visitas`, mesma chave `anon`, mesma policy: **inserir sim, ler
+não**. Colunas: `pagina`, `hospedagem`, `origem`, `meio`, `campanha` e o
+`criado_em` do banco. **Nenhum dado pessoal** — não há pessoa identificada
+aqui, e por isso não há consentimento a pedir.
+
+Ficou no Supabase, e não no Analytics do Vercel, porque a mesma página é
+servida por **duas** hospedagens (Vercel e o espelho do GitHub Pages) e as duas
+recebem gente de verdade: uma medida que só vê o Vercel fica cega para metade
+da casa. No mesmo banco, numerador e denominador têm os mesmos campos de
+origem, e a taxa por campanha é uma consulta em vez de duas telas.
+
+- **Antes de funcionar, a migration tem de ser aplicada uma vez**:
+  `docs/visitas.sql` no SQL Editor do Supabase. Sem isso o POST devolve 404, a
+  visita simplesmente não é contada e o cadastro segue igual.
+- **Cada página declara o próprio nome** em `<body data-pagina="...">`. Deduzir
+  do caminho não serve: o Vercel serve `/imperdiveis` e o GitHub Pages serve
+  `/alertas-tech/imperdiveis.html` — o mesmo arquivo viraria duas linhas no
+  relatório. Quem esquecer de declarar aparece como `nao-declarada`.
+- **Uma visita por página por sessão**: F5 não conta de novo (`sessionStorage`).
+  Se o POST não passou, a marca não é gravada — o próximo carregamento tenta
+  outra vez em vez de dar a contagem por feita.
+- **Dispara e segue**, sem `await`: contagem de visita é telemetria, igual ao
+  Pixel. Não segura a página e não pode custar um cadastro.
+
+A taxa, quando a tabela tiver dados. Atenção: `leads` **não** tem coluna
+`pagina` — o que as duas tabelas têm em comum é `origem`/`meio`/`campanha`, e é
+por aí que a conversão se quebra sem inventar número:
+
+```sql
+-- conversão por origem (7 dias)
+with v as (select origem, count(*) n from visitas
+            where criado_em >= now() - interval '7 days' group by origem),
+     l as (select origem, count(*) n from leads
+            where criado_em >= now() - interval '7 days' group by origem)
+select coalesce(v.origem, l.origem) as origem,
+       coalesce(v.n, 0)             as visitas,
+       coalesce(l.n, 0)             as cadastros,
+       round(100.0 * coalesce(l.n, 0) / nullif(v.n, 0), 1) as taxa_pct
+  from v full join l on l.origem = v.origem
+ order by visitas desc nulls last;
+
+-- visitas por página e por hospedagem (onde a gente realmente está)
+select pagina, hospedagem, count(*) visitas
+  from visitas
+ where criado_em >= now() - interval '7 days'
+ group by pagina, hospedagem
+ order by visitas desc;
+```

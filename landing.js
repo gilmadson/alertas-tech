@@ -125,6 +125,91 @@ function origemParaEnviar() {
   return origemMemo;
 }
 
+// ── CONTAGEM DE VISITA ───────────────────────────────
+// Até 22/09/2026 havia contagem de CADASTRO e nenhuma de visita: o numerador
+// sem o denominador. Sem saber quanta gente entra não existe taxa de conversão
+// visita→cadastro, e sem taxa nenhuma mudança na página pode ser provada boa —
+// foi esse o motivo de um redesenho inteiro ser vetado.
+//
+// A contagem mora no MESMO Supabase dos leads, e não no Analytics do Vercel,
+// porque a página é servida por duas hospedagens (Vercel e GitHub Pages) e as
+// duas recebem gente: medida que vê metade da casa é medida que engana.
+// Tabela e policy em `docs/visitas.sql` — insert-only, como a `leads`.
+//
+// Sem dado pessoal: qual página, de onde veio, em qual hospedagem. O instante
+// é o `criado_em` do banco.
+const CHAVE_VISITA = 'alertastech:visita:';
+
+// Cada página DECLARA o próprio nome em `<body data-pagina="...">`, do mesmo
+// jeito que a exclusiva declara a loja fixa. Deduzir do caminho não serve: o
+// Vercel serve `/imperdiveis` e o GitHub Pages serve
+// `/alertas-tech/imperdiveis.html` — o mesmo arquivo viraria duas linhas
+// diferentes no relatório. Quem esquecer de declarar aparece como
+// 'nao-declarada', que é o dado gritando em vez de somar no balde errado.
+function paginaAtual() {
+  return document.body.dataset.pagina || 'nao-declarada';
+}
+
+function hospedagemAtual() {
+  try {
+    return location.hostname || null;
+  } catch (_) {
+    return null;
+  }
+}
+
+// F5 não é visita nova. A marca é por página: quem foi contado no index e
+// depois abre o /imperdiveis é visita daquela página também.
+function visitaJaContada(pagina) {
+  try {
+    return sessionStorage.getItem(CHAVE_VISITA + pagina) === '1';
+  } catch (_) {
+    return false;   // storage bloqueado conta de novo: perder o denominador é pior
+  }
+}
+
+function marcarVisitaContada(pagina) {
+  try {
+    sessionStorage.setItem(CHAVE_VISITA + pagina, '1');
+  } catch (_) {}
+}
+
+// Dispara e segue: ninguém espera por isto. Contagem de visita é telemetria,
+// igual ao Pixel e à origem — não pode segurar a página nem custar um cadastro,
+// então nada aqui escapa para fora.
+async function registrarVisita() {
+  const pagina = paginaAtual();
+  if (visitaJaContada(pagina)) return false;
+  const daVisita = origemParaEnviar();
+  const visita = {
+    pagina,
+    hospedagem: hospedagemAtual(),
+    origem: daVisita.origem,
+    meio: daVisita.meio,
+    campanha: daVisita.campanha,
+  };
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/visitas`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON,
+        'Authorization': `Bearer ${SUPABASE_ANON}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify(visita),
+    });
+    // Não passou, não aconteceu: sem marca, o próximo carregamento tenta de
+    // novo em vez de dar a contagem por feita. É o que roda enquanto a
+    // migration de `docs/visitas.sql` não foi aplicada (404).
+    if (!res.ok) return false;
+    marcarVisitaContada(pagina);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
 // ── STATE ────────────────────────────────────────────
 let categoriaAtual = '';
 let plataformaEscolhida = '';
@@ -370,3 +455,7 @@ if (autoAbrir) {
 // Guarda a origem já no carregamento: se a pessoa chegou por campanha e só se
 // cadastrar depois de dar uma volta pela página, a origem real dela não se perde.
 origemParaEnviar();
+
+// E conta a visita — depois da origem, que é ela quem diz de onde a pessoa
+// veio. Sem `await`: a página não espera telemetria.
+registrarVisita();
