@@ -117,6 +117,13 @@ def loja_ids(js):
     return set(re.findall(r"'([^']+)'", lista.group(1)))
 
 
+# `lojas-section`/`modal-subtitle` (22/09/2026) só existem nas páginas que
+# escolhem loja na hora — a exclusiva já resolve com HTML próprio (texto fixo,
+# sem seção pra esconder, ver `imperdiveis.html`). Mesma exceção que o
+# `LOJA_IDS` já tem logo abaixo, pelo mesmo motivo.
+IDS_SO_SEM_LOJA_FIXA = {"lojas-section", "modal-subtitle"}
+
+
 def test_toda_pagina_tem_os_elementos_que_o_js_procura(paginas, js):
     """`document.getElementById('x').checked` com `x` ausente é TypeError: o
     cadastro inteiro morre, e a pessoa só vê um botão que não faz nada."""
@@ -124,7 +131,8 @@ def test_toda_pagina_tem_os_elementos_que_o_js_procura(paginas, js):
     assert "consent-check" in exigidos, "o parser de ids não achou nada"
     for nome, texto in paginas.items():
         presentes = set(re.findall(r'id="([^"]+)"', texto))
-        faltando = exigidos - presentes
+        pede = exigidos - IDS_SO_SEM_LOJA_FIXA if re.search(r"<body[^>]*data-lojas=", texto) else exigidos
+        faltando = pede - presentes
         assert not faltando, f"{nome} sem: {sorted(faltando)}"
 
 

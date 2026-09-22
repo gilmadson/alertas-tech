@@ -97,7 +97,7 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
       <span class="modal-cat-emoji" id="modal-emoji">🔥</span>
       <span class="modal-cat-name" id="modal-nome">Ofertas gerais</span>
     </div>
-    <p class="modal-subtitle">Deixa seu contato e escolha de quais lojas quer receber alertas.</p>
+    <p class="modal-subtitle" id="modal-subtitle">Deixa seu contato e escolha de quais lojas quer receber alertas.</p>
 
     <form id="lead-form" onsubmit="submeterLead(event)">
       <input type="text" id="hp-field" name="website" tabindex="-1"
@@ -112,7 +112,7 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
           autocomplete="tel" required oninput="checarCampos()">
       </div>
 
-      <div class="lojas-section">
+      <div class="lojas-section" id="lojas-section">
         <span class="lojas-label">De quais lojas quer alertas?</span>
         <div class="lojas-grid">
           <label class="loja-check ml">
