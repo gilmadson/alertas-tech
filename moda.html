@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moda e acessórios em promoção no seu WhatsApp | AlertasTech</title>
+<meta name="description" content="Grupo de Moda & Acessórios: mochila, óculos, mala e mais com o preço caindo, conferido na loja. Direto no seu WhatsApp.">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1137836155269322');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="landing.css">
+</head>
+<!-- Página da campanha paga de Moda & Acessórios (23/09/2026): a grade saiu do index.html
+     e com ela o único caminho até esta categoria. Mesmo molde do
+     imperdiveis.html. `data-lojas` declara as 6 lojas que o motor monitora
+     — o grupo recebe de qualquer uma, então não há o que escolher. -->
+<body data-pagina="moda" data-lojas="mercadolivre,amazon,magalu,shopee,aliexpress,kabum" data-auto-abrir="moda">
+
+<header>
+  <div class="logo-dot"></div>
+  <div class="logo-text">Alertas<span>Tech</span></div>
+</header>
+
+<main>
+
+<section class="hero">
+  <div class="container">
+    <div class="badge"><span class="badge-dot"></span>Grupo de Moda & Acessórios</div>
+    <h1>Moda e acessórios com <em>desconto real</em> no seu bolso</h1>
+    <p>Mochila, óculos, mala e mais: quando o preço cai numa das 6 lojas que monitoramos, o alerta chega no grupo. Direto no seu WhatsApp.</p>
+
+    <div class="lojas-hero">
+      <span class="loja-badge"><span class="loja-badge-dot ml"></span>Mercado Livre</span>
+      <span class="loja-badge"><span class="loja-badge-dot amz"></span>Amazon</span>
+      <span class="loja-badge"><span class="loja-badge-dot mag"></span>Magalu</span>
+      <span class="loja-badge"><span class="loja-badge-dot shp"></span>Shopee</span>
+      <span class="loja-badge"><span class="loja-badge-dot ali"></span>AliExpress</span>
+      <span class="loja-badge"><span class="loja-badge-dot kbm"></span>KaBuM!</span>
+    </div>
+  </div>
+</section>
+
+<!-- Card oculto só existe pro auto-clique (ver landing.js); o formulário
+     aparece direto embaixo do hero. -->
+<section class="categorias">
+  <div class="categorias-grid">
+
+    <div class="cat-card full destaque" data-slug="moda" onclick="abrirModal('👜','Moda & Acessórios','moda')">
+      <span class="cat-emoji">👜</span>
+      <div class="cat-info">
+        <div class="cat-name">Entrar no grupo de Moda & Acessórios</div>
+        <div class="cat-count">Mochila · Óculos · Mala — preço conferido na loja</div>
+      </div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>Ofertas de Mercado Livre, Amazon, Magalu, Shopee, AliExpress e KaBuM!</p>
+  <p style="margin-top:4px">Alertas gratuitos · Sem spam</p>
+  <p style="margin-top:8px">Preços verificados diretamente na loja.<br>Comissionado pelo programa de afiliados.</p>
+  <!-- A política mora no index.html: uma só, para as duas páginas. Duas
+       cópias do mesmo texto legal é como elas passam a dizer coisas
+       diferentes. Caminho relativo por causa do GitHub Pages. -->
+  <p style="margin-top:8px"><a href="index.html#privacidade">Privacidade e uso dos dados</a></p>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="fecharModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-cat">
+      <span class="modal-cat-emoji" id="modal-emoji">👜</span>
+      <span class="modal-cat-name" id="modal-nome">Moda & Acessórios</span>
+    </div>
+    <p class="modal-subtitle">Deixa seu contato e entra no grupo de Moda & Acessórios.</p>
+
+    <form id="lead-form" onsubmit="submeterLead(event)">
+      <input type="text" id="hp-field" name="website" tabindex="-1"
+        autocomplete="off" style="position:absolute;left:-9999px;opacity:0;height:0">
+
+      <div class="field-group">
+        <input type="text" id="lead-nome" placeholder="Seu nome (opcional)"
+          autocomplete="name" maxlength="60" oninput="checarCampos()">
+        <input type="email" id="lead-email" placeholder="E-mail (opcional)"
+          autocomplete="email" maxlength="100" oninput="checarCampos()">
+        <input type="tel" id="lead-tel" placeholder="WhatsApp com DDD (obrigatório)"
+          autocomplete="tel" required oninput="checarCampos()">
+      </div>
+
+      <label class="captcha-box consent-box">
+        <input type="checkbox" id="consent-check" onchange="marcarConsentimento()">
+        <span class="captcha-check-ui"></span>
+        <div class="captcha-text">
+          <span class="captcha-label-txt">Autorizo receber as ofertas</span>
+          <span class="captcha-sub">Guardar meu nome, e-mail e WhatsApp para me
+            mandar ofertas e me colocar no grupo de
+            <strong id="consent-cat">Moda & Acessórios</strong>. Posso pedir a
+            exclusão quando quiser.</span>
+        </div>
+      </label>
+      <p class="consent-link"><a href="index.html#privacidade" target="_blank" rel="noopener">O que fazemos com seus dados</a></p>
+
+      <p id="form-erro" class="form-erro"></p>
+      <div class="modal-btns">
+        <button type="submit" class="btn btn-whatsapp" id="btn-whatsapp"
+          data-plat="wpp" disabled>
+          <span class="btn-icon">💬</span> Entrar pelo WhatsApp
+        </button>
+        <button type="submit" class="btn btn-telegram" id="btn-telegram"
+          data-plat="tg" disabled>
+          <span class="btn-icon">✈️</span> Entrar pelo Telegram
+        </button>
+      </div>
+      <p id="tg-nota" class="tg-nota"></p>
+      <!-- Sem este aviso a página fingia sucesso quando o cadastro falhava. -->
+      <p id="form-aviso" class="form-aviso"></p>
+    </form>
+
+    <button class="modal-close" onclick="fecharModal()">Cancelar</button>
+  </div>
+</div>
+
+<script src="landing.js"></script>
+</body>
+</html>
