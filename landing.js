@@ -282,12 +282,15 @@ function getLojasEscolhidas() {
     .map(el => el.value);
 }
 
+// A caixa "Não sou um robô" saiu em 23/09/2026 (pedido dele, pra reduzir
+// toque): ela era decorativa — um clique não prova humanidade nenhuma. A
+// proteção de verdade já roda escondida e continua aqui: o campo-isca
+// (`hp-field`) e a trava de 1,5s (`BOT_THRESHOLD_MS`, em `submeterLead`).
 function checarCampos() {
   const tel      = document.getElementById('lead-tel').value.replace(/\D/g, '');
-  const captcha  = document.getElementById('captcha-check').checked;
   const consent  = document.getElementById('consent-check').checked;
   const lojas    = getLojasEscolhidas();
-  const ok       = tel.length >= 8 && captcha && consent && lojas.length > 0;
+  const ok       = tel.length >= 8 && consent && lojas.length > 0;
   document.getElementById('btn-whatsapp').disabled = !ok;
   document.getElementById('btn-telegram').disabled = !ok;
 }
@@ -306,7 +309,6 @@ function abrirModal(emoji, nome, slug) {
   document.getElementById('lead-email').value = '';
   document.getElementById('lead-tel').value = '';
   document.getElementById('hp-field').value = '';
-  document.getElementById('captcha-check').checked = false;
   document.getElementById('consent-check').checked = false;
   consentimentoEm = null;
   document.getElementById('consent-cat').textContent =
@@ -345,6 +347,15 @@ function abrirModal(emoji, nome, slug) {
 
 function fecharModal(e) {
   if (e && e.target !== document.getElementById('modal')) return;
+  // Página sem grade (`data-auto-abrir`) não tem pra onde "voltar" — a
+  // grade já está escondida por CSS. Fechar do jeito normal deixava a
+  // pessoa numa tela vazia até dar F5 (achado do projeto-arquiteto,
+  // 23/09/2026). Cancelar reabre o mesmo formulário limpo, igual ao clique
+  // automático do carregamento.
+  if (autoAbrir) {
+    const card = document.querySelector(`.cat-card[data-slug="${autoAbrir}"]`);
+    if (card) { card.click(); return; }
+  }
   document.getElementById('modal').classList.remove('active');
   document.body.style.overflow = '';
 }
@@ -510,7 +521,13 @@ async function submeterLead(e) {
 // ("entrada direta"), mas ele PARA de capturar o lead — o Gilmadson quer o
 // contrário: nome/e-mail/telefone visíveis (autopreenchidos pelo celular
 // sempre que ele tiver salvo antes — os 3 campos já têm autocomplete
-// correto), marca "não sou robô", o botão habilita. Volta a ser isto.
+// correto), o botão habilita ao preencher. Volta a ser isto.
+//
+// Desde 23/09/2026 o `index.html` também usa este padrão (slug `geral`): a
+// grade de 21 categorias saiu de lá depois de medir que 15 delas nunca
+// tiveram um cadastro sequer. `fecharModal` (acima) reusa este mesmo
+// `autoAbrir` pra saber quando "Cancelar" tem de reabrir o formulário em vez
+// de fechar — nesta variável abaixo é onde ele nasce.
 const autoAbrir = document.body.dataset.autoAbrir;
 if (autoAbrir) {
   const card = document.querySelector(`.cat-card[data-slug="${autoAbrir}"]`);

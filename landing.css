@@ -683,10 +683,11 @@ footer a { color: var(--accent); text-decoration: none; }
 .tapped { animation: tapVibrate .15s ease; }
 
 /* PÁGINA DE PROPÓSITO ÚNICO — pedido dele (18/09/2026): quem chega já
-   escolheu, então o formulário é o conteúdo, não um modal por cima do card.
-   Escopado por `data-auto-abrir` no <body> (ver landing.js) — não afeta a
-   landing principal, que continua abrindo o modal por clique, por cima da
-   grade de 21 categorias. */
+   escolheu (ou não quer escolher), então o formulário é o conteúdo, não um
+   modal por cima de um card. Escopado por `data-auto-abrir` no <body> (ver
+   landing.js). Desde 23/09/2026 isso inclui o `index.html`: a grade de 21
+   categorias saiu de lá (15 delas nunca converteram um lead sequer), e ele
+   vira, por inteiro, a porta "não quero escolher". */
 body[data-auto-abrir] .categorias { display: none; }
 body[data-auto-abrir] #modal.modal-overlay {
   position: static; background: none; backdrop-filter: none;

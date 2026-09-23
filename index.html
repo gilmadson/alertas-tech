@@ -29,7 +29,19 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="landing.css">
 </head>
-<body data-pagina="index">
+<!-- Decisão de 23/09/2026: a grade de 21 categorias saiu daqui. Medido, não
+     suposto — 15 das 19 categorias do motor nunca tiveram um cadastro
+     sequer, na história inteira da landing (ver memória do projeto,
+     alertastech-operacao-estado). A grade custava fricção sem entregar o
+     que prometia. `data-auto-abrir="geral"` reaproveita o slug e o sorteio
+     geral/imperdiveis que já existiam para o card "não quero escolher" —
+     esta página vira, por inteiro, essa porta. Quem precisar de entrada
+     dedicada numa categoria específica (campanha futura, por exemplo) usa
+     este mesmo padrão numa página nova, sob demanda — ver
+     imperdiveis.html/super-desconto.html. `grupos.json` e as 19 categorias
+     do motor continuam configuradas; só não tem mais card apontando pra
+     elas aqui. -->
+<body data-pagina="index" data-auto-abrir="geral">
 
 <header>
   <div class="logo-dot"></div>
@@ -45,7 +57,7 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
   <div class="container">
     <div class="badge"><span class="badge-dot"></span>Monitoramento em tempo real</div>
     <h1>Tecnologia com <em>desconto real</em> no seu bolso</h1>
-    <p>Receba alertas automáticos quando o preço cair nas suas categorias favoritas. Direto no WhatsApp ou Telegram.</p>
+    <p>Receba alertas automáticos quando o preço cair — qualquer categoria, qualquer uma das 6 lojas que monitoramos. Direto no seu WhatsApp.</p>
 
     <div class="lojas-hero">
       <span class="loja-badge"><span class="loja-badge-dot ml"></span>Mercado Livre</span>
@@ -55,26 +67,12 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
       <span class="loja-badge"><span class="loja-badge-dot ali"></span>AliExpress</span>
       <span class="loja-badge"><span class="loja-badge-dot kbm"></span>KaBuM!</span>
     </div>
-
-    <div class="stats">
-      <div class="stat">
-        <span class="stat-num" id="stat-produtos">100+</span>
-        <span class="stat-label">Produtos monitorados</span>
-      </div>
-      <div class="stat">
-        <span class="stat-num">3&times;</span>
-        <span class="stat-label">Coletas por dia</span>
-      </div>
-      <div class="stat">
-        <span class="stat-num">&ge;15%</span>
-        <span class="stat-label">Desconto m&iacute;nimo</span>
-      </div>
-    </div>
   </div>
 </section>
 
-<div class="section-label">Escolha sua categoria</div>
-
+<!-- Mesmo padrão enxuto das páginas exclusivas: card oculto só existe pro
+     auto-clique (ver landing.js), o formulário aparece direto embaixo do
+     hero. -->
 <section class="categorias">
   <div class="categorias-grid">
 
@@ -87,183 +85,6 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
       <span class="cat-arrow">↗</span>
     </div>
 
-    <div class="cat-card full destaque" data-slug="imperdiveis" onclick="abrirModal('⚡','Imperdíveis ML','imperdiveis')">
-      <span class="cat-emoji">⚡</span>
-      <div class="cat-info">
-        <div class="cat-name">Imperdíveis ML</div>
-        <div class="cat-count">O maior desconto do dia, revezando entre 9 categorias de tech</div>
-      </div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-    <div class="cat-card" data-slug="smartphone" onclick="abrirModal('📱','Smartphones','smartphone')">
-      <span class="cat-emoji">📱</span>
-      <div class="cat-name">Smartphones</div>
-      <div class="cat-count">iPhone · Samsung · Motorola</div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-    <div class="cat-card" data-slug="notebook" onclick="abrirModal('💻','Notebooks','notebook')">
-      <span class="cat-emoji">💻</span>
-      <div class="cat-name">Notebooks</div>
-      <div class="cat-count">Dell · Lenovo · MacBook</div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-    <div class="cat-card" data-slug="smart-tv" onclick="abrirModal('📺','Smart TVs','smart-tv')">
-      <span class="cat-emoji">📺</span>
-      <div class="cat-name">Smart TVs</div>
-      <div class="cat-count">4K · QLED · OLED</div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-    <div class="cat-card" data-slug="fone-audio" onclick="abrirModal('🎧','Fones & Áudio','fone-audio')">
-      <span class="cat-emoji">🎧</span>
-      <div class="cat-name">Fones & Áudio</div>
-      <div class="cat-count">JBL · Sony · AirPods</div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-    <div class="cat-card" data-slug="smartwatch" onclick="abrirModal('⌚','Smartwatches','smartwatch')">
-      <span class="cat-emoji">⌚</span>
-      <div class="cat-name">Smartwatches</div>
-      <div class="cat-count">Galaxy Watch · Apple Watch</div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-    <div class="cat-card" data-slug="tablet" onclick="abrirModal('📟','Tablets','tablet')">
-      <span class="cat-emoji">📟</span>
-      <div class="cat-name">Tablets</div>
-      <div class="cat-count">iPad · Galaxy Tab · Xiaomi</div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-    <div class="cat-card" data-slug="monitor" onclick="abrirModal('🖥','Monitores & Periféricos','monitor')">
-      <span class="cat-emoji">🖥</span>
-      <div class="cat-name">Monitores & Periféricos</div>
-      <div class="cat-count">Monitor · Teclado · Mouse</div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-    <div class="cat-card" data-slug="armazenamento" onclick="abrirModal('💾','Armazenamento','armazenamento')">
-      <span class="cat-emoji">💾</span>
-      <div class="cat-name">Armazenamento</div>
-      <div class="cat-count">SSD · HD externo · Pendrive</div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-    <div class="cat-card" data-slug="camera" onclick="abrirModal('📷','Câmeras & Drones','camera')">
-      <span class="cat-emoji">📷</span>
-      <div class="cat-name">Câmeras & Drones</div>
-      <div class="cat-count">Câmera · GoPro · Drone</div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-    <div class="cat-card" data-slug="livros" onclick="abrirModal('📚','Livros','livros')">
-      <span class="cat-emoji">📚</span>
-      <div class="cat-name">Livros</div>
-      <div class="cat-count">Box · Capa dura · Best-seller</div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-    <div class="cat-card" data-slug="eletrodomestico" onclick="abrirModal('🏠','Eletrodomésticos','eletrodomestico')">
-      <span class="cat-emoji">🏠</span>
-      <div class="cat-name">Eletrodomésticos</div>
-      <div class="cat-count">Air fryer · Liquidificador · Mixer</div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-    <div class="cat-card" data-slug="cozinha" onclick="abrirModal('🍳','Cozinha','cozinha')">
-      <span class="cat-emoji">🍳</span>
-      <div class="cat-name">Cozinha</div>
-      <div class="cat-count">Jogo de panelas · Aparelho de jantar</div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-    <div class="cat-card" data-slug="mesa-posta" onclick="abrirModal('🍽️','Mesa Posta','mesa-posta')">
-      <span class="cat-emoji">🍽️</span>
-      <div class="cat-name">Mesa Posta</div>
-      <div class="cat-count">Faqueiro · Jogo de copos</div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-    <div class="cat-card" data-slug="casa-moveis" onclick="abrirModal('🛋️','Casa & Móveis','casa-moveis')">
-      <span class="cat-emoji">🛋️</span>
-      <div class="cat-name">Casa & Móveis</div>
-      <div class="cat-count">Sofá · Rack · Cadeira</div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-    <div class="cat-card" data-slug="fitness" onclick="abrirModal('💪','Fitness & Esporte','fitness')">
-      <span class="cat-emoji">💪</span>
-      <div class="cat-name">Fitness & Esporte</div>
-      <div class="cat-count">Whey · Creatina · Colchonete</div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-    <div class="cat-card" data-slug="beleza" onclick="abrirModal('✨','Beleza & Perfumes','beleza')">
-      <span class="cat-emoji">✨</span>
-      <div class="cat-name">Beleza & Perfumes</div>
-      <div class="cat-count">Perfume · Skincare · Prancha</div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-    <div class="cat-card" data-slug="salao" onclick="abrirModal('💇','Salão de Beleza','salao')">
-      <span class="cat-emoji">💇</span>
-      <div class="cat-name">Salão de Beleza</div>
-      <div class="cat-count">Shampoo profissional · Botox · Secador</div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-    <div class="cat-card" data-slug="moda" onclick="abrirModal('👜','Moda & Acessórios','moda')">
-      <span class="cat-emoji">👜</span>
-      <div class="cat-name">Moda & Acessórios</div>
-      <div class="cat-count">Mochila · Óculos · Mala</div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-    <div class="cat-card" data-slug="outros" onclick="abrirModal('🎁','Outros Tech','outros')">
-      <span class="cat-emoji">🎁</span>
-      <div class="cat-name">Outros Tech</div>
-      <div class="cat-count">Impressora · Roteador · Mais</div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-  </div>
-</section>
-
-<div class="section-label">Como funciona</div>
-
-<section class="how">
-  <div class="how-steps">
-    <div class="step">
-      <div class="step-num">1</div>
-      <div>
-        <div class="step-title">Escolha sua categoria</div>
-        <div class="step-desc">Selecione o tipo de produto que você quer monitorar.</div>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <div>
-        <div class="step-title">Escolha as lojas</div>
-        <div class="step-desc">Marque de quais lojas quer receber alertas: Mercado Livre, Amazon, Magalu, Shopee, AliExpress e KaBuM!.</div>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <div>
-        <div class="step-title">Entre no grupo</div>
-        <div class="step-desc">Um clique. Direto para o seu WhatsApp ou Telegram.</div>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <div>
-        <div class="step-title">Receba os alertas</div>
-        <div class="step-desc">Nosso bot monitora 3× ao dia. Quando o preço cair ≥15%, você é o primeiro a saber.</div>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -309,8 +130,8 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-cat">
-      <span class="modal-cat-emoji" id="modal-emoji">📱</span>
-      <span class="modal-cat-name" id="modal-nome">Smartphones</span>
+      <span class="modal-cat-emoji" id="modal-emoji">🔥</span>
+      <span class="modal-cat-name" id="modal-nome">Ofertas gerais</span>
     </div>
     <p class="modal-subtitle" id="modal-subtitle">Deixa seu contato e escolha de quais lojas quer receber alertas.</p>
 
@@ -363,16 +184,6 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
         </div>
       </div>
 
-      <label class="captcha-box" id="captcha-label">
-        <input type="checkbox" id="captcha-check" onchange="checarCampos()">
-        <span class="captcha-check-ui"></span>
-        <div class="captcha-text">
-          <span class="captcha-label-txt">Não sou um robô</span>
-          <span class="captcha-sub">Verificação de segurança</span>
-        </div>
-        <div class="captcha-logo">🛡️</div>
-      </label>
-
       <label class="captcha-box consent-box">
         <input type="checkbox" id="consent-check" onchange="marcarConsentimento()">
         <span class="captcha-check-ui"></span>
@@ -380,7 +191,7 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
           <span class="captcha-label-txt">Autorizo receber as ofertas</span>
           <span class="captcha-sub">Guardar meu nome, e-mail e WhatsApp para me
             mandar ofertas e me colocar no grupo de
-            <strong id="consent-cat">Smartphones</strong>. Posso pedir a
+            <strong id="consent-cat">Ofertas gerais</strong>. Posso pedir a
             exclusão quando quiser.</span>
         </div>
       </label>
@@ -394,6 +205,8 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
           data-plat="wpp" disabled>
           <span class="btn-icon">💬</span> Entrar pelo WhatsApp
         </button>
+        <!-- O grupo "geral" não tem canal no Telegram (`telegram: null` no
+             grupos.json): o landing.js esconde o botão sozinho. -->
         <button type="submit" class="btn btn-telegram" id="btn-telegram"
           data-plat="tg" disabled>
           <span class="btn-icon">✈️</span> Entrar pelo Telegram

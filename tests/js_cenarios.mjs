@@ -3,9 +3,8 @@
 
 const cenario = process.env.CENARIO;
 
-function preencher({ consent = true, captcha = true, tel = '81999998888' } = {}) {
+function preencher({ consent = true, tel = '81999998888' } = {}) {
   el('lead-tel').value = tel;
-  el('captcha-check').checked = captcha;
   el('consent-check').checked = consent;
   // É o onchange da caixa: registra o instante do aceite e revalida o formulário.
   marcarConsentimento();
@@ -127,6 +126,31 @@ if (cenario === 'cadastro') {
   avancarRelogio(5000);
   preencher();
   await submeter('wpp');
+
+} else if (cenario === 'abertura_automatica') {
+  // Ninguém chama abrirModal aqui: é o próprio landing.js que clica sozinho
+  // no card, no carregamento, quando `data-auto-abrir` está no body (env
+  // BODY_AUTOABRIR). Os cenários de página exclusiva acima chamam abrirModal
+  // direto — nenhum deles prova que o clique automático em si funciona.
+  extra.modalAtivoSozinho = el('modal').classList.contains('active');
+
+} else if (cenario === 'cancelar_em_pagina_sem_grade') {
+  // "Cancelar" numa página sem grade não pode deixar tela vazia (achado do
+  // projeto-arquiteto, 23/09/2026): sem card pra clicar de novo, só o F5
+  // resolvia antes. O carregamento já abriu o modal sozinho (BODY_AUTOABRIR);
+  // preenche, cancela, e confere que reabriu limpo em vez de sumir.
+  avancarRelogio(5000);
+  preencher();
+  el('lead-nome').value = 'Fulano';
+  fecharModal();
+
+} else if (cenario === 'cancelar_em_pagina_com_grade') {
+  // Sem BODY_AUTOABRIR: página comum continua com o comportamento de sempre
+  // — cancelar fecha o modal, a grade por baixo resolve.
+  abrirModal('📱', 'Smartphones', 'smartphone');
+  avancarRelogio(5000);
+  preencher();
+  fecharModal();
 
 } else if (cenario === 'visita') {
   // Só o carregamento, ninguém toca em nada: a contagem de visita tem de sair

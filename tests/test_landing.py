@@ -108,21 +108,16 @@ def test_grupos_json_nao_guarda_a_chave_do_gateway():
 
 
 # ── landing x grupos.json ────────────────────────────────────────────────────
-
-def test_toda_categoria_do_json_tem_card_no_grid(html, dados):
-    slugs_no_html = set(re.findall(r'class="cat-card[^"]*"\s+data-slug="([^"]+)"', html))
-    faltando = {c["slug"] for c in dados["categorias"]} - slugs_no_html
-    assert not faltando, f"categorias sem card: {sorted(faltando)}"
-
-
-def test_todo_card_abre_o_modal_com_o_proprio_slug(html, dados):
-    for cat in dados["categorias"]:
-        padrao = (r'data-slug="%s"[^>]*onclick="abrirModal\(&#39;[^&]+&#39;,\s*'
-                  r'&#39;[^&]+&#39;,\s*&#39;%s&#39;\)"') % (cat["slug"], cat["slug"])
-        alternativo = r"data-slug=\"%s\"[^>]*abrirModal\('[^']+',\s*'[^']+',\s*'%s'\)" % (
-            cat["slug"], cat["slug"])
-        assert re.search(padrao, html) or re.search(alternativo, html), cat["slug"]
-
+#
+# Até 22/09/2026 havia aqui dois testes (`test_toda_categoria_do_json_tem_
+# card_no_grid`, `test_todo_card_abre_o_modal_com_o_proprio_slug`) que
+# exigiam card no HTML pra toda categoria do `grupos.json`. Em 23/09/2026 a
+# grade de 21 categorias saiu do `index.html` por decisão dele (15 das 19
+# categorias do motor nunca tiveram um cadastro sequer, medido — não é mais
+# verdade que toda categoria precisa de card). Os dois morreram de propósito:
+# a invariante que sobra — categoria do `grupos.json` sincronizada com o
+# mapa `GRUPOS` do landing.js — continua provada pelos dois testes abaixo,
+# que nunca dependeram de HTML nenhum.
 
 def test_toda_categoria_do_json_tem_link_no_mapa_grupos(mapa, dados):
     faltando = {c["slug"] for c in dados["categorias"]} - set(mapa)
@@ -309,8 +304,11 @@ def test_a_politica_e_alcancavel_a_partir_do_formulario(html):
 # ── ofertas gerais ───────────────────────────────────────────────────────────
 
 def test_existe_a_opcao_de_ofertas_gerais(html):
-    """Ele pediu literalmente: quem não quer escolher categoria tem que ver
-    a opção, e ela ocupa a linha inteira do grid para não se esconder."""
+    """Desde 23/09/2026 este card não fica mais visível num grid — ele é o
+    único card do `index.html`, escondido por CSS e clicado sozinho no
+    carregamento (`data-auto-abrir="geral"`, ver landing.js). O que este
+    teste ainda garante: a marcação em si existe e continua "full" (mesma
+    classe de quando era destaque no meio de 21 opções — não custa manter)."""
     card = re.search(r'<div class="cat-card([^"]*)" data-slug="geral"[^>]*>(.*?)</div>\s*</div>',
                      html, re.S)
     assert card, "sem card de ofertas gerais"
