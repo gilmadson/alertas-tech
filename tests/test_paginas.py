@@ -34,7 +34,8 @@ GRUPOS_JSON = RAIZ / "grupos.json"
 
 # Toda página que capta lead entra nesta lista. Quem esquecer de acrescentar
 # aqui a próxima página exclusiva perde todas as travas de uma vez.
-PAGINAS = ("index.html", "imperdiveis.html", "super-desconto.html")
+PAGINAS = ("index.html", "imperdiveis.html", "super-desconto.html",
+           "moda.html", "smartphone.html")
 
 
 @pytest.fixture(scope="module")
@@ -335,3 +336,56 @@ def test_o_compartilhado_vai_sem_cache(vercel):
     for alvo in ("/landing.js", "/landing.css"):
         assert alvo in cabecalhos, f"{alvo} sem regra de cache"
         assert "no-cache" in cabecalhos[alvo]["cache-control"], alvo
+
+
+# ── páginas de categoria das campanhas pagas (23/09/2026) ───────────────────
+# A grade saiu do index.html em 23/09/2026 e, com ela, o único caminho até
+# Moda e Smartphone — justo as duas categorias com campanha paga no ar. Quem
+# vinha do anúncio de Smartphone caía no "Ofertas gerais". Cada campanha de
+# categoria ganha a própria porta, no mesmo molde do Imperdíveis.
+
+CATEGORIAS_COM_PAGINA = {"moda": "moda.html", "smartphone": "smartphone.html"}
+
+
+@pytest.mark.parametrize("slug,arquivo", CATEGORIAS_COM_PAGINA.items())
+def test_pagina_de_categoria_esta_na_lista_de_travas(slug, arquivo):
+    assert arquivo in PAGINAS
+
+
+@pytest.mark.parametrize("slug,arquivo", CATEGORIAS_COM_PAGINA.items())
+def test_pagina_de_categoria_abre_o_modal_com_o_slug_do_grupos_json(slug, arquivo, paginas, dados):
+    cat = entrada(dados, slug)
+    padrao = r"abrirModal\('%s',\s*'%s',\s*'%s'\)" % (
+        re.escape(cat["emoji"]), re.escape(cat["nome"]), slug)
+    assert re.search(padrao, paginas[arquivo]), "a chamada não bate com o grupos.json"
+
+
+@pytest.mark.parametrize("slug,arquivo", CATEGORIAS_COM_PAGINA.items())
+def test_pagina_de_categoria_so_tem_o_proprio_card(slug, arquivo, paginas):
+    assert set(re.findall(r'data-slug="([^"]+)"', paginas[arquivo])) == {slug}
+
+
+@pytest.mark.parametrize("slug,arquivo", CATEGORIAS_COM_PAGINA.items())
+def test_pagina_de_categoria_abre_o_formulario_sozinha(slug, arquivo, paginas):
+    assert re.search(r'<body[^>]*data-auto-abrir="%s"' % slug, paginas[arquivo])
+
+
+@pytest.mark.parametrize("slug,arquivo", CATEGORIAS_COM_PAGINA.items())
+def test_pagina_de_categoria_nao_pede_escolha_de_loja(slug, arquivo, paginas):
+    """Pedido dele: nome/e-mail/telefone e 1 botão. O grupo da categoria
+    recebe da loja que o motor achar — a página declara as 6 que o motor
+    monitora, com as MESMAS strings das caixas do super-desconto."""
+    texto = paginas[arquivo]
+    assert "lojas-section" not in texto
+    declaradas = re.search(r'<body[^>]*data-lojas="([^"]+)"', texto).group(1).split(",")
+    das_caixas = re.findall(r'id="loja-[^"]+" value="([^"]+)"', paginas["super-desconto.html"])
+    assert sorted(declaradas) == sorted(das_caixas)
+
+
+@pytest.mark.parametrize("slug,arquivo", CATEGORIAS_COM_PAGINA.items())
+def test_pagina_de_categoria_tem_rota_propria_antes_do_catch_all(slug, arquivo):
+    regras = json.loads(VERCEL.read_text(encoding="utf-8"))["rewrites"]
+    rotas = {r["source"]: r["destination"] for r in regras}
+    assert rotas.get("/" + slug) == "/" + arquivo
+    ordem = [r["source"] for r in regras]
+    assert ordem.index("/" + slug) < ordem.index("/(.*)")

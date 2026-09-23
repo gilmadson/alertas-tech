@@ -2,6 +2,8 @@
   "rewrites": [
     { "source": "/imperdiveis", "destination": "/imperdiveis.html" },
     { "source": "/super-desconto", "destination": "/super-desconto.html" },
+    { "source": "/moda", "destination": "/moda.html" },
+    { "source": "/smartphone", "destination": "/smartphone.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
