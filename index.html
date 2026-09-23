@@ -70,62 +70,9 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
   </div>
 </section>
 
-<!-- Mesmo padrão enxuto das páginas exclusivas: card oculto só existe pro
-     auto-clique (ver landing.js), o formulário aparece direto embaixo do
-     hero. -->
-<section class="categorias">
-  <div class="categorias-grid">
-
-    <div class="cat-card full destaque" data-slug="geral" onclick="abrirModal('🔥','Ofertas gerais','geral')">
-      <span class="cat-emoji">🔥</span>
-      <div class="cat-info">
-        <div class="cat-name">Ofertas gerais — não quero escolher</div>
-        <div class="cat-count">Um grupo só, com o desconto grande de qualquer loja</div>
-      </div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-  </div>
-</section>
-
-<div class="section-label">Privacidade</div>
-
-<section class="privacidade" id="privacidade">
-  <h2 class="priv-titulo">O que fazemos com os seus dados</h2>
-  <p><strong>Responsável:</strong> AlertasTech, projeto pessoal de curadoria de
-    ofertas. O contato é o mesmo número de WhatsApp que envia os alertas.</p>
-  <p><strong>O que é coletado:</strong> seu WhatsApp (obrigatório), e nome e
-    e-mail se você quiser preencher — esses dois são opcionais. Guardamos
-    também a categoria e as lojas que você escolheu, e a data do cadastro.</p>
-  <p><strong>Para quê:</strong> te enviar alertas de oferta e te colocar no
-    grupo da categoria que você escolheu. Nada além disso.</p>
-  <p><strong>Base legal:</strong> o seu consentimento (art. 7º, I da LGPD),
-    dado na caixa que você marca antes de entrar. Sem ela marcada, nada é
-    enviado e nada é guardado.</p>
-  <p><strong>Com quem é compartilhado:</strong> ninguém. Os dados ficam num
-    banco de uso exclusivo do projeto (Supabase). Não vendemos, não trocamos e
-    não alugamos cadastro. Os links levam a grupos de WhatsApp e canais de
-    Telegram, que têm as políticas deles.</p>
-  <p><strong>Por quanto tempo:</strong> enquanto você quiser receber.</p>
-  <p><strong>Como pedir a exclusão:</strong> mande "APAGAR MEUS DADOS" para o
-    mesmo número que te envia os alertas, ou fale com o administrador dentro de
-    qualquer um dos grupos. Sair do grupo você pode a qualquer momento, sem
-    precisar justificar.</p>
-  <p class="priv-rodape">Os links de produto podem conter código de afiliado: se
-    você comprar, o AlertasTech pode receber comissão da loja, sem custo a mais
-    para você.</p>
-</section>
-
-</main>
-
-<footer>
-  <p>Mercado Livre · Amazon · Magalu · Shopee · AliExpress · KaBuM!</p>
-  <p style="margin-top:4px">Alertas gratuitos · Sem spam</p>
-  <p style="margin-top:8px">Preços verificados diretamente nas lojas.<br>Comissionado pelos programas de afiliados.</p>
-  <p style="margin-top:8px"><a href="#privacidade">Privacidade e uso dos dados</a></p>
-</footer>
-
-<!-- MODAL -->
+<!-- FORMULÁRIO — logo depois do título, dentro do <main>: aqui ele é a
+     página, não um popup. Até 23/09/2026 ficava depois do rodapé e, no
+     celular, a pessoa via título e rodapé antes de achar os campos. -->
 <div class="modal-overlay" id="modal" onclick="fecharModal(event)">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -220,6 +167,61 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
     <button class="modal-close" onclick="fecharModal()">Cancelar</button>
   </div>
 </div>
+
+<!-- Mesmo padrão enxuto das páginas exclusivas: card oculto só existe pro
+     auto-clique (ver landing.js), o formulário aparece direto embaixo do
+     hero. -->
+<section class="categorias">
+  <div class="categorias-grid">
+
+    <div class="cat-card full destaque" data-slug="geral" onclick="abrirModal('🔥','Ofertas gerais','geral')">
+      <span class="cat-emoji">🔥</span>
+      <div class="cat-info">
+        <div class="cat-name">Ofertas gerais — não quero escolher</div>
+        <div class="cat-count">Um grupo só, com o desconto grande de qualquer loja</div>
+      </div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+  </div>
+</section>
+
+<div class="section-label">Privacidade</div>
+
+<section class="privacidade" id="privacidade">
+  <h2 class="priv-titulo">O que fazemos com os seus dados</h2>
+  <p><strong>Responsável:</strong> AlertasTech, projeto pessoal de curadoria de
+    ofertas. O contato é o mesmo número de WhatsApp que envia os alertas.</p>
+  <p><strong>O que é coletado:</strong> seu WhatsApp (obrigatório), e nome e
+    e-mail se você quiser preencher — esses dois são opcionais. Guardamos
+    também a categoria e as lojas que você escolheu, e a data do cadastro.</p>
+  <p><strong>Para quê:</strong> te enviar alertas de oferta e te colocar no
+    grupo da categoria que você escolheu. Nada além disso.</p>
+  <p><strong>Base legal:</strong> o seu consentimento (art. 7º, I da LGPD),
+    dado na caixa que você marca antes de entrar. Sem ela marcada, nada é
+    enviado e nada é guardado.</p>
+  <p><strong>Com quem é compartilhado:</strong> ninguém. Os dados ficam num
+    banco de uso exclusivo do projeto (Supabase). Não vendemos, não trocamos e
+    não alugamos cadastro. Os links levam a grupos de WhatsApp e canais de
+    Telegram, que têm as políticas deles.</p>
+  <p><strong>Por quanto tempo:</strong> enquanto você quiser receber.</p>
+  <p><strong>Como pedir a exclusão:</strong> mande "APAGAR MEUS DADOS" para o
+    mesmo número que te envia os alertas, ou fale com o administrador dentro de
+    qualquer um dos grupos. Sair do grupo você pode a qualquer momento, sem
+    precisar justificar.</p>
+  <p class="priv-rodape">Os links de produto podem conter código de afiliado: se
+    você comprar, o AlertasTech pode receber comissão da loja, sem custo a mais
+    para você.</p>
+</section>
+
+</main>
+
+<footer>
+  <p>Mercado Livre · Amazon · Magalu · Shopee · AliExpress · KaBuM!</p>
+  <p style="margin-top:4px">Alertas gratuitos · Sem spam</p>
+  <p style="margin-top:8px">Preços verificados diretamente nas lojas.<br>Comissionado pelos programas de afiliados.</p>
+  <p style="margin-top:8px"><a href="#privacidade">Privacidade e uso dos dados</a></p>
+</footer>
 
 <script src="landing.js"></script>
 </body>

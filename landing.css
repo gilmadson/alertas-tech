@@ -696,3 +696,37 @@ body[data-auto-abrir] #modal.modal-overlay {
 body[data-auto-abrir] #modal .modal {
   animation: none; border-radius: 24px; max-width: 480px; margin: 0 auto; width: 100%;
 }
+
+/* Tudo numa tela de celular (pedido dele, 23/09/2026: "nome, e-mail,
+   telefone e um botão, compacto numa tela"). Em página sem grade o título
+   encolhe, as etiquetas de loja e o cabeçalho repetido do formulário somem
+   (o título já diz a categoria), e "Cancelar" sai — não há pra onde voltar. */
+body[data-auto-abrir] header { padding-top: 14px; }
+body[data-auto-abrir] .hero { padding: 16px 20px 0; }
+body[data-auto-abrir] .badge { margin-bottom: 10px; }
+body[data-auto-abrir] .hero h1 { font-size: clamp(1.5rem, 6.5vw, 2.2rem); margin-bottom: 8px; }
+body[data-auto-abrir] .hero p { font-size: .88rem; line-height: 1.45; margin-bottom: 14px; }
+body[data-auto-abrir] .lojas-hero,
+body[data-auto-abrir] #modal .modal-handle,
+body[data-auto-abrir] #modal .modal-cat,
+body[data-auto-abrir] #modal .modal-subtitle,
+body[data-auto-abrir] #modal .modal-close { display: none; }
+body[data-auto-abrir] #modal.modal-overlay { padding: 0 16px 16px; }
+body[data-auto-abrir] #modal .modal { padding: 16px 16px 18px; max-height: none; overflow: visible; }
+body[data-auto-abrir] .field-group { gap: 8px; margin-bottom: 10px; }
+body[data-auto-abrir] .field-group input { padding: 12px 14px; font-size: 16px; }
+body[data-auto-abrir] .captcha-box { padding: 10px 12px; margin-bottom: 6px; }
+body[data-auto-abrir] .consent-link { margin: 0 0 10px; }
+body[data-auto-abrir] .modal-btns { gap: 8px; }
+body[data-auto-abrir] .btn { padding: 14px 18px; }
+
+/* Navegador dentro do Instagram/Facebook/Telegram come ~150px com as barras
+   dele. Em tela baixa o subtítulo e a etiqueta saem pra o botão continuar
+   acima da dobra — o título já diz do que se trata. */
+body[data-auto-abrir] .form-erro:empty { display: none; }
+@media (max-height: 720px) {
+  body[data-auto-abrir] .badge,
+  body[data-auto-abrir] .hero p { display: none; }
+  body[data-auto-abrir] .hero h1 { font-size: clamp(1.35rem, 6vw, 1.8rem); margin-bottom: 12px; }
+  body[data-auto-abrir] .captcha-sub { font-size: .66rem; line-height: 1.35; }
+}

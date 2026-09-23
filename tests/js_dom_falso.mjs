@@ -123,6 +123,8 @@ export function responderSupabase(resp) { respostaDoSupabase = resp; }
 const CARD_POR_SLUG = {
   geral: ['🔥', 'Ofertas gerais'],
   imperdiveis: ['⚡', 'Imperdíveis ML'],
+  smartphone: ['📱', 'Smartphones'],
+  moda: ['👜', 'Moda & Acessórios'],
 };
 
 globalThis.document = {
@@ -163,7 +165,10 @@ globalThis.window = {
     return { set location(destino) { abertas.push(destino); } };
   },
 };
-globalThis.setTimeout = () => {};   // o focus() atrasado do modal
+// Conta o que foi agendado sem rodar: o único timer do modal é o focus()
+// atrasado, e em página sem grade ele NÃO pode existir (ver js_cenarios).
+globalThis.timersAgendados = 0;
+globalThis.setTimeout = () => { globalThis.timersAgendados++; };
 globalThis.fetch = async (url, opcoes) => {
   ordemDeChamadas.push('fetch:' + (String(url).includes('/leads') ? 'leads' : 'visitas'));
   chamadasFetch.push({ url, opcoes });

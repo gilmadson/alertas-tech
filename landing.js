@@ -341,12 +341,20 @@ function abrirModal(emoji, nome, slug) {
   document.getElementById('btn-telegram').disabled = true;
   modalAbertaEm = Date.now();
   document.getElementById('modal').classList.add('active');
+  // Em página sem grade (`data-auto-abrir`) o formulário É a página, não um
+  // popup: travar a rolagem e focar o telefone sozinho deixava a tela
+  // "congelada, sem os campos" no Safari e no navegador do Telegram (ele,
+  // 23/09/2026).
+  if (document.body.dataset.autoAbrir) return;
   document.body.style.overflow = 'hidden';
   setTimeout(() => document.getElementById('lead-tel').focus(), 300);
 }
 
 function fecharModal(e) {
   if (e && e.target !== document.getElementById('modal')) return;
+  // Sem popup não existe "tocar fora pra fechar": o toque na margem em volta
+  // do formulário reabria tudo e apagava o que a pessoa já tinha digitado.
+  if (e && autoAbrir) return;
   // Página sem grade (`data-auto-abrir`) não tem pra onde "voltar" — a
   // grade já está escondida por CSS. Fechar do jeito normal deixava a
   // pessoa numa tela vazia até dar F5 (achado do projeto-arquiteto,
