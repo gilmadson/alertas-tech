@@ -166,6 +166,28 @@ if (cenario === 'cadastro') {
   await Promise.resolve();
   await registrarVisita();
 
+} else if (cenario === 'pagina_sem_grade_nao_trava_a_tela') {
+  // Bug de 23/09/2026 (ele, no Safari e no navegador do Telegram): a página
+  // de Smartphone abria "congelada", sem os campos. O abrirModal travava a
+  // rolagem do body e agendava o foco no telefone — herança do modal por
+  // cima da grade. Em página sem grade o formulário É a página: travar a
+  // rolagem prende a pessoa no topo, e o foco automático rola a tela sozinho.
+  // O carregamento já abriu o formulário (BODY_AUTOABRIR); só lê o estado.
+  extra.overflowDoBody = document.body.style.overflow || '';
+  extra.timersAgendados = globalThis.timersAgendados;
+
+} else if (cenario === 'modal_por_cima_da_grade_ainda_trava') {
+  abrirModal('📱', 'Smartphones', 'smartphone');
+  extra.overflowDoBody = document.body.style.overflow || '';
+  extra.timersAgendados = globalThis.timersAgendados;
+
+} else if (cenario === 'toque_na_margem_da_pagina_sem_grade') {
+  // Sem popup, o toque na margem em volta do formulário (o próprio #modal)
+  // não pode reabrir o formulário e apagar o que a pessoa digitou.
+  preencher();
+  fecharModal({ target: el('modal') });
+  extra.telDepois = el('lead-tel').value;
+
 } else if (cenario === 'telegram_categoria_nova') {
   abrirModal('👜', 'Moda & Acessórios', 'moda');
   avancarRelogio(5000);

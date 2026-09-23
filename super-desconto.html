@@ -61,35 +61,9 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
   </div>
 </section>
 
-<!-- Mesmo padrão enxuto do imperdiveis.html: card oculto só existe pro
-     auto-clique (ver landing.js), o formulário aparece direto embaixo do
-     hero. -->
-<section class="categorias">
-  <div class="categorias-grid">
-
-    <div class="cat-card full destaque" data-slug="geral" onclick="abrirModal('🔥','Ofertas gerais','geral')">
-      <span class="cat-emoji">🔥</span>
-      <div class="cat-info">
-        <div class="cat-name">Entrar no grupo de Super Desconto</div>
-        <div class="cat-count">O maior desconto do dia, de qualquer loja e categoria</div>
-      </div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-  </div>
-</section>
-
-</main>
-
-<footer>
-  <p>Mercado Livre · Amazon · Magalu · Shopee · AliExpress · KaBuM!</p>
-  <p style="margin-top:4px">Alertas gratuitos · Sem spam</p>
-  <p style="margin-top:8px">Preços verificados diretamente nas lojas.<br>Comissionado pelos programas de afiliados.</p>
-  <!-- A política mora no index.html: uma só, para todas as páginas. -->
-  <p style="margin-top:8px"><a href="index.html#privacidade">Privacidade e uso dos dados</a></p>
-</footer>
-
-<!-- MODAL -->
+<!-- FORMULÁRIO — logo depois do título, dentro do <main>: aqui ele é a
+     página, não um popup. Até 23/09/2026 ficava depois do rodapé e, no
+     celular, a pessoa via título e rodapé antes de achar os campos. -->
 <div class="modal-overlay" id="modal" onclick="fecharModal(event)">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -181,6 +155,34 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
     <button class="modal-close" onclick="fecharModal()">Cancelar</button>
   </div>
 </div>
+
+<!-- Mesmo padrão enxuto do imperdiveis.html: card oculto só existe pro
+     auto-clique (ver landing.js), o formulário aparece direto embaixo do
+     hero. -->
+<section class="categorias">
+  <div class="categorias-grid">
+
+    <div class="cat-card full destaque" data-slug="geral" onclick="abrirModal('🔥','Ofertas gerais','geral')">
+      <span class="cat-emoji">🔥</span>
+      <div class="cat-info">
+        <div class="cat-name">Entrar no grupo de Super Desconto</div>
+        <div class="cat-count">O maior desconto do dia, de qualquer loja e categoria</div>
+      </div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>Mercado Livre · Amazon · Magalu · Shopee · AliExpress · KaBuM!</p>
+  <p style="margin-top:4px">Alertas gratuitos · Sem spam</p>
+  <p style="margin-top:8px">Preços verificados diretamente nas lojas.<br>Comissionado pelos programas de afiliados.</p>
+  <!-- A política mora no index.html: uma só, para todas as páginas. -->
+  <p style="margin-top:8px"><a href="index.html#privacidade">Privacidade e uso dos dados</a></p>
+</footer>
 
 <script src="landing.js"></script>
 </body>

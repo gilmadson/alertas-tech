@@ -59,36 +59,9 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
   </div>
 </section>
 
-<!-- Card oculto só existe pro auto-clique (ver landing.js); o formulário
-     aparece direto embaixo do hero. -->
-<section class="categorias">
-  <div class="categorias-grid">
-
-    <div class="cat-card full destaque" data-slug="moda" onclick="abrirModal('👜','Moda & Acessórios','moda')">
-      <span class="cat-emoji">👜</span>
-      <div class="cat-info">
-        <div class="cat-name">Entrar no grupo de Moda & Acessórios</div>
-        <div class="cat-count">Mochila · Óculos · Mala — preço conferido na loja</div>
-      </div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-  </div>
-</section>
-
-</main>
-
-<footer>
-  <p>Ofertas de Mercado Livre, Amazon, Magalu, Shopee, AliExpress e KaBuM!</p>
-  <p style="margin-top:4px">Alertas gratuitos · Sem spam</p>
-  <p style="margin-top:8px">Preços verificados diretamente na loja.<br>Comissionado pelo programa de afiliados.</p>
-  <!-- A política mora no index.html: uma só, para as duas páginas. Duas
-       cópias do mesmo texto legal é como elas passam a dizer coisas
-       diferentes. Caminho relativo por causa do GitHub Pages. -->
-  <p style="margin-top:8px"><a href="index.html#privacidade">Privacidade e uso dos dados</a></p>
-</footer>
-
-<!-- MODAL -->
+<!-- FORMULÁRIO — logo depois do título, dentro do <main>: aqui ele é a
+     página, não um popup. Até 23/09/2026 ficava depois do rodapé e, no
+     celular, a pessoa via título e rodapé antes de achar os campos. -->
 <div class="modal-overlay" id="modal" onclick="fecharModal(event)">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -143,6 +116,35 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
     <button class="modal-close" onclick="fecharModal()">Cancelar</button>
   </div>
 </div>
+
+<!-- Card oculto só existe pro auto-clique (ver landing.js); o formulário
+     aparece direto embaixo do hero. -->
+<section class="categorias">
+  <div class="categorias-grid">
+
+    <div class="cat-card full destaque" data-slug="moda" onclick="abrirModal('👜','Moda & Acessórios','moda')">
+      <span class="cat-emoji">👜</span>
+      <div class="cat-info">
+        <div class="cat-name">Entrar no grupo de Moda & Acessórios</div>
+        <div class="cat-count">Mochila · Óculos · Mala — preço conferido na loja</div>
+      </div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>Ofertas de Mercado Livre, Amazon, Magalu, Shopee, AliExpress e KaBuM!</p>
+  <p style="margin-top:4px">Alertas gratuitos · Sem spam</p>
+  <p style="margin-top:8px">Preços verificados diretamente na loja.<br>Comissionado pelo programa de afiliados.</p>
+  <!-- A política mora no index.html: uma só, para as duas páginas. Duas
+       cópias do mesmo texto legal é como elas passam a dizer coisas
+       diferentes. Caminho relativo por causa do GitHub Pages. -->
+  <p style="margin-top:8px"><a href="index.html#privacidade">Privacidade e uso dos dados</a></p>
+</footer>
 
 <script src="landing.js"></script>
 </body>

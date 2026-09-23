@@ -747,3 +747,31 @@ def test_telemetria_quebrada_manda_conteudo_nulo_sem_perder_o_cadastro(tmp_path)
     r = rodar("cadastro", tmp_path, SESSION_QUEBRADO="1", LOCATION_QUEBRADA="1")
     assert corpo(r)["conteudo"] is None
     assert r["modalAtivo"] is False, "o cadastro seguiu normal"
+
+
+# ── página sem grade não pode travar a tela (23/09/2026) ─────────────────────
+
+@pytest.mark.parametrize("slug", ["geral", "smartphone", "moda", "imperdiveis"])
+def test_pagina_sem_grade_nao_trava_a_rolagem_nem_rola_sozinha(tmp_path, slug):
+    """Ele abriu /smartphone no Safari e no navegador do Telegram e a tela
+    ficou "congelada, sem os campos": o formulário mora embaixo do topo, e o
+    abrirModal travava a rolagem do body (herança do modal por cima da
+    grade) e ainda agendava o foco automático no telefone."""
+    r = rodar("pagina_sem_grade_nao_trava_a_tela", tmp_path, BODY_AUTOABRIR=slug)
+    assert r["modalAtivo"] is True, "o formulário tem de estar aberto"
+    assert r["overflowDoBody"] != "hidden"
+    assert r["timersAgendados"] == 0, "nada de foco automático rolando a tela"
+
+
+def test_modal_por_cima_da_grade_continua_travando_o_fundo(tmp_path):
+    """Sem `data-auto-abrir` o modal é um popup de verdade: aí sim o fundo
+    trava, e o foco no telefone ajuda."""
+    r = rodar("modal_por_cima_da_grade_ainda_trava", tmp_path)
+    assert r["overflowDoBody"] == "hidden"
+    assert r["timersAgendados"] == 1
+
+
+def test_toque_na_margem_da_pagina_sem_grade_nao_apaga_o_que_foi_digitado(tmp_path):
+    r = rodar("toque_na_margem_da_pagina_sem_grade", tmp_path, BODY_AUTOABRIR="smartphone")
+    assert r["modalAtivo"] is True
+    assert r["telDepois"] == "81999998888"

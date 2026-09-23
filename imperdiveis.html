@@ -57,37 +57,9 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
   </div>
 </section>
 
-<!-- Pedido dele (18/09/2026 noite): página mais enxuta — sem stats, sem
-     "como funciona", card oculto só existe pro auto-clique (ver landing.js),
-     o formulário aparece direto embaixo do hero. -->
-<section class="categorias">
-  <div class="categorias-grid">
-
-    <div class="cat-card full destaque" data-slug="imperdiveis" onclick="abrirModal('⚡','Imperdíveis ML','imperdiveis')">
-      <span class="cat-emoji">⚡</span>
-      <div class="cat-info">
-        <div class="cat-name">Entrar no grupo dos Imperdíveis</div>
-        <div class="cat-count">O maior desconto do dia, revezando entre 9 categorias de tech</div>
-      </div>
-      <span class="cat-arrow">↗</span>
-    </div>
-
-  </div>
-</section>
-
-</main>
-
-<footer>
-  <p>Ofertas do Mercado Livre</p>
-  <p style="margin-top:4px">Alertas gratuitos · Sem spam</p>
-  <p style="margin-top:8px">Preços verificados diretamente na loja.<br>Comissionado pelo programa de afiliados.</p>
-  <!-- A política mora no index.html: uma só, para as duas páginas. Duas
-       cópias do mesmo texto legal é como elas passam a dizer coisas
-       diferentes. Caminho relativo por causa do GitHub Pages. -->
-  <p style="margin-top:8px"><a href="index.html#privacidade">Privacidade e uso dos dados</a></p>
-</footer>
-
-<!-- MODAL -->
+<!-- FORMULÁRIO — logo depois do título, dentro do <main>: aqui ele é a
+     página, não um popup. Até 23/09/2026 ficava depois do rodapé e, no
+     celular, a pessoa via título e rodapé antes de achar os campos. -->
 <div class="modal-overlay" id="modal" onclick="fecharModal(event)">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -146,6 +118,36 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
     <button class="modal-close" onclick="fecharModal()">Cancelar</button>
   </div>
 </div>
+
+<!-- Pedido dele (18/09/2026 noite): página mais enxuta — sem stats, sem
+     "como funciona", card oculto só existe pro auto-clique (ver landing.js),
+     o formulário aparece direto embaixo do hero. -->
+<section class="categorias">
+  <div class="categorias-grid">
+
+    <div class="cat-card full destaque" data-slug="imperdiveis" onclick="abrirModal('⚡','Imperdíveis ML','imperdiveis')">
+      <span class="cat-emoji">⚡</span>
+      <div class="cat-info">
+        <div class="cat-name">Entrar no grupo dos Imperdíveis</div>
+        <div class="cat-count">O maior desconto do dia, revezando entre 9 categorias de tech</div>
+      </div>
+      <span class="cat-arrow">↗</span>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>Ofertas do Mercado Livre</p>
+  <p style="margin-top:4px">Alertas gratuitos · Sem spam</p>
+  <p style="margin-top:8px">Preços verificados diretamente na loja.<br>Comissionado pelo programa de afiliados.</p>
+  <!-- A política mora no index.html: uma só, para as duas páginas. Duas
+       cópias do mesmo texto legal é como elas passam a dizer coisas
+       diferentes. Caminho relativo por causa do GitHub Pages. -->
+  <p style="margin-top:8px"><a href="index.html#privacidade">Privacidade e uso dos dados</a></p>
+</footer>
 
 <script src="landing.js"></script>
 </body>
