@@ -115,16 +115,40 @@ export let respostaDoSupabase = amb.RESPOSTA_STATUS
   : { ok: true, status: 201 };
 export function responderSupabase(resp) { respostaDoSupabase = resp; }
 
+// Mesma dupla emoji/nome que o card oculto de cada página usa no onclick de
+// verdade (`abrirModal(emoji, nome, slug)`, ver index.html/super-desconto.html
+// /imperdiveis.html). Só serve pro `querySelector` abaixo simular o clique
+// automático do carregamento e o reclique do "Cancelar" — não tenta ser um
+// DOM de verdade, só o card que `data-auto-abrir` precisa encontrar.
+const CARD_POR_SLUG = {
+  geral: ['🔥', 'Ofertas gerais'],
+  imperdiveis: ['⚡', 'Imperdíveis ML'],
+};
+
 globalThis.document = {
   getElementById: elemento,
+  // Só entende o seletor que o landing.js de fato usa
+  // (`.cat-card[data-slug="..."]`) — dublê, não um querySelector de verdade.
+  querySelector(seletor) {
+    const m = /data-slug="([^"]+)"/.exec(seletor);
+    const par = m && CARD_POR_SLUG[m[1]];
+    if (!par) return null;
+    return { click: () => abrirModal(par[0], par[1], m[1]) };
+  },
   // `data-lojas` no <body> é como a página exclusiva declara a loja fixa dela.
   // Vazio = página com seção de lojas (o index.html).
   // `data-pagina` é como a página declara o próprio nome para a contagem de
   // visita. Vazio de propósito: o dublê não inventa declaração que a página
   // não fez — é assim que o teste vê o esquecimento.
+  // `data-auto-abrir` é o que faz o formulário aparecer sozinho, sem grade —
+  // ver `js_cenarios.mjs` para os cenários que ligam isso.
   body: {
     style: {},
-    dataset: { lojas: amb.BODY_LOJAS || '', pagina: amb.BODY_PAGINA || '' },
+    dataset: {
+      lojas: amb.BODY_LOJAS || '',
+      pagina: amb.BODY_PAGINA || '',
+      autoAbrir: amb.BODY_AUTOABRIR || '',
+    },
   },
   referrer: amb.REFERRER || '',
 };
@@ -171,6 +195,7 @@ export function estado() {
     botaoTelegram: el('btn-telegram').style.display,
     secaoLojas: el('lojas-section').style.display,
     subtituloModal: el('modal-subtitle').textContent,
+    nomePreenchido: el('lead-nome').value,
     fetchesTentados: doLead.length,
     origemGuardada: naSessao[CHAVE_ORIGEM_TESTE] ?? null,
     abertas,

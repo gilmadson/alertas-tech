@@ -471,6 +471,34 @@ def test_imperdiveis_tem_fallback_proprio_mesmo_sem_data_lojas(tmp_path):
     assert c["lojas"] == "mercadolivre"
 
 
+# ── página sem grade: abertura automática e o botão "Cancelar" ──────────────
+# Achado do projeto-arquiteto (23/09/2026): o mecanismo de `data-auto-abrir`
+# nunca tinha teste próprio — os cenários de página exclusiva acima chamam
+# `abrirModal` direto, sem provar que o clique automático em si funciona. E
+# "Cancelar" numa página sem grade (a `.categorias` já está escondida por
+# CSS) deixava a pessoa numa tela vazia: sem card pra clicar de novo, só o F5
+# trazia o formulário de volta. Fica mais grave agora que o index.html também
+# usa esse padrão — antes era só um canto pouco visitado das exclusivas.
+
+def test_pagina_sem_grade_abre_o_formulario_sozinha(tmp_path):
+    r = rodar("abertura_automatica", tmp_path, BODY_AUTOABRIR="geral")
+    assert r["modalAtivoSozinho"] is True
+
+
+def test_cancelar_em_pagina_sem_grade_reabre_em_vez_de_sumir(tmp_path):
+    r = rodar("cancelar_em_pagina_sem_grade", tmp_path, BODY_AUTOABRIR="geral")
+    assert r["modalAtivo"] is True, "cancelar não pode deixar tela vazia"
+    assert r["nomePreenchido"] == "", "tem de reabrir limpo, não com dado velho"
+
+
+def test_cancelar_em_pagina_com_grade_continua_fechando(tmp_path):
+    """Sem `data-auto-abrir`: comportamento de sempre — cancelar fecha o
+    modal, a grade por baixo resolve. Nenhuma página pública usa mais este
+    caminho hoje, mas o código ainda o suporta — este teste é a garantia."""
+    r = rodar("cancelar_em_pagina_com_grade", tmp_path)
+    assert r["modalAtivo"] is False
+
+
 # ── Telegram das categorias novas ────────────────────────────────────────────
 
 def test_categoria_sem_canal_proprio_avisa_no_modal(tmp_path):

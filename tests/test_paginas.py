@@ -202,6 +202,20 @@ def test_toda_pagina_carrega_o_mesmo_pixel(paginas):
     assert len({v[0] for v in ids.values()}) == 1, ids
 
 
+# ── a página principal (23/09/2026: perdeu a grade de 21 categorias) ────────
+
+def test_index_tambem_nao_tem_mais_grade_de_categoria(paginas):
+    """Mesma regra das duas páginas exclusivas: `index.html` virou página de
+    propósito único (só o card oculto de `geral`) em 23/09/2026, depois de
+    medir que 15 das 19 categorias do motor nunca converteram um lead
+    sequer pela landing."""
+    assert set(re.findall(r'data-slug="([^"]+)"', paginas["index.html"])) == {"geral"}
+
+
+def test_index_ainda_declara_data_auto_abrir(paginas):
+    assert re.search(r'<body[^>]*data-auto-abrir="geral"', paginas["index.html"])
+
+
 # ── a página exclusiva do Imperdíveis ML ─────────────────────────────────────
 
 @pytest.fixture(scope="module")

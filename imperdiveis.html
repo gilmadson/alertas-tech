@@ -35,7 +35,7 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
      vale como decisão, porque elemento que some é drift e não escolha.
      `data-auto-abrir` faz o formulário aparecer direto, sem clicar em nada
      — pedido dele: nome/e-mail/telefone visíveis (autopreenchidos pelo
-     celular), marca "não sou robô", o botão do WhatsApp habilita. -->
+     celular), o botão do WhatsApp habilita ao preencher. -->
 <body data-pagina="imperdiveis" data-lojas="mercadolivre" data-auto-abrir="imperdiveis">
 
 <header>
@@ -109,16 +109,6 @@ src="https://www.facebook.com/tr?id=1137836155269322&ev=PageView&noscript=1"
         <input type="tel" id="lead-tel" placeholder="WhatsApp com DDD (obrigatório)"
           autocomplete="tel" required oninput="checarCampos()">
       </div>
-
-      <label class="captcha-box" id="captcha-label">
-        <input type="checkbox" id="captcha-check" onchange="checarCampos()">
-        <span class="captcha-check-ui"></span>
-        <div class="captcha-text">
-          <span class="captcha-label-txt">Não sou um robô</span>
-          <span class="captcha-sub">Verificação de segurança</span>
-        </div>
-        <div class="captcha-logo">🛡️</div>
-      </label>
 
       <label class="captcha-box consent-box">
         <input type="checkbox" id="consent-check" onchange="marcarConsentimento()">
